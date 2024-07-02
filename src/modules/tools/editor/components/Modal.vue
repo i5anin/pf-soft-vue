@@ -110,7 +110,16 @@
 
             <v-divider class="my-1" />
             <v-row>
-              <v-col cols="6">
+              <v-col cols="3">
+                <v-text-field
+                  :disabled="toolModel.group_id && !toolModel.group_standard"
+                  v-model="toolModel.norma"
+                  type="number"
+                  label="Зеленый"
+                  required
+                />
+              </v-col>
+              <v-col cols="3">
                 <v-text-field
                   :disabled="toolModel.group_id && !toolModel.group_standard"
                   v-model="toolModel.norma"
@@ -119,7 +128,17 @@
                   required
                 />
               </v-col>
-              <v-col cols="6">
+              <v-col cols="3">
+                <v-text-field
+                  :disabled="toolModel.group_id && !toolModel.group_standard"
+                  v-model="toolModel.norma"
+                  type="number"
+                  color='red'
+                  label="Красный"
+                  required
+                />
+              </v-col>
+              <v-col cols="3">
                 <v-text-field
                   v-model="toolModel.sklad"
                   type="number"
