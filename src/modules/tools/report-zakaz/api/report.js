@@ -16,9 +16,11 @@ export const reportApi = {
       .get('/report/buch-end-op')
       .then(handleResponse)
       .catch(handleApiError),
-  genNalad: async () =>
+  genNalad: async (token) =>
     axiosInstance
-      .get('/report/setup')
+      .get('/report/setup', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       .then(handleResponse)
       .catch(handleApiError),
   genZayavInstr: async (token) =>
