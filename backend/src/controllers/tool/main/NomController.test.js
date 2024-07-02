@@ -83,7 +83,7 @@ console.log(baseUrl);
       expect(response.status).toBe(200);
     });
 
-    it('Проверка удаления: получение несуществующего инструмента', async () => {
+    it('Проверка удаления инструмента', async () => {
       console.log('--- Проверка удаления ---');
       try {
         const response = await axios.get(`${baseUrl}/tool/${createdRecordId}`);
