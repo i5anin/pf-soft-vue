@@ -1,14 +1,13 @@
 const axios = require('axios');
-const config = require('./config');
+const config = require('../../../config/config-test');
 
 const baseUrl = config.api.baseUrl;
 
 console.log(baseUrl);
 
-describe('Тесты API', () => { // Главная группа тестов
   let createdRecordId;
 
-  describe('Инструмент', () => { // Группа тестов для инструмента
+  describe('Работа с создание номенклатур', () => { // Группа тестов для инструмента
     it('Создание нового инструмента', async () => {
       const newRecordData = {
         'name': 'Название',
@@ -121,4 +120,4 @@ describe('Тесты API', () => { // Главная группа тестов
         throw error;
       }
     });
-}); // Конец главной группы тестов
+

@@ -1,9 +1,9 @@
 const axios = require('axios');
-const config = require('./config');
+const config = require('../../../config/config-test');
 
 const baseUrl = config.api.baseUrl;
 
-describe('Тесты API для групп инструментов', () => {
+
   it('Получение списка инструментов, сгруппированных по ID группы', async () => {
     console.log('--- Получение списка инструментов, сгруппированных по ID группы ---');
     const response = await axios.get(`${baseUrl}/tools-groups`);
@@ -30,4 +30,4 @@ describe('Тесты API для групп инструментов', () => {
 
     // Добавьте проверки для других групп, если необходимо
   });
-});
+
