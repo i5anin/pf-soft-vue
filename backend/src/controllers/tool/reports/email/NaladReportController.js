@@ -11,62 +11,32 @@ const pool = new Pool(dbConfig)
 // Функция для получения данных из базы данных
 async function getReportData() {
   const query = `
-    WITH RECURSIVE
-      TreePath AS (SELECT id, CAST(name AS TEXT) AS path, parent_id
-                   FROM dbo.tool_tree
-                   WHERE parent_id = 1
-                   UNION ALL
-                   SELECT tt.id, CONCAT(tp.path, ' / ', tt.name) AS path, tt.parent_id
-                   FROM dbo.tool_tree tt
-                          JOIN TreePath tp ON tt.parent_id = tp.id),
-      totals AS (
-        SELECT group_id, SUM(sklad) AS group_total_sklad
-        FROM dbo.tool_nom
-        WHERE group_id IS NOT NULL AND group_id <> 0
-        GROUP BY group_id
-      ),
-      damaged AS (
-        SELECT tn.id AS id_tool,
-               tn.name,
-               tn.sklad,
-               tn.norma,
-               tn.parent_id,
-               tn.group_id,
-               tn.group_standard,
-               CASE
-                 WHEN tn.group_id IS NOT NULL AND tn.group_id <> 0 THEN
-                   GREATEST(tn.norma - t.group_total_sklad, 0)
-                 ELSE
-                   GREATEST(tn.norma - tn.sklad, 0)
-               END AS zakaz,
-               COALESCE(SUM(thd.quantity), 0) AS damaged_last_7_days,
-               t.group_total_sklad AS group_sum
-        FROM dbo.tool_nom tn
-        LEFT JOIN dbo.tool_history_damaged thd ON tn.id = thd.id_tool AND thd.timestamp >= CURRENT_DATE - INTERVAL '7 days'
-        LEFT JOIN totals t ON tn.group_id = t.group_id
-        GROUP BY tn.id, tn.parent_id, tn.name, tn.sklad, tn.norma, tn.group_id, tn.group_standard, t.group_total_sklad
-        HAVING CASE
-                 WHEN tn.group_id IS NOT NULL AND tn.group_id <> 0 THEN
-                   GREATEST(tn.norma - t.group_total_sklad, 0)
-                 ELSE
-                   GREATEST(tn.norma - tn.sklad, 0)
-               END > 0
-      )
-    SELECT d.id_tool,
-           d.name,
-           d.sklad,
-           d.norma,
-           d.zakaz,
-           tp.path AS tool_path,
-           CASE
-             WHEN d.group_id IS NULL THEN '0'
-             ELSE d.group_id
-           END AS group_display,
-           d.group_standard,
-           d.group_sum
-    FROM damaged d
-    LEFT JOIN TreePath tp ON d.parent_id = tp.id
-    ORDER BY tp.path, d.name;
+    WITH RankedRecords AS (SELECT marsh_naladka.cnc_code,
+                                  CONCAT(NAME, ' ', description, ' операция: ', NO) AS det_name,
+                                  'наладчик'                                        AS fio_nalad,
+                                  marsh_naladka.datetime_nal,
+                                  ROW_NUMBER() OVER (
+                                    PARTITION BY CAST(marsh_naladka.datetime_nal AS DATE)
+                                    ORDER BY LENGTH(CONCAT(NAME, ' ', description)), marsh_naladka.datetime_nal
+                                    )                                               AS rn
+                           FROM dbo.marsh_naladka
+                                  INNER JOIN dbo.specs_nom_operations
+                                             ON specs_nom_operations.ID = marsh_naladka.specs_op_id
+                                  INNER JOIN dbo.specs_nom ON specs_nom.ID = specs_nom_operations.specs_nom_id
+                                  INNER JOIN dbo.operations_ordersnom
+                                             ON operations_ordersnom.op_id = specs_nom_operations.ordersnom_op_id
+                           WHERE marsh_naladka.datetime_nal BETWEEN '01.05.2024 09:00:00' AND '01.06.2024 9:00:00'
+                             AND dbo.get_op_cnc_type(specs_nom_operations.id) = 'Т')
+    SELECT cnc_name                                  Станок,
+           det_name                                  Наименование,
+           fio_nalad                                 Нададчик,
+           TO_CHAR(datetime_nal::DATE, 'DD.MM.YYYY') Дата
+    FROM RankedRecords
+           INNER JOIN dbo.cnc ON cnc.cnc_code = RankedRecords.cnc_code
+    WHERE rn <= 3
+    ORDER BY CAST(datetime_nal AS DATE),
+             rn;
+
   `
 
   const { rows } = await pool.query(query)
@@ -78,12 +48,12 @@ function getCurrentMonthDates() {
   const firstDayOfMonth = new Date(
     currentDate.getFullYear(),
     currentDate.getMonth(),
-    1
+    1,
   )
   const lastDayOfMonth = new Date(
     currentDate.getFullYear(),
     currentDate.getMonth() + 1,
-    0
+    0,
   )
 
   const firstDate = firstDayOfMonth.toISOString().split('T')[0]
@@ -332,6 +302,4 @@ function getRoundedCount(count) {
     : Math.ceil(count / 10) * 10
 }
 
-module.exports = {
-  genSetupReport,
-}
+module.exports = { genSetupReport }
