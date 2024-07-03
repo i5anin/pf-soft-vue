@@ -49,7 +49,7 @@ async function getTools(req, res) {
 
     // Обработка стандартных параметров для фильтрации
     if (search)
-      conditions.push(`tool_nom.name ILIKE '%${search.replace(/'/g, "''")}%'`)
+      conditions.push(`tool_nom.name ILIKE '%${search.replace(/'/g, '\'\'')}%'`)
 
     if (parent_id) conditions.push(`tool_nom.parent_id = ${parent_id}`)
 
@@ -62,7 +62,7 @@ async function getTools(req, res) {
         const paramId = key.split('_')[1] // Извлечение ID параметра
         return `tool_nom.property ->> '${paramId}' = '${value.replace(
           /'/g,
-          "''"
+          '\'\'',
         )}'`
       })
 
@@ -76,22 +76,22 @@ async function getTools(req, res) {
     const countQuery = `
       SELECT COUNT(*)
       FROM dbo.tool_nom as tool_nom
-      ${whereClause}
+        ${whereClause}
     `
 
     const toolQuery = `
-        SELECT tool_nom.id,
-               tool_nom.name,
-               tool_nom.property,
-               tool_nom.sklad,
-               tool_nom.norma,
-               tool_nom.group_id,
-               tool_nom.group_standard
-        FROM dbo.tool_nom as tool_nom
-            ${whereClause}
-        ORDER BY
-            CASE WHEN tool_nom.sklad > 0 THEN 1 ELSE 2
-        END,
+      SELECT tool_nom.id,
+             tool_nom.name,
+             tool_nom.property,
+             tool_nom.sklad,
+             tool_nom.norma,
+             tool_nom.group_id,
+             tool_nom.group_standard
+      FROM dbo.tool_nom as tool_nom
+        ${whereClause}
+      ORDER BY
+        CASE WHEN tool_nom.sklad > 0 THEN 1 ELSE 2
+      END,
         tool_nom.name
       LIMIT ${limitNumber} OFFSET ${offset}
     `
@@ -131,7 +131,7 @@ async function getTools(req, res) {
             }
             return acc
           },
-          {}
+          {},
         )
       }
 
@@ -184,7 +184,7 @@ async function deleteTool(req, res) {
       `SELECT 1
        FROM dbo.tool_history_nom
        WHERE id_tool = $1`,
-      [id]
+      [id],
     )
 
     // Проверяем наличие инструмента в списке уничтоженных
@@ -192,7 +192,7 @@ async function deleteTool(req, res) {
       `SELECT 1
        FROM dbo.tool_history_damaged
        WHERE id_tool = $1`,
-      [id]
+      [id],
     )
 
     if (toolInIssueHistory.rowCount > 0 || toolInDamagedHistory.rowCount > 0) {
@@ -208,7 +208,7 @@ async function deleteTool(req, res) {
       `SELECT id
        FROM dbo.tool_nom
        WHERE id = $1`,
-      [id]
+      [id],
     )
 
     if (toolExists.rowCount > 0) {
@@ -216,7 +216,7 @@ async function deleteTool(req, res) {
         `DELETE
          FROM dbo.tool_nom
          WHERE id = $1`,
-        [id]
+        [id],
       )
       res.json({ success: 'OK' })
     } else {
@@ -229,8 +229,17 @@ async function deleteTool(req, res) {
 }
 
 async function addTool(req, res) {
-  const { name, parent_id, property, sklad, norma, group_id, group_standard } =
-    req.body
+  const {
+    name,
+    parent_id,
+    property,
+    sklad,
+    norma,
+    group_id,
+    group_standard,
+    norma_red,
+    norma_green,
+  } = req.body
   // Преобразование запятых в точки в числах в property
   replaceCommaWithDotInNumbers(property)
 
@@ -241,10 +250,19 @@ async function addTool(req, res) {
         .json({ error: 'parent_id must be greater than 1.' })
     }
 
+    if (sklad < 0)
+      return res.status(400).json({ error: 'Склад не может быть отрицательным.' })
+
+
+    // Проверка на корректность значений норм для светофора (изменено условие)
+    if (norma_green < norma || norma < norma_red)
+      return res.status(400).json({ error: 'Некорректные значения норм для светофора: green > norma > red.' })
+
+
     if (property && property.id) {
       const propertyIdCheckResult = await pool.query(
         'SELECT id FROM dbo.tool_params WHERE id = $1',
-        [property.id]
+        [property.id],
       )
 
       if (propertyIdCheckResult.rowCount === 0) {
@@ -256,7 +274,7 @@ async function addTool(req, res) {
 
     const parentCheckResult = await pool.query(
       'SELECT id FROM dbo.tool_tree WHERE id = $1',
-      [parent_id]
+      [parent_id],
     )
 
     if (parentCheckResult.rowCount === 0) {
@@ -272,14 +290,14 @@ async function addTool(req, res) {
     if (group_standard && group_id) {
       await pool.query(
         'UPDATE dbo.tool_nom SET group_standard = false WHERE group_id = $1',
-        [group_id]
+        [group_id],
       )
     }
 
     const toolInsertResult = await pool.query(
-      'INSERT INTO dbo.tool_nom (name, parent_id, property, sklad, norma, group_id, group_standard) ' +
-        'VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
-      [name, parent_id, propertyString, sklad, norma, group_id, group_standard]
+      'INSERT INTO dbo.tool_nom (name, parent_id, property, sklad, norma, group_id, group_standard, norma_red, norma_green) ' +
+      'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
+      [name, parent_id, propertyString, sklad, norma, group_id, group_standard, norma_red, norma_green],
     )
 
     const toolId = toolInsertResult.rows[0].id
@@ -288,12 +306,12 @@ async function addTool(req, res) {
     const logMessage = `Инструмент успешно добавлен ID ${toolId}, группа ${group_id}.`
     await pool.query(
       'INSERT INTO dbo.vue_log (message, tool_id, datetime_log, new_amount) VALUES ($1, $2, NOW(), $3)',
-      [logMessage, toolId, sklad]
+      [logMessage, toolId, sklad],
     )
 
     const newToolResult = await pool.query(
       'SELECT * FROM dbo.tool_nom WHERE id = $1',
-      [toolId]
+      [toolId],
     )
 
     if (newToolResult.rowCount > 0) {
@@ -317,6 +335,8 @@ async function editTool(req, res) {
     norma,
     group_id,
     group_standard,
+    norma_red, // Добавлено поле norma_red
+    norma_green, // Добавлено поле norma_green
   } = req.body
 
   replaceCommaWithDotInNumbers(property)
@@ -331,7 +351,7 @@ async function editTool(req, res) {
     if (property && property.id) {
       const propertyIdCheckResult = await pool.query(
         'SELECT id FROM dbo.tool_params WHERE id = $1',
-        [property.id]
+        [property.id],
       )
 
       if (propertyIdCheckResult.rowCount === 0) {
@@ -343,7 +363,7 @@ async function editTool(req, res) {
 
     const parentCheckResult = await pool.query(
       'SELECT id FROM dbo.tool_tree WHERE id = $1',
-      [parent_id]
+      [parent_id],
     )
 
     if (parentCheckResult.rowCount === 0) {
@@ -352,9 +372,18 @@ async function editTool(req, res) {
         .json({ error: 'Specified parent_id does not exist.' })
     }
 
+    // Проверка на неотрицательное значение склада
+    if (newSklad < 0) return res.status(400).json({ error: 'Склад не может быть отрицательным.' })
+
+
+    // Проверка на корректность значений норм для светофора (изменено условие)
+    if (norma_green < norma || norma < norma_red)
+      return res.status(400).json({ error: 'Некорректные значения норм для светофора: green > norma > red.' })
+
+
     const currentSkladResult = await pool.query(
       'SELECT sklad FROM dbo.tool_nom WHERE id = $1',
-      [id]
+      [id],
     )
 
     if (currentSkladResult.rowCount === 0) {
@@ -371,12 +400,12 @@ async function editTool(req, res) {
       // Сброс флага group_standard для всех инструментов в группе
       await pool.query(
         'UPDATE dbo.tool_nom SET group_standard=false WHERE group_id=$1 AND id<>$2',
-        [group_id, id]
+        [group_id, id],
       )
     }
 
     const result = await pool.query(
-      'UPDATE dbo.tool_nom SET name=$1, parent_id=$2, property=$3, sklad=$4, norma=$5, group_id=$7, group_standard=$8 WHERE id=$6 RETURNING *',
+      'UPDATE dbo.tool_nom SET name=$1, parent_id=$2, property=$3, sklad=$4, norma=$5, group_id=$7, group_standard=$8, norma_red=$9, norma_green=$10 WHERE id=$6 RETURNING *', // Добавлены поля norma_red и norma_green
       [
         name,
         parent_id,
@@ -386,13 +415,15 @@ async function editTool(req, res) {
         id,
         group_id,
         group_standard,
-      ]
+        norma_red, // Добавлено значение norma_red
+        norma_green, // Добавлено значение norma_green
+      ],
     )
 
     if (result.rowCount > 0) {
       await pool.query(
         'INSERT INTO dbo.vue_log (message, tool_id, datetime_log, old_amount, new_amount) VALUES ($1, $2, NOW(), $3, $4)',
-        [`Обновлен ID инструмента ${id}`, id, oldSklad, newSklad]
+        [`Обновлен ID инструмента ${id}`, id, oldSklad, newSklad],
       )
 
       res.status(200).json({ success: 'OK', data: result.rows[0] })
@@ -413,7 +444,7 @@ async function getToolById(req, res) {
     const query = `
       SELECT dbo.tool_nom.*, dbo.tool_tree.name as folder_name
       FROM dbo.tool_nom
-      LEFT JOIN dbo.tool_tree ON dbo.tool_nom.parent_id = dbo.tool_tree.id
+             LEFT JOIN dbo.tool_tree ON dbo.tool_nom.parent_id = dbo.tool_tree.id
       WHERE dbo.tool_nom.id = $1`
 
     const result = await pool.query(query, [id])
@@ -432,6 +463,8 @@ async function getToolById(req, res) {
         group_id: toolData.group_id,
         group_standard: toolData.group_standard,
         norma: toolData.norma,
+        norma_red: toolData.norma_red, // Добавлено поле norma_red
+        norma_green: toolData.norma_green, // Добавлено поле norma_green
       }
 
       res.json(jsonResponse)
@@ -454,7 +487,8 @@ async function getFilterParamsByParentId(req, res) {
 
   try {
     // Получаем маппинг параметров и их порядки
-    const queryMapping = `SELECT id, label, param_order FROM dbo.tool_params` // Выбираем id здесь
+    const queryMapping = `SELECT id, label, param_order
+                          FROM dbo.tool_params` // Выбираем id здесь
     const mappingResult = await pool.query(queryMapping)
     const paramsMapping = mappingResult.rows.reduce(
       (acc, { id, label, param_order }) => {
@@ -462,11 +496,13 @@ async function getFilterParamsByParentId(req, res) {
         acc[id] = { label, param_order }
         return acc
       },
-      {}
+      {},
     )
 
     // Запрос на получение свойств инструментов
-    const query = `SELECT property FROM dbo.tool_nom WHERE parent_id = $1`
+    const query = `SELECT property
+                   FROM dbo.tool_nom
+                   WHERE parent_id = $1`
     const { rows } = await pool.query(query, [parent_id])
 
     const paramsAggregation = {}

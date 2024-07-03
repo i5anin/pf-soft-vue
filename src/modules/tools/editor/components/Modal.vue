@@ -117,11 +117,11 @@
               <v-col cols='3'>
                 <v-text-field
                   :disabled='toolModel.group_id && !toolModel.group_standard'
-                  v-model='toolModel.normaGreen'
+                  v-model='toolModel.norma_green'
                   type='number'
                   color='green'
                   active
-                  label='Норма'
+                  label='Норма макс'
                   required>
                   <template v-slot:append-inner>
                     <v-icon color='green'>mdi-alert-box</v-icon>
@@ -145,11 +145,11 @@
               <v-col cols='3'>
                 <v-text-field
                   :disabled='toolModel.group_id && !toolModel.group_standard'
-                  v-model='toolModel.normaRed'
+                  v-model='toolModel.norma_red'
                   type='number'
                   color='red'
                   color-icon='red'
-                  label='Норма'
+                  label='Норма мин'
                   required>
                   <template v-slot:append-inner>
                     <v-icon color='red'>mdi-alert-box</v-icon>
@@ -236,8 +236,8 @@ export default {
         group_standard: null,
         sklad: null,
         norma: null,
-        normaGreen: null,
-        normaRed: null,
+        norma_green: null,
+        norma_red: null,
       },
       toolNameOptions: [],
       parameterValuePairs: [{ parameter: null, value: null }],
