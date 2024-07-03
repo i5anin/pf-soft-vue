@@ -73,7 +73,7 @@ const tabs = [
     ico: 'mdi-file-tree',
   },
   {
-    name: 'Отчёт заказ',
+    name: 'Заказ',
     url: '#report',
     component: markRaw(Report),
     access: ['Admin', 'Editor'],

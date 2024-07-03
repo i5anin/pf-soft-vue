@@ -33,11 +33,12 @@ async function getTableReportData(req, res) {
                                         tn.name,
                                         tn.sklad,
                                         tn.norma,
+                                        tn.norma_green,
+                                        tn.norma_red,
                                         CASE
                                           WHEN t.group_total_sklad > 0 THEN GREATEST(tn.norma - t.group_total_sklad, 0)
                                           ELSE GREATEST(tn.norma - tn.sklad, 0)
                                           END                          AS zakaz,
-                                        COALESCE(SUM(thd.quantity), 0) AS damaged_last_7_days,
                                         t.group_total_sklad            AS group_sklad
                                  FROM dbo.tool_nom tn
                                         LEFT JOIN dbo.tool_history_damaged thd ON tn.id = thd.id_tool
@@ -57,8 +58,9 @@ async function getTableReportData(req, res) {
                               'name', d.name,
                               'sklad', d.sklad,
                               'norma', d.norma,
+                              'norma_green', d.norma_green,
+                              'norma_red', d.norma_red,
                               'zakaz', d.zakaz,
-                              'damaged_last_7_days', d.damaged_last_7_days,
                               'group_id', d.group_id,
                               'group_standard', d.group_standard,
                               'group_sklad', d.group_sklad
