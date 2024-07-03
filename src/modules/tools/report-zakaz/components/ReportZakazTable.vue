@@ -48,7 +48,10 @@
           >
             <td class='grey'>{{ toolIndex + 1 }}</td>
             <td>
-              <v-chip variant='flat' :color='getToolColor(tool.sklad / tool.norma)'>
+              <v-chip v-if='!tool.norma_red || !tool.norma_green' variant='flat' :color='getToolColor(tool.sklad / tool.norma)'>
+                {{ tool.name }}
+              </v-chip>
+              <v-chip v-if='tool.norma_red || tool.norma_green' :color='getToolColorLight(tool.sklad, tool.norma_red,tool.norma, tool.norma_red)'>
                 {{ tool.name }}
               </v-chip>
               <v-chip
@@ -87,11 +90,7 @@
               <v-chip v-if='tool.norma_red' color='red'>{{ tool.norma_red }}</v-chip>
             </td>
             <td>
-              <!--              <v-chip v-if='tool.norma_green' color='green'>-->
-              <!--                <span v-if='tool.group_sklad'>{{ calcPercent(tool.group_sklad, tool.norma_green) }} %</span>-->
-              <!--                <span v-else>{{ calcPercent(tool.sklad, tool.norma_green) }} %</span>-->
-              <!--              </v-chip>-->
-              <v-chip variant='flat' :color='getToolColor(tool.sklad / tool.norma)'>
+              <v-chip v-if='!tool.norma_red || !tool.norma_green' variant='flat' :color='getToolColor(tool.sklad / tool.norma)'>
                 <span v-if='tool.group_sklad'>{{ calcPercent(tool.group_sklad, tool.norma) }} %</span>
                 <span v-else>{{ calcPercent(tool.sklad, tool.norma) }} %</span>
               </v-chip>
