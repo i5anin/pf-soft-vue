@@ -48,22 +48,16 @@
           >
             <td class='grey'>{{ toolIndex + 1 }}</td>
             <td>
-              <!-- <v-chip v-if='!tool.norma_red || !tool.norma_green' variant='flat' :color='getToolColor(tool.sklad / tool.norma)'>-->
               {{ tool.name }}
-              <!-- </v-chip>-->
-              <!-- <v-chip v-if='tool.norma_red || tool.norma_green' :color='getToolColorLight(tool.sklad, tool.norma_red,tool.norma, tool.norma_red)'>-->
-              <!-- {{ tool.name }}-->
-              <!-- </v-chip>-->
               <v-chip
                 v-if='tool.group_id'
                 size='x-small'
                 :color='getColorForGroup(tool.group_id)'
                 :title="'Группа ' + tool.group_id"
               >
-              <span v-if='tool.group_standard' style='color: yellow'
-              >★</span
-              >
-                G{{ tool.group_id }}
+              <span v-if='tool.group_standard' style='color: yellow'>
+                ★
+              </span> G{{ tool.group_id }}
               </v-chip>
             </td>
             <td>
@@ -83,15 +77,15 @@
               </template>
             </td>
             <td class='grey'>{{ tool.sklad }}</td>
-            <!-- <td class='grey'>{{ tool.group_sklad }}</td>-->
+
             <td class='grey'>
-              <!-- <v-chip v-if='tool.norma_green' color='green'> {{ tool.norma_green }}</v-chip>-->
+
               {{ tool.norma_green }}
               <span v-if='tool.norma_green'> | </span>
               {{ tool.norma }}
               <span v-if='tool.norma_green'> | </span>
               {{ tool.norma_red }}
-              <!-- <v-chip v-if='tool.norma_red' color='red'>{{ tool.norma_red }}</v-chip>-->
+
             </td>
             <td>
               <v-chip v-if='!tool.norma_red || !tool.norma_green' :color='getToolColor(tool.sklad / tool.norma)'>
