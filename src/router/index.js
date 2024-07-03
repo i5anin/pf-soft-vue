@@ -2,7 +2,8 @@
 
 import { createRouter, createWebHistory } from 'vue-router'
 
-import Tool from '@/modules/tabs/components/Tabs.vue'
+import Tool from '@/modules/tools/_tabs/components/Tabs.vue'
+import QRcode from '@/modules/qr-code/main/components/Table.vue'
 import Login from '@/views/Login.vue'
 import Error404 from '@/views/404.vue'
 
@@ -29,6 +30,11 @@ const routes = [
     path: '/Tool',
     name: 'Tool',
     component: Tool,
+  },
+  {
+    path: '/QR-code',
+    name: 'QR-code',
+    component: QRcode,
   },
 ]
 

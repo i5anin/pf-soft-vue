@@ -1,7 +1,7 @@
 // models/tool_nom.js
 const { Sequelize, DataTypes } = require('sequelize')
 
-const getDbConfig = require('../databaseConfig')
+const getDbConfig = require('../config/databaseConfig')
 
 const dbConfig = getDbConfig()
 

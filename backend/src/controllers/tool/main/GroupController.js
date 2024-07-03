@@ -1,6 +1,6 @@
 // Импорт зависимостей
 const { Pool } = require('pg')
-const getDbConfig = require('../../../databaseConfig') // Убедитесь, что путь правильный!
+const getDbConfig = require('../../../config/databaseConfig') // Убедитесь, что путь правильный!
 
 const dbConfig = getDbConfig()
 // Создание пула подключений к БД

@@ -42,7 +42,7 @@ export const toolApi = {
   // Получить инструмент по ID инструмента
   getToolById: async (id) => {
     return axiosInstance
-      .get(`/tool/${id}`)
+      .get(`/tool/modal-form/${id}`)
       .then(handleResponse)
       .catch(handleApiError)
   },
@@ -50,7 +50,7 @@ export const toolApi = {
   // Получить фильтры по ID папки
   filterParamsByParentId: async (parent_id) =>
     axiosInstance
-      .get(`/filter-params/${parent_id}`)
+      .get(`/tools/params/${parent_id}/filter`)
       .then(handleResponse)
       .catch(handleApiError),
 }

@@ -2,8 +2,8 @@ const { Pool } = require('pg')
 const { v4: uuidv4 } = require('uuid')
 require('dotenv').config() // Это должно быть в самом верху файла
 // const jwt = require('jsonwebtoken')
-const { getNetworkDetails } = require('../../db_type')
-const getDbConfig = require('../../databaseConfig')
+const { getNetworkDetails } = require('../../config/db_type')
+const getDbConfig = require('../../config/databaseConfig')
 
 const dbConfig = getDbConfig()
 const dbName = dbConfig.database // Добавляем название базы данных из конфигурации

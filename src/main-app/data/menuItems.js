@@ -69,6 +69,13 @@ export const plotsMenuItems = [
       { title: 'Инструмент', path: '/Tool' },
     ],
   },
+  {
+    title: 'Другое',
+    access: ['admin', 'hohlov'],
+    items: [
+      { title: 'QR-code', path: '/QR-code',  icon: 'mdi-qrcode', },
+    ],
+  },
   // { title: 'Участок заготовки', icon: 'mdi-cog', path: '/machining_area' },
   // { title: 'Отдел продаж', icon: 'mdi-chart-line' },
   // {

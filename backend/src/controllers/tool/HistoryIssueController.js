@@ -1,5 +1,5 @@
 const { Pool } = require('pg')
-const getDbConfig = require('../../databaseConfig')
+const getDbConfig = require('../../config/databaseConfig')
 
 const dbConfig = getDbConfig()
 // Создание соединения с базой данных
@@ -42,7 +42,7 @@ async function getToolHistory(req, res) {
       whereStatement += ` AND (dbo.tool_part_archive.specs_nom_id IS NOT NULL AND dbo.tool_part_archive.archive IS TRUE)`
     } else {
       // В противном случае, показываем только данные не из архива
-      whereStatement += ` AND (dbo.tool_part_archive.specs_nom_id IS NULL OR dbo.tool_part_archive.archive IS FALSE)`
+      whereStatement += ` AND (dbo.tool_part_archive.specs_nom_id IS NULL OR dbo.tool_part_archive.archive IS NULL OR dbo.tool_part_archive.archive = FALSE )`
     }
 
     let orderStatement = `ORDER BY MIN(tool_history_nom.TIMESTAMP) DESC`

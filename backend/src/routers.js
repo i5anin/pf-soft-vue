@@ -7,7 +7,6 @@ const loginController = require('./controllers/login/LoginController')
 const nomController = require('./controllers/tool/main/NomController')
 const paramController = require('./controllers/tool/main/ParamController')
 const treeController = require('./controllers/tool/main/TreeController')
-const skladController = require('./controllers/tool/SkladController')
 
 const historyController = require('./controllers/tool/HistoryIssueController')
 const historyControllerModal = require('./controllers/tool/HistoryIssueModalController')
@@ -15,96 +14,87 @@ const historyControllerModal = require('./controllers/tool/HistoryIssueModalCont
 const damagedController = require('./controllers/tool/HistoryDamagedController')
 const issueController = require('./controllers/tool/IssueController')
 
-const reportBuchWeekController = require('./controllers/tool/reports/email/BuchWeekController')
-const reportBuchEndOpController = require('./controllers/tool/reports/email/BuchEndOpController')
-const reportBuchMonthController = require('./controllers/tool/reports/email/BuchMonthController')
+const reportBuchEndPartController = require('./controllers/tool/reports/email/BuchEndPartController')
 const reportZakazController = require('./controllers/tool/reports/email/OrderToolsController')
+const reportSetupController = require('./controllers/tool/reports/email/NaladReportController')
+
+const reportRevisionController = require('./controllers/tool/reports/email/RevisionToolsController')
 
 const reportVueZakazController = require('./controllers/tool/reports/vue/OrderToolsController')
 const reportVueBuhController = require('./controllers/tool/reports/vue/BuchWeekController')
 
 const groupsController = require('./controllers/tool/main/GroupController')
 
-// const excelZakazController = require('./controllers/tool/reports/excel/b_order_Instr')
-
-// Маршруты для аутентификации
+// 'Аутентификация'
 router.post('/login', loginController.login)
 router.post('/check-login', loginController.checkLogin)
-
 router.get('/database-info', loginController.getDatabaseInfo)
-// nom
-router.get('/tool/:id', nomController.getToolById) //1 элемент
+
+// "Инструмент"
 router.get('/tools', nomController.getTools)
-// router.post('/tools', nomController.getTools) //POST ALL
 router.post('/tool', nomController.addTool)
 router.put('/tool/:id', nomController.editTool)
 router.delete('/tool/:id', nomController.deleteTool)
-router.get('/filter-params/:parent_id', nomController.getFilterParamsByParentId)
+// "Главный фильтр"
+router.get('/tools/params/:parent_id/filter', nomController.getFilterParamsByParentId)
+// "Инструмент Modal"
+router.get('/tool/modal-form/:id', nomController.getToolById) //1 элемент router.get('/tool/:id', nomController.getToolById)
+router.get('/tools/modal-form/:id/names', nomController.getToolNameId) // router.get('/tools-params-name/:id', paramController.getToolNameId)
+router.get('/tools/modal-form/:id/params', paramController.getToolParamsParentId) // подсказки для заполнения router.get('/tools-params/:id', paramController.getToolParamsParentId)
 
-// param
+
+
+// "Параметры"
 router.get('/tools-params', paramController.getToolParams)
-router.get('/tools-params/:id', paramController.getToolParamsParentId)
 router.post('/tools-params', paramController.addToolParam)
 router.put('/tools-params/:id', paramController.updateToolParam)
 router.delete('/tools-params/:id', paramController.deleteToolParam)
-router.get('/tools-params-name/:id', paramController.getToolNameId)
+// "Параметры дополнительно"
 router.patch('/tools-params/:id/move', paramController.moveToolParam)
 
-// tree
+// "Дерево"
 router.get('/tools-tree', treeController.getToolsTree)
 router.post('/tools-tree', treeController.addBranch)
 router.put('/tools-tree', treeController.updateFolderTree)
 router.delete('/tools-tree/:id', treeController.dellFolderTree)
 
-// issue
-router.get('/detail/id', issueController.findDetailProduction)
-router.get('/operators/fio', issueController.getFioOperators)
-
-// router.get('/issue/cancel-operation-admin/:id', issueController.cancelOperationAdmin) // отмена любой
-router.post('/issue/cancel-operation/:id', issueController.cancelOperation) //отмена 3 дня
-
-router.post('/issue', issueController.issueTool)
+// "Выдача инструмента"
 router.post('/issues', issueController.issueTools)
-router.get('/cnc', issueController.getCncData)
+router.get('/modal-form/parties', issueController.findParties)//форма заполнения поиск партии
+router.get('/modal-form/cnc', issueController.getCncData) //форма заполнения
+router.get('/modal-form/operators/fio', issueController.getFioOperators) //форма заполнения
+router.get('/issue/cancel-operation-admin/:id', issueController.cancelOperationAdmin) // отмена операции любой
+router.post('/issue/cancel-operation/:id', issueController.cancelOperation) //отмена операции 3 дня
 
-// history
-router.get('/history/:id', historyController.getToolHistoryId)
+// "История выдачи"
 router.get('/history', historyController.getToolHistory)
-router.get('/history-all-tool', historyController.getAllIssuedToolIdsWithNames)
+router.get('/history-all-tool', historyController.getAllIssuedToolIdsWithNames) //инструмент для поиска
+// router.get('/history/:id', historyController.getToolHistoryId)
+
+// "История выдачи Modal"
+router.get('/history-part', historyControllerModal.getToolHistoryByPartId) //история основной список
+router.get('/history-part/info', historyControllerModal.getToolHistoryByPartIdInfo) //история информация по партии
+router.post('/history-add-archive', historyControllerModal.addToArchive) //архив истории выдачи
+
+// "Движение инструмента"
 router.get('/tool-movement/:id', historyController.getToolMovementById)
 
-//groups
+// "Группы"
 router.get('/tools-groups', groupsController.getGroupedTools)
 
-router.get('/history-part', historyControllerModal.getToolHistoryByPartId)
-router.post('/history-add-archive', historyControllerModal.addToArchive)
-router.get(
-  '/history-part/info',
-  historyControllerModal.getToolHistoryByPartIdInfo
-)
-
-// damaged
+// "Поврежденный инструмент"
 router.get('/damaged-history', damagedController.getDamaged)
 router.post('/tool-history-damaged', damagedController.addToolHistoryDamaged)
 
-// sklad
-router.post('/sklad/update', skladController.updateToolInventory)
-
-// email report
-router.get('/report/buch-week', reportBuchWeekController.genBuchWeek) // бухгалтерию исключен сломанный	раз в неделю каждый ПТ в 12:00 (за неделю)
-router.get('/report/buch-end-op', reportBuchEndOpController.checkStatusChanges) // бухгалтерию	по завершению операции
-router.get('/report/buch-month', reportBuchMonthController.genBuchMonth) // бухгалтерию журнал уничтоженного	раз в месяц каждый ПТ в 12:00 (за месяц)
-
+// "Email report"
 router.get('/report/zayav-instr', reportZakazController.genZayavInstr) // заявка на инструмент	раз в неделю каждый ЧТ в 12:00 (за неделю)
+router.get('/report/setup', reportSetupController.genSetupReport) // заявка на инструмент	раз в неделю каждый ЧТ в 12:00 (за неделю)
+router.get('/report/revision-instr', reportRevisionController.genRevisionInstr) // заявка на инструмент	раз в неделю каждый ЧТ в 12:00 (за неделю)
+// "Email report Buch *CRON"
+router.get('/report/buch-end-op', reportBuchEndPartController.checkStatusChanges) //в режиме CRON
 
-//vue
-router.get('/report/getBuchWeek', reportVueBuhController.getTableReportData) // бухгалтерию исключен сломанный	раз в неделю каждый ПТ в 12:00 (за неделю)
+// "Vue"
 router.get('/report/get-zakaz', reportVueZakazController.getTableReportData) // заявка на инструмент	раз в неделю каждый ЧТ в 12:00 (за неделю)
-
-// excel report
-// router.get(
-//   '/report/genZayavInstrExcel',
-//   excelZakazController.createExcelFileStream
-// ) // заявка на инструмент	раз в неделю каждый ЧТ в 12:00 (за неделю)
+router.get('/report/getBuchWeek', reportVueBuhController.getTableReportData) //❓ бухгалтерию исключен сломанный	раз в неделю каждый ПТ в 12:00 (за неделю)
 
 module.exports = router

@@ -1,7 +1,7 @@
 import Vuex from 'vuex'
-import EditorToolStore from '@/modules/editor/store'
-import IssueToolStore from '@/modules/issue/store'
-import ViewToolStore from '@/modules/view/store'
+import EditorToolStore from '@/modules/tools/editor/store'
+import IssueToolStore from '@/modules/tools/issue/store'
+import ViewToolStore from '@/modules/tools/view/store'
 import AuthStore from './authStore'
 
 const store = new Vuex.Store({

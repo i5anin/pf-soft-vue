@@ -1,0 +1,125 @@
+openapi: 3.0.0
+info:
+  title: "API Authentication"
+  version: "1.0.0"
+  description: "API для аутентификации пользователей"
+paths:
+  /login:
+    post:
+      tags:
+        - Authentication
+      summary: "Вход в систему"
+      description: "Авторизация пользователя"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                login:
+                  type: "string"
+                  description: "Имя пользователя"
+                  required: true
+                password:
+                  type: "string"
+                  description: "Пароль пользователя"
+                  required: true
+      responses:
+        "200":
+          description: "Успешная авторизация"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  status:
+                    type: "string"
+                    enum: [ "ok" ]
+                  token:
+                    type: "string"
+                    description: "Токен авторизации"
+        "401":
+          description: "Неверный логин или пароль"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  status:
+                    type: "string"
+                    enum: [ "error" ]
+                  message:
+                    type: "string"
+                    description: "Ошибка аутентификации"
+        "500":
+          description: "Ошибка сервера"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  status:
+                    type: "string"
+                    enum: [ "error" ]
+                  message:
+                    type: "string"
+                    description: "Ошибка сервера"
+  /check-login:
+    post:
+      tags:
+        - Authentication
+      summary: "Проверка авторизации"
+      description: "Проверка действительности токена авторизации"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                token:
+                  type: "string"
+                  description: "Токен авторизации"
+                  required: true
+      responses:
+        "200":
+          description: "Успешная проверка авторизации"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  status:
+                    type: "string"
+                    enum: [ "ok" ]
+                  user:
+                    type: "string"
+                    description: "Имя пользователя"
+                  role:
+                    type: "string"
+                    description: "Роль пользователя"
+        "401":
+          description: "Недействительный токен"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  status:
+                    type: "string"
+                    enum: [ "error" ]
+                  message:
+                    type: "string"
+                    description: "Ошибка авторизации"
+        "500":
+          description: "Ошибка сервера"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  status:
+                    type: "string"
+                    enum: [ "error" ]
+                  message:
+                    type: "string"
+                    description: "Ошибка сервера"

@@ -1,5 +1,5 @@
 const { Pool } = require('pg')
-const getDbConfig = require('../../../databaseConfig')
+const getDbConfig = require('../../../config/databaseConfig')
 
 // Получение настроек для подключения к базе данных
 const dbConfig = getDbConfig()
@@ -86,6 +86,42 @@ async function getToolParams(req, res) {
   }
 }
 
+async function deleteToolParam(req, res) {
+  const id = req.params.id;
+  try {
+    const query = 'DELETE FROM dbo.tool_params WHERE id = $1';
+    const result = await pool.query(query, [id]);
+
+    if (result.rowCount === 0) {
+      res.status(404).json({ success: false, message: 'Parameter not found' });
+    } else {
+      res.status(200).json({ success: true, message: 'Parameter deleted successfully' });
+    }
+  } catch (error) {
+    console.error('Error deleting tool parameter:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+}
+
+async function updateToolParam(req, res) {
+  const id = req.params.id;
+  const { label } = req.body;
+
+  try {
+    const query = 'UPDATE dbo.tool_params SET label = $1 WHERE id = $2';
+    const result = await pool.query(query, [label, id]);
+
+    if (result.rowCount === 0) {
+      res.status(404).json({ success: false, message: 'Parameter not found' });
+    } else {
+      res.status(200).json({ success: true, message: 'Parameter updated successfully' });
+    }
+  } catch (error) {
+    console.error('Error updating tool parameter:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+}
+
 async function getToolParamsParentId(req, res) {
   const parentId = req.params.id // Используем id из параметров маршрута
 
@@ -128,72 +164,13 @@ async function getToolParamsParentId(req, res) {
   }
 }
 
-async function getToolNameId(req, res) {
-  try {
-    // Получаем parent_id из параметров маршрута
-    const parentId = req.params.id
-    // Запрос на выборку id и name всех инструментов, у которых parent_id соответствует переданному параметру
-    const query = 'SELECT id, name FROM dbo.tool_nom WHERE parent_id = $1'
-    const { rows } = await pool.query(query, [parentId])
 
-    // Преобразуем массив объектов в массив строк названий инструментов
-    const namesArray = rows.map((row) => row.name)
-
-    // Возвращаем результат в ответе
-    res.json(namesArray)
-  } catch (error) {
-    console.error(
-      'Ошибка при получении названий инструментов по parent_id:',
-      error
-    )
-    res.status(500).send('Server error')
-  }
-}
-
-async function deleteToolParam(req, res) {
-  const id = req.params.id // Получение ID из параметров запроса
-  try {
-    const query = 'DELETE FROM dbo.tool_params WHERE id = $1'
-    const result = await pool.query(query, [id])
-
-    if (result.rowCount === 0) {
-      // Нет такого ID в базе данных
-      res.status(404).send('Parameter not found')
-    } else {
-      res.status(200).send('Parameter deleted successfully')
-    }
-  } catch (error) {
-    console.error('Error deleting tool parameter:', error)
-    res.status(500).send('Internal Server Error')
-  }
-}
-
-async function updateToolParam(req, res) {
-  const id = req.params.id // Получение ID из параметров запроса
-  const { label } = req.body // Получение нового названия из тела запроса
-
-  try {
-    const query = 'UPDATE dbo.tool_params SET label = $1 WHERE id = $2'
-    const result = await pool.query(query, [label, id])
-
-    if (result.rowCount === 0) {
-      // Нет такого ID в базе данных
-      res.status(404).send('Parameter not found')
-    } else {
-      res.status(200).send('Parameter updated successfully')
-    }
-  } catch (error) {
-    console.error('Error updating tool parameter:', error)
-    res.status(500).send('Internal Server Error')
-  }
-}
 
 module.exports = {
+  getToolParamsParentId,
   getToolParams,
   updateToolParam,
   deleteToolParam,
   addToolParam,
-  getToolParamsParentId,
-  getToolNameId,
   moveToolParam,
 }

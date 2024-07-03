@@ -1,5 +1,5 @@
 const { Pool } = require('pg')
-const getDbConfig = require('../../../databaseConfig')
+const getDbConfig = require('../../../config/databaseConfig')
 
 const dbConfig = getDbConfig()
 
