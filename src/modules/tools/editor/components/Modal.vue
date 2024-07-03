@@ -120,7 +120,6 @@
                   v-model='toolModel.norma_green'
                   type='number'
                   color='green'
-                  active
                   label='Норма макс'
                   required>
                   <template v-slot:append-inner>

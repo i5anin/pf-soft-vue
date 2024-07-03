@@ -35,13 +35,17 @@ router.get('/tools', nomController.getTools)
 router.post('/tool', nomController.addTool)
 router.put('/tool/:id', nomController.editTool)
 router.delete('/tool/:id', nomController.deleteTool)
-// "Инструмент дополнительно"
-router.get('/tool/:id', nomController.getToolById) //1 элемент
-router.get('/filter-params/:parent_id', nomController.getFilterParamsByParentId)
+// "Главный фильтр"
+router.get('/tools/params/:parent_id/filter', nomController.getFilterParamsByParentId)
+// "Инструмент Modal"
+router.get('/tool/modal-form/:id', nomController.getToolById) //1 элемент router.get('/tool/:id', nomController.getToolById)
+router.get('/tools/modal-form/:id/names', nomController.getToolNameId) // router.get('/tools-params-name/:id', paramController.getToolNameId)
+router.get('/tools/modal-form/:id/params', paramController.getToolParamsParentId) // подсказки для заполнения router.get('/tools-params/:id', paramController.getToolParamsParentId)
+
+
 
 // "Параметры"
 router.get('/tools-params', paramController.getToolParams)
-router.get('/tools-params/:id', paramController.getToolParamsParentId) // подсказки для заполнения
 router.post('/tools-params', paramController.addToolParam)
 router.put('/tools-params/:id', paramController.updateToolParam)
 router.delete('/tools-params/:id', paramController.deleteToolParam)
@@ -84,7 +88,7 @@ router.post('/tool-history-damaged', damagedController.addToolHistoryDamaged)
 
 // "Email report"
 router.get('/report/zayav-instr', reportZakazController.genZayavInstr) // заявка на инструмент	раз в неделю каждый ЧТ в 12:00 (за неделю)
-router.get('/report/setup', reportSetupController.genSetupReport ) // заявка на инструмент	раз в неделю каждый ЧТ в 12:00 (за неделю)
+router.get('/report/setup', reportSetupController.genSetupReport) // заявка на инструмент	раз в неделю каждый ЧТ в 12:00 (за неделю)
 router.get('/report/revision-instr', reportRevisionController.genRevisionInstr) // заявка на инструмент	раз в неделю каждый ЧТ в 12:00 (за неделю)
 // "Email report Buch *CRON"
 router.get('/report/buch-end-op', reportBuchEndPartController.checkStatusChanges) //в режиме CRON

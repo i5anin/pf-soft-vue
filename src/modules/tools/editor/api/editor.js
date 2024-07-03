@@ -30,13 +30,13 @@ export const editorToolApi = {
   // Получить параметры инструмента по parent_id
   getToolParamsByParentId: async (parentId) =>
     axiosInstance
-      .get(`/tools-params/${parentId}`)
+      .get(`/tools/modal-form/${parentId}/params`)
       .then(handleResponse)
       .catch(handleApiError),
   // В editorToolApi объекте
   getToolNamesByParentId: async (parentId) =>
     axiosInstance
-      .get(`/tools-params-name/${parentId}`)
+      .get(`/tools/modal-form/${parentId}/names`)
       .then(handleResponse)
       .catch(handleApiError),
 }
