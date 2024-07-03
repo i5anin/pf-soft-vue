@@ -35,8 +35,10 @@
             <th class='text-left mw300'>Название</th>
             <th class='text-left mw50'>Заказ</th>
             <th class='text-left mw50'>Склад</th>
-            <!--            <th class='text-left mw50'>Склад группы</th>-->
+            <!-- <th class='text-left mw50'>Склад группы</th>-->
+            <!-- <th class='text-left mw50'>Норма зеленая</th>-->
             <th class='text-left mw50'>Норма</th>
+            <!-- <th class='text-left mw50'>Норма красная</th>-->
             <th class='text-left mw50'>Не хватает</th>
           </tr>
           </thead>
@@ -48,7 +50,7 @@
           >
             <td class='grey'>{{ toolIndex + 1 }}</td>
             <td>
-              <v-chip variant='flat'  :color='getToolColor(tool.sklad / tool.norma)'>
+              <v-chip variant='flat' :color='getToolColor(tool.sklad / tool.norma)'>
                 {{ tool.name }}
               </v-chip>
               <v-chip
@@ -80,15 +82,19 @@
               </template>
             </td>
             <td class='grey'>{{ tool.sklad }}</td>
-            <!--            <td class='grey'>{{ tool.group_sklad }}</td>-->
-            <td class='grey'>{{ tool.norma }}</td>
-            <td
-
-
-            >
-              <v-chip variant='flat' :color='getToolColor(tool.sklad / tool.norma)'>
-                <span v-if='!tool.group_sklad'>{{ ((1 - (tool.sklad) / tool.norma) * 100).toFixed(0) }} %</span>
-                <span v-else>{{ ((1 - (tool.group_sklad) / tool.norma) * 100).toFixed(0) }} %</span>
+            <!-- <td class='grey'>{{ tool.group_sklad }}</td>-->
+            <!-- <td class='grey'>{{ tool.norma_green }}</td>-->
+            <td class='grey'>
+              <v-chip v-if='tool.norma_green' color='green'> {{ tool.norma_green }}</v-chip>
+              {{ tool.norma }}
+              <v-chip v-if='tool.norma_red' color='red'>{{ tool.norma_red }}</v-chip>
+            </td>
+            <!-- <td class='grey'>{{ tool.norma_red }}</td>-->
+            <td>
+              <v-chip variant='flat' :color='getToolColor(tool)'>
+                <span v-if='!tool.group_sklad'>{{ ((1 - (tool.sklad) / getNormaForCalculation(tool)) * 100).toFixed(0)
+                  }} %</span>
+                <span v-else>{{ ((1 - (tool.group_sklad) / getNormaForCalculation(tool)) * 100).toFixed(0) }} %</span>
               </v-chip>
             </td>
           </tr>
@@ -180,25 +186,35 @@ export default {
         this.visibleGroups = []
       }
     },
+
     getLowestGroupColor(group) {
       let lowestRatio = 1 // Начальное значение для максимального запаса
       group.tools.forEach((tool) => {
-        const ratio = tool.sklad / tool.norma
+        const ratio = tool.sklad / this.getNormaForCalculation(tool) // Используем getNormaForCalculation
         if (ratio < lowestRatio) {
           lowestRatio = ratio
         }
       })
       return this.getToolColor(lowestRatio) // Получаем цвет на основе самого низкого запаса
     },
-    getToolColor(ratio) {
-      if (ratio >= 0.8) {
+    getToolColor(tool) {
+      const norma = this.getNormaForCalculation(tool) // Получаем норму для расчета
+
+      if (tool.sklad / norma >= 0.8) {
         return 'green' // Зеленый - хороший запас
-      } else if (ratio >= 0.4) {
+      } else if (tool.sklad / norma >= 0.4) {
         return 'yellow' // Желтый - умеренный запас
       } else {
         return 'red' // Красный - критический запас
       }
     },
+    getNormaForCalculation(tool) {
+      // Возвращаем норму для расчета цвета
+      if (tool.norma_green) return tool.norma_green
+      if (tool.norma_red) return tool.norma_red
+      return tool.norma // Используем tool.norma, если norma_green и norma_red не заданы
+    },
+
   },
 }
 </script>
