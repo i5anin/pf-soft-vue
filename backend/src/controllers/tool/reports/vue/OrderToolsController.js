@@ -36,8 +36,9 @@ async function getTableReportData(req, res) {
                                         tn.norma_green,
                                         tn.norma_red,
                                         CASE
-                                          WHEN t.group_total_sklad > 0 THEN GREATEST(tn.norma - t.group_total_sklad, 0)
-                                          ELSE GREATEST(tn.norma - tn.sklad, 0)
+                                          WHEN t.group_total_sklad > 0
+                                            THEN GREATEST(CASE WHEN tn.norma_green > 0 THEN tn.norma_green ELSE tn.norma END - t.group_total_sklad, 0)
+                                          ELSE GREATEST(CASE WHEN tn.norma_green > 0 THEN tn.norma_green ELSE tn.norma END - tn.sklad, 0)
                                           END                          AS zakaz,
                                         t.group_total_sklad            AS group_sklad
                                  FROM dbo.tool_nom tn
@@ -45,11 +46,11 @@ async function getTableReportData(req, res) {
                                    AND thd.timestamp >= CURRENT_DATE - INTERVAL '7 days'
                                         LEFT JOIN totals t ON tn.group_id = t.group_id
                                  WHERE CASE
-                                         WHEN t.group_total_sklad > 0 THEN tn.norma - t.group_total_sklad > 0
-                                         ELSE tn.norma - tn.sklad > 0
+                                         WHEN t.group_total_sklad > 0 THEN CASE WHEN tn.norma_green > 0 THEN tn.norma_green ELSE tn.norma END - t.group_total_sklad > 0
+                                         ELSE CASE WHEN tn.norma_green > 0 THEN tn.norma_green ELSE tn.norma END - tn.sklad > 0
                                          END
                                  GROUP BY tn.id, tn.parent_id, tn.name, tn.sklad, tn.norma, tn.group_id,
-                                          tn.group_standard, t.group_total_sklad)
+                                          tn.group_standard, t.group_total_sklad, tn.norma_green, tn.norma_red)
                    SELECT d.parent_id,
                           tp.path,
                           JSON_AGG(
