@@ -35,7 +35,7 @@
             <th class='text-left mw300'>Название</th>
             <th class='text-left mw50'>Заказ</th>
             <th class='text-left mw50'>Склад</th>
-            <th class='text-left mw50'>Склад группы</th>
+            <!-- <th class='text-left mw50'>Склад группы</th>-->
             <th class='text-left mw50'>Норма</th>
             <th class='text-left mw50'>Не хватает</th>
           </tr>
@@ -48,12 +48,12 @@
           >
             <td class='grey'>{{ toolIndex + 1 }}</td>
             <td>
-              <v-chip v-if='!tool.norma_red || !tool.norma_green' variant='flat' :color='getToolColor(tool.sklad / tool.norma)'>
-                {{ tool.name }}
-              </v-chip>
-              <v-chip v-if='tool.norma_red || tool.norma_green' :color='getToolColorLight(tool.sklad, tool.norma_red,tool.norma, tool.norma_red)'>
-                {{ tool.name }}
-              </v-chip>
+              <!-- <v-chip v-if='!tool.norma_red || !tool.norma_green' variant='flat' :color='getToolColor(tool.sklad / tool.norma)'>-->
+              {{ tool.name }}
+              <!-- </v-chip>-->
+              <!-- <v-chip v-if='tool.norma_red || tool.norma_green' :color='getToolColorLight(tool.sklad, tool.norma_red,tool.norma, tool.norma_red)'>-->
+              <!-- {{ tool.name }}-->
+              <!-- </v-chip>-->
               <v-chip
                 v-if='tool.group_id'
                 size='x-small'
@@ -83,21 +83,25 @@
               </template>
             </td>
             <td class='grey'>{{ tool.sklad }}</td>
-            <td class='grey'>{{ tool.group_sklad }}</td>
+            <!-- <td class='grey'>{{ tool.group_sklad }}</td>-->
             <td class='grey'>
-              <v-chip v-if='tool.norma_green' color='green'> {{ tool.norma_green }}</v-chip>
+              <!-- <v-chip v-if='tool.norma_green' color='green'> {{ tool.norma_green }}</v-chip>-->
+              {{ tool.norma_green }}
+              <span v-if='tool.norma_green'> | </span>
               {{ tool.norma }}
-              <v-chip v-if='tool.norma_red' color='red'>{{ tool.norma_red }}</v-chip>
+              <span v-if='tool.norma_green'> | </span>
+              {{ tool.norma_red }}
+              <!-- <v-chip v-if='tool.norma_red' color='red'>{{ tool.norma_red }}</v-chip>-->
             </td>
             <td>
-              <v-chip v-if='!tool.norma_red || !tool.norma_green' variant='flat' :color='getToolColor(tool.sklad / tool.norma)'>
+              <v-chip v-if='!tool.norma_red || !tool.norma_green' :color='getToolColor(tool.sklad / tool.norma)'>
                 <span v-if='tool.group_sklad'>{{ calcPercent(tool.group_sklad, tool.norma) }} %</span>
                 <span v-else>{{ calcPercent(tool.sklad, tool.norma) }} %</span>
               </v-chip>
               <v-chip v-if='tool.norma_red || tool.norma_green'
                       :color='getToolColorLight(tool.sklad, tool.norma_red,tool.norma, tool.norma_red)'>
-                <span v-if='tool.group_sklad'>{{ calcPercent(tool.group_sklad, tool.norma) }} %</span>
-                <span v-else>{{ calcPercent(tool.sklad, tool.norma) }} %</span>
+                <span v-if='tool.group_sklad'>{{ calcPercent(tool.group_sklad, tool.norma_green) }} %</span>
+                <span v-else>{{ calcPercent(tool.sklad, tool.norma_green) }} %</span>
               </v-chip>
             </td>
           </tr>
@@ -205,23 +209,23 @@ export default {
     },
     getToolColorLight(sklad, norma, normaGreen, normaRed) {
       if (sklad >= normaGreen) {
-        return 'green'; // Если склад больше или равен "зеленой" нормы, цвет будет зеленый
+        return '#28a745' // Если склад больше или равен "зеленой" нормы, цвет будет зеленый
       } else if (sklad >= norma && sklad < normaGreen) {
-        return 'yellow'; // Если склад меньше "зеленой" нормы и больше обычной нормы, цвет будет желтый
+        return '#ffc107' // Если склад меньше "зеленой" нормы и больше обычной нормы, цвет будет желтый
       } else if (sklad < norma) {
-        return 'red'; // Если склад меньше обычной нормы, цвет будет красный
+        return '#dc3545' // Если склад меньше обычной нормы, цвет будет красный
       }
-      return ''; // Если никакие условия не совпадают, возвращает пустую строку
+      return '' // Если никакие условия не совпадают, возвращает пустую строку
     },
 
 
     getToolColor(ratio) {
       if (ratio >= 0.8) {
-        return 'green' // Зеленый - хороший запас
+        return '#28a745' // Зеленый - хороший запас
       } else if (ratio >= 0.4) {
-        return 'yellow' // Желтый - умеренный запас
+        return '#ffc107' // Желтый - умеренный запас
       } else {
-        return 'red' // Красный - критический запас
+        return '#dc3545' // Красный - критический запас
       }
     },
   },
