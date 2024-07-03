@@ -157,16 +157,6 @@ export default {
       return ((1 - (sklad) / norma) * 100).toFixed(0)
     },
 
-    checkTools(group) {
-      let check = false
-
-      group.tools.forEach((tool) => {
-        let percentage = (1 - tool.sklad / tool.norma) * 100
-        if (percentage >= 20) check = true
-      })
-
-      return check
-    },
     async fetchZakazData() {
       try {
         this.toolGroups = await reportApi.getZakaz() // Убедитесь, что это правильный путь к данным в вашем API
@@ -191,16 +181,6 @@ export default {
         this.visibleGroups = []
       }
     },
-    getLowestGroupColor(group) {
-      let lowestRatio = 1 // Начальное значение для максимального запаса
-      group.tools.forEach((tool) => {
-        const ratio = tool.sklad / tool.norma
-        if (ratio < lowestRatio) {
-          lowestRatio = ratio
-        }
-      })
-      return this.getToolColor(lowestRatio) // Получаем цвет на основе самого низкого запаса
-    },
     getToolColorLight(sklad, norma, normaGreen, normaRed) {
       if (sklad >= normaGreen) {
         return '#28a745' // Если склад больше или равен "зеленой" нормы, цвет будет зеленый
@@ -213,6 +193,16 @@ export default {
     },
 
 
+    getLowestGroupColor(group) {
+      let lowestRatio = 1 // Начальное значение для максимального запаса
+      group.tools.forEach((tool) => {
+        const ratio = tool.sklad / this.getNormaForCalculation(tool) // Используем getNormaForCalculation
+        if (ratio < lowestRatio) lowestRatio = ratio
+      })
+      console.log(lowestRatio, this.getToolColor(lowestRatio))
+      return this.getToolColor(lowestRatio) // Получаем цвет на основе самого низкого запаса
+    },
+
     getToolColor(ratio) {
       if (ratio >= 0.8) {
         return '#28a745' // Зеленый - хороший запас
@@ -221,6 +211,24 @@ export default {
       } else {
         return '#dc3545' // Красный - критический запас
       }
+    },
+
+    getNormaForCalculation(tool) {
+      // Используем norma_green или norma_red только для расчета нехватки
+      if (tool.norma_green && tool.sklad < tool.norma_green) {
+        return tool.norma_green;
+      } else if (tool.norma_red && tool.sklad < tool.norma_red) {
+        return tool.norma_red;
+      } else {
+        return tool.norma; // В остальных случаях используем tool.norma
+      }
+    },
+
+    checkTools(group) {
+      return group.tools.some((tool) => {
+        const ratio = tool.sklad / this.getNormaForCalculation(tool)
+        return (1 - ratio) * 100 >= 20
+      })
     },
   },
 }
