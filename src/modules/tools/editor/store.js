@@ -19,6 +19,7 @@ export default {
       search: '',
       includeNull: false,
       selectedDynamicFilters: {},
+
     },
   }),
   mutations: {
@@ -73,7 +74,7 @@ export default {
       }
 
       try {
-        const dynamicFilters = await toolApi.filterParamsByParentId(id)
+        const dynamicFilters = await toolApi.filterParamsByParentId(id) // todo: иногда выполняется 2 раза
         commit(
           'setSelectedDynamicFilters',
           dynamicFilters.reduce((acc, { key }) => ({ ...acc, [key]: null }), {})
