@@ -38,6 +38,7 @@
             <!-- <th class='text-left mw50'>Склад группы</th>-->
             <th class='text-left mw50'>Норма</th>
             <th class='text-left mw50'>Не хватает</th>
+            <th class='text-left mw50'>Коэф исп</th>
           </tr>
           </thead>
           <tbody>
@@ -98,6 +99,7 @@
                 <span v-else>{{ calcPercent(tool.sklad, tool.norma_green) }} %</span>
               </v-chip>
             </td>
+            <td>{{ tool.taken_coefficient.toFixed(4)}} </td>
           </tr>
           </tbody>
         </v-table>
@@ -199,7 +201,6 @@ export default {
         const ratio = tool.sklad / this.getNormaForCalculation(tool) // Используем getNormaForCalculation
         if (ratio < lowestRatio) lowestRatio = ratio
       })
-      console.log(lowestRatio, this.getToolColor(lowestRatio))
       return this.getToolColor(lowestRatio) // Получаем цвет на основе самого низкого запаса
     },
 
