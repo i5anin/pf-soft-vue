@@ -38,7 +38,7 @@ export default {
       tableStructure: [
         { header: 'Дата', data: 'timestamp' },
         { header: 'Инструмент', data: 'name_tool' },
-        { header: 'Количество', data: 'quantity' },
+        { header: 'Кол-во', data: 'quantity' },
         { header: 'Тип выдачи', data: 'type_issue' },
         { header: 'Выдал', data: 'issuer_fio' },
       ],
@@ -66,7 +66,7 @@ export default {
     },
     formatDate(timestamp) {
       // Преобразуем timestamp в дату в формате "ДД.ММ.ГГГГ ЧЧ:ММ"
-      return format(new Date(timestamp), 'dd.MM.yyyy HH:mm')
+      return format(new Date(timestamp), 'dd.MM.yy HH:mm')
     },
   },
 }
