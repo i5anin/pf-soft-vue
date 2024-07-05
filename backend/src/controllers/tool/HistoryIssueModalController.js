@@ -253,6 +253,7 @@ LEFT JOIN dbo.tool_nom tn ON thn.id_tool = tn.id
 LEFT JOIN dbo.vue_users vu ON thn.issuer_id = vu.id
 LEFT JOIN dbo.vue_users vu2 ON thn.cancelled_id = vu2.id
 WHERE thn.specs_op_id =  $1
+ORDER BY thn.timestamp DESC;
     `
     const queryParams = [idOperation]
 
@@ -260,8 +261,6 @@ WHERE thn.specs_op_id =  $1
       operationsQuery += ` AND thn.timestamp >= $2::date AND thn.timestamp < $2::date + interval '1 day'`
       queryParams.push(selectedDate)
     }
-
-    operationsQuery += ' ORDER BY thn.timestamp DESC;'
 
     const operationsResult = await pool.query(operationsQuery, queryParams)
 
