@@ -74,36 +74,35 @@
                     tool.zakaz !== getRoundedCount(tool.zakaz)
                   "
               >
-                <v-chip variant='plain'>({{ tool.zakaz }})</v-chip>
+                ({{ tool.zakaz }})
               </template>
             </td>
-            <td>
-              <v-chip variant='plain'>{{ tool.sklad }}</v-chip>
-            </td>
+            <td class='grey'>{{ tool.sklad }}</td>
 
-            <td  class='grey'>
+            <td class='grey'>
+
               {{ tool.norma_green }}
               <span v-if='tool.norma_green'> | </span>
               {{ tool.norma }}
               <span v-if='tool.norma_green'> | </span>
               {{ tool.norma_red }}
+
             </td>
             <td>
-<!--              {{tool.sklad / tool.norma}}-->
-              <v-chip v-if='!tool.norma_red || !tool.norma_green' :color='getToolColor(tool.group_sklad / tool.norma)'>
+              <v-chip v-if='!tool.norma_red || !tool.norma_green' :color='getToolColor(tool.sklad / tool.norma)'>
                 <span v-if='tool.group_sklad'>{{ calcPercent(tool.group_sklad, tool.norma) }} %</span>
                 <span v-else>{{ calcPercent(tool.sklad, tool.norma) }} %</span>
               </v-chip>
               <v-chip v-if='tool.norma_red || tool.norma_green'
-                      :color='getToolColorLight(tool.sklad,tool.norma, tool.norma_green, tool.norma_red)'>
+                      :color='getToolColorLight(tool.sklad, tool.norma_red,tool.norma, tool.norma_red)'>
                 <span v-if='tool.group_sklad'>{{ calcPercent(tool.group_sklad, tool.norma_green) }} %</span>
                 <span v-else>{{ calcPercent(tool.sklad, tool.norma_green) }} %</span>
               </v-chip>
             </td>
             <td>
-              <v-chip v-if='tool.taken_coefficient'
-                      :variant='getChipVariant(tool.taken_coefficient)'
-                      :color='getChipColor(tool.taken_coefficient)'>
+              <v-chip
+                :variant="getChipVariant(tool.taken_coefficient)"
+                :color="getChipColor(tool.taken_coefficient)">
                 {{ tool.taken_coefficient.toFixed(4) }}
               </v-chip>
             </td>
@@ -130,11 +129,6 @@ export default {
       openDialog: false,
       isAllVisible: false, // Состояние - все списки развернуты или нет
       totalToolCount: 0, // Общее количество инструментов
-      colorMap: { // Массив цветов с номерами
-        green: '#28a745', // Зеленый
-        yellow: '#ffc107', // Желтый
-        red: '#dc3545', // Красный
-      },
     }
   },
   mounted() {
@@ -150,43 +144,28 @@ export default {
     },
   },
   methods: {
-    getLowestGroupColor(group) {
-      let lowestRatio = 1 // Начальное значение для максимального запаса
-      let worstColor = this.colorMap.green // Начинаем с наилучшего цвета
-      group.tools.forEach((tool) => {
-        const ratio = tool.sklad / this.getNormaForCalculation(tool) // Используем getNormaForCalculation
-        if (ratio < lowestRatio) lowestRatio = ratio
-        const toolColor = this.getToolColor(tool.sklad, tool.norma, tool.norma_green, tool.norma_red)
-        // Если цвет инструмента "хуже" текущего worstColor, обновляем worstColor
-        if (toolColor === this.colorMap.red || (toolColor === this.colorMap.yellow && worstColor === this.colorMap.green)) {
-          worstColor = toolColor
-        }
-      })
-      return this.getToolColor(lowestRatio) // Получаем цвет на основе самого низкого запаса
-    },
-
     getChipVariant(coefficient) {
       if (coefficient > 2) {
-        return 'filled'
+        return 'filled';
       } else if (coefficient > 1) {
-        return 'filled'
+        return 'filled';
       } else if (coefficient > 0.5) {
-        return 'text'
-      } else if (coefficient >= 0) {
-        return 'plain'
+        return 'text';
+      } else if (coefficient > 0) {
+        return 'plain';
       } else {
-        return 'default'
+        return 'default';
       }
     },
     getChipColor(coefficient) {
       if (coefficient > 2) {
-        return 'red'
+        return 'red';
       } else if (coefficient > 1) {
-        return 'secondary'
+        return 'secondary';
       } else if (coefficient > 0.5) {
-        return 'primary' // или любой другой цвет по вашему выбору
+        return 'primary'; // или любой другой цвет по вашему выбору
       } else {
-        return '' // без цвета
+        return ''; // без цвета
       }
     },
     onClosePopup() {
@@ -234,26 +213,34 @@ export default {
         this.visibleGroups = []
       }
     },
-
-
     getToolColorLight(sklad, norma, normaGreen, normaRed) {
-      if (norma <= sklad && sklad < normaGreen) {
-        return this.colorMap.green // Зеленый - хороший запас
-      } else if (normaRed <= sklad && sklad < norma) {
-        return this.colorMap.yellow // Желтый - умеренный запас
-      } else if (norma < normaRed) {
-        return this.colorMap.green  // Красный - критический запас
+      if (sklad >= normaGreen) {
+        return '#28a745' // Если склад больше или равен "зеленой" нормы, цвет будет зеленый
+      } else if (sklad >= norma && sklad < normaGreen) {
+        return '#ffc107' // Если склад меньше "зеленой" нормы и больше обычной нормы, цвет будет желтый
+      } else if (sklad < norma) {
+        return '#dc3545' // Если склад меньше обычной нормы, цвет будет красный
       }
       return '' // Если никакие условия не совпадают, возвращает пустую строку
     },
 
+
+    getLowestGroupColor(group) {
+      let lowestRatio = 1 // Начальное значение для максимального запаса
+      group.tools.forEach((tool) => {
+        const ratio = tool.sklad / this.getNormaForCalculation(tool) // Используем getNormaForCalculation
+        if (ratio < lowestRatio) lowestRatio = ratio
+      })
+      return this.getToolColor(lowestRatio) // Получаем цвет на основе самого низкого запаса
+    },
+
     getToolColor(ratio) {
       if (ratio >= 0.8) {
-        return this.colorMap.green // Зеленый - хороший запас
+        return '#28a745' // Зеленый - хороший запас
       } else if (ratio >= 0.4) {
-        return this.colorMap.yellow // Желтый - умеренный запас
+        return '#ffc107' // Желтый - умеренный запас
       } else {
-        return this.colorMap.red // Красный - критический запас
+        return '#dc3545' // Красный - критический запас
       }
     },
 
