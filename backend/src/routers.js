@@ -42,8 +42,6 @@ router.get('/tool/modal-form/:id', nomController.getToolById) //1 элемент
 router.get('/tools/modal-form/:id/names', nomController.getToolNameId) // router.get('/tools-params-name/:id', paramController.getToolNameId)
 router.get('/tools/modal-form/:id/params', paramController.getToolParamsParentId) // подсказки для заполнения router.get('/tools-params/:id', paramController.getToolParamsParentId)
 
-
-
 // "Параметры"
 router.get('/tools-params', paramController.getToolParams)
 router.post('/tools-params', paramController.addToolParam)
@@ -60,7 +58,7 @@ router.delete('/tools-tree/:id', treeController.dellFolderTree)
 
 // "Выдача инструмента"
 router.post('/issues', issueController.issueTools)
-router.get('/modal-form/parties', issueController.findParties)//форма заполнения поиск партии
+router.get('/modal-form/parties', issueController.findParties) //форма заполнения поиск партии
 router.get('/modal-form/cnc', issueController.getCncData) //форма заполнения
 router.get('/modal-form/operators/fio', issueController.getFioOperators) //форма заполнения
 router.get('/issue/cancel-operation-admin/:id', issueController.cancelOperationAdmin) // отмена операции любой
