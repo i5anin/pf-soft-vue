@@ -101,8 +101,9 @@
             </td>
             <td>
               <v-chip
-                :variant="getChipVariant(tool.taken_coefficient)"
-                :color="getChipColor(tool.taken_coefficient)">
+                v-if='tool.taken_coefficient'
+                :variant='getChipVariant(tool.taken_coefficient)'
+                :color='getChipColor(tool.taken_coefficient)'>
                 {{ tool.taken_coefficient.toFixed(4) }}
               </v-chip>
             </td>
@@ -146,26 +147,26 @@ export default {
   methods: {
     getChipVariant(coefficient) {
       if (coefficient > 2) {
-        return 'filled';
+        return 'filled'
       } else if (coefficient > 1) {
-        return 'filled';
+        return 'filled'
       } else if (coefficient > 0.5) {
-        return 'text';
+        return 'text'
       } else if (coefficient > 0) {
-        return 'plain';
+        return 'plain'
       } else {
-        return 'default';
+        return 'default'
       }
     },
     getChipColor(coefficient) {
       if (coefficient > 2) {
-        return 'red';
+        return 'red'
       } else if (coefficient > 1) {
-        return 'secondary';
+        return 'secondary'
       } else if (coefficient > 0.5) {
-        return 'primary'; // или любой другой цвет по вашему выбору
+        return 'primary' // или любой другой цвет по вашему выбору
       } else {
-        return ''; // без цвета
+        return '' // без цвета
       }
     },
     onClosePopup() {
