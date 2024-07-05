@@ -53,16 +53,17 @@ async function getTableReportData(req, res) {
                      ),
                      ToolUsage AS (
                        SELECT
-                         tool_id,
-                         SUM(new_amount) as total_taken
+                         CASE WHEN tn.group_standard THEN tn.group_id ELSE tn.id END AS tool_group_id, -- Группируем по group_id, если инструмент эталонный
+                         SUM(vl.new_amount) AS total_taken
                        FROM
-                         dbo.vue_log
-                       WHERE datetime_log >= CURRENT_DATE - INTERVAL '14 days' -- Фильтруем записи за последние 2 недели
+                         dbo.vue_log vl
+                           JOIN dbo.tool_nom tn ON vl.tool_id = tn.id
+                       WHERE vl.datetime_log >= CURRENT_DATE - INTERVAL '14 days'
                        GROUP BY
-                         tool_id
+                         tool_group_id
                      ),
                      TotalTaken AS (
-                       SELECT SUM(new_amount) as total_taken_all FROM dbo.vue_log WHERE datetime_log >= CURRENT_DATE - INTERVAL '14 days' -- Фильтруем записи за последние 2 недели
+                       SELECT SUM(new_amount) as total_taken_all FROM dbo.vue_log WHERE datetime_log >= CURRENT_DATE - INTERVAL '14 days'
                      )
                    SELECT
                      d.parent_id,
@@ -88,7 +89,7 @@ async function getTableReportData(req, res) {
                        JOIN
                      TreePath tp ON d.parent_id = tp.id
                        LEFT JOIN
-                     ToolUsage tu ON d.id_tool = tu.tool_id
+                     ToolUsage tu ON CASE WHEN d.group_standard THEN d.group_id ELSE d.id_tool END = tu.tool_group_id -- Используем tool_group_id для объединения
                        CROSS JOIN
                      TotalTaken tt
                    GROUP BY
