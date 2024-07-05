@@ -71,6 +71,7 @@ router.get('/history-all-tool', historyController.getAllIssuedToolIdsWithNames) 
 
 // "История выдачи Modal"
 router.get('/history-part', historyControllerModal.getToolHistoryByPartId) //история основной список
+router.get('/history-operation', historyControllerModal.getToolHistoryByOperationId) //история по операции
 router.get('/history-part/info', historyControllerModal.getToolHistoryByPartIdInfo) //история информация по партии
 router.post('/history-add-archive', historyControllerModal.addToArchive) //архив истории выдачи
 
