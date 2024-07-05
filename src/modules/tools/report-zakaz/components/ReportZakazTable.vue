@@ -37,6 +37,7 @@
             <th class='text-left mw50'>Склад</th>
             <!-- <th class='text-left mw50'>Склад группы</th>-->
             <th class='text-left mw50'>Норма</th>
+            <th class='text-left mw50'>Коэф исп</th>
             <th class='text-left mw50'>Не хватает</th>
           </tr>
           </thead>
@@ -73,7 +74,7 @@
                     tool.zakaz !== getRoundedCount(tool.zakaz)
                   "
               >
-                ({{ tool.zakaz }})
+                <span class='grey'> ({{ tool.zakaz }})</span>
               </template>
             </td>
             <td class='grey'>{{ tool.sklad }}</td>
@@ -88,6 +89,14 @@
 
             </td>
             <td>
+              <v-chip
+                v-if='tool.taken_coefficient'
+                :variant='getChipVariant(tool.taken_coefficient)'
+                :color='getChipColor(tool.taken_coefficient)'>
+                {{ tool.taken_coefficient.toFixed(4) }}
+              </v-chip>
+            </td>
+            <td>
               <v-chip v-if='!tool.norma_red || !tool.norma_green' :color='getToolColor(tool.sklad / tool.norma)'>
                 <span v-if='tool.group_sklad'>{{ calcPercent(tool.group_sklad, tool.norma) }} %</span>
                 <span v-else>{{ calcPercent(tool.sklad, tool.norma) }} %</span>
@@ -98,6 +107,7 @@
                 <span v-else>{{ calcPercent(tool.sklad, tool.norma_green) }} %</span>
               </v-chip>
             </td>
+
           </tr>
           </tbody>
         </v-table>
@@ -136,6 +146,30 @@ export default {
     },
   },
   methods: {
+    getChipVariant(coefficient) {
+      if (coefficient > 2) {
+        return 'filled'
+      } else if (coefficient > 1) {
+        return 'filled'
+      } else if (coefficient > 0.5) {
+        return 'text'
+      } else if (coefficient > 0) {
+        return 'plain'
+      } else {
+        return 'default'
+      }
+    },
+    getChipColor(coefficient) {
+      if (coefficient > 2) {
+        return 'red'
+      } else if (coefficient > 1) {
+        return 'secondary'
+      } else if (coefficient > 0.5) {
+        return 'primary' // или любой другой цвет по вашему выбору
+      } else {
+        return '' // без цвета
+      }
+    },
     onClosePopup() {
       this.openDialog = false
     },
@@ -199,7 +233,6 @@ export default {
         const ratio = tool.sklad / this.getNormaForCalculation(tool) // Используем getNormaForCalculation
         if (ratio < lowestRatio) lowestRatio = ratio
       })
-      console.log(lowestRatio, this.getToolColor(lowestRatio))
       return this.getToolColor(lowestRatio) // Получаем цвет на основе самого низкого запаса
     },
 
@@ -216,11 +249,11 @@ export default {
     getNormaForCalculation(tool) {
       // Используем norma_green или norma_red только для расчета нехватки
       if (tool.norma_green && tool.sklad < tool.norma_green) {
-        return tool.norma_green;
+        return tool.norma_green
       } else if (tool.norma_red && tool.sklad < tool.norma_red) {
-        return tool.norma_red;
+        return tool.norma_red
       } else {
-        return tool.norma; // В остальных случаях используем tool.norma
+        return tool.norma // В остальных случаях используем tool.norma
       }
     },
 

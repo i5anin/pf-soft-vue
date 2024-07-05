@@ -250,14 +250,14 @@ async function addTool(req, res) {
         .json({ error: 'parent_id must be greater than 1.' })
     }
 
-    if (sklad < 0)
-      return res.status(400).json({ error: 'Склад не может быть отрицательным.' })
+    // if (sklad < 0)
+    //   return res.status(400).json({ error: 'Склад не может быть отрицательным.' })
 
 
     // Проверка на корректность значений норм для светофора (изменено условие)
-    if (norma_green < norma || norma < norma_red)
-      return res.status(400).json({ error: 'Некорректные значения норм для светофора: green > norma > red.' })
-
+    // if (norma_green < norma || norma < norma_red)
+    //   return res.status(400).json({ error: 'Некорректные значения норм для светофора: green > norma > red.' })
+    //
 
     if (property && property.id) {
       const propertyIdCheckResult = await pool.query(
@@ -326,8 +326,8 @@ async function addTool(req, res) {
 }
 
 async function editTool(req, res) {
-  const { id } = req.params
-  const {
+  const { id } = req.params;
+  let { // Используем let вместо const
     name,
     parent_id,
     property,
@@ -335,77 +335,83 @@ async function editTool(req, res) {
     norma,
     group_id,
     group_standard,
-    norma_red, // Добавлено поле norma_red
-    norma_green, // Добавлено поле norma_green
-  } = req.body
+    norma_red,
+    norma_green,
+  } = req.body;
 
-  replaceCommaWithDotInNumbers(property)
+  replaceCommaWithDotInNumbers(property);
 
   try {
     if (parent_id <= 1) {
       return res
         .status(400)
-        .json({ error: 'parent_id must be greater than 1.' })
+        .json({ error: 'parent_id must be greater than 1.' });
     }
 
     if (property && property.id) {
       const propertyIdCheckResult = await pool.query(
         'SELECT id FROM dbo.tool_params WHERE id = $1',
         [property.id],
-      )
+      );
 
       if (propertyIdCheckResult.rowCount === 0) {
         return res.status(400).json({
           error: 'Specified property.id does not exist in tool_params.',
-        })
+        });
       }
     }
 
     const parentCheckResult = await pool.query(
       'SELECT id FROM dbo.tool_tree WHERE id = $1',
       [parent_id],
-    )
+    );
 
     if (parentCheckResult.rowCount === 0) {
       return res
         .status(400)
-        .json({ error: 'Specified parent_id does not exist.' })
+        .json({ error: 'Specified parent_id does not exist.' });
     }
 
-    // Проверка на неотрицательное значение склада
-    if (newSklad < 0) return res.status(400).json({ error: 'Склад не может быть отрицательным.' })
-
-
-    // Проверка на корректность значений норм для светофора (изменено условие)
-    if (norma_green < norma || norma < norma_red)
-      return res.status(400).json({ error: 'Некорректные значения норм для светофора: green > norma > red.' })
-
+    // Проверка на корректность значений норм для светофора
+    if (
+      (norma_green !== null && norma !== null && norma_green < norma) ||
+      (norma !== null && norma_red !== null && norma < norma_red)
+    ) {
+      return res.status(400).json({
+        error: 'Некорректные значения норм для светофора: green >= norma >= red.',
+      });
+    }
 
     const currentSkladResult = await pool.query(
       'SELECT sklad FROM dbo.tool_nom WHERE id = $1',
       [id],
-    )
+    );
 
     if (currentSkladResult.rowCount === 0) {
       return res
         .status(404)
-        .json({ error: 'Tool with the specified ID not found.' })
+        .json({ error: 'Tool with the specified ID not found.' });
     }
 
-    const oldSklad = currentSkladResult.rows[0].sklad
-    const propertyWithoutNull = removeNullProperties(property)
-    const propertyString = JSON.stringify(propertyWithoutNull)
+    const oldSklad = currentSkladResult.rows[0].sklad;
+    const propertyWithoutNull = removeNullProperties(property);
+    const propertyString = JSON.stringify(propertyWithoutNull);
 
     if (group_standard) {
-      // Сброс флага group_standard для всех инструментов в группе
       await pool.query(
         'UPDATE dbo.tool_nom SET group_standard=false WHERE group_id=$1 AND id<>$2',
         [group_id, id],
-      )
+      );
     }
 
+    // Преобразование пустых строк и нулей в null
+    norma = norma === '' || norma === 0 ? null : norma;
+    norma_red = norma_red === '' || norma_red === 0 ? null : norma_red;
+    norma_green = norma_green === '' || norma_green === 0 ? null : norma_green;
+    newSklad = newSklad === '' || newSklad === 0 ? null : newSklad;
+
     const result = await pool.query(
-      'UPDATE dbo.tool_nom SET name=$1, parent_id=$2, property=$3, sklad=$4, norma=$5, group_id=$7, group_standard=$8, norma_red=$9, norma_green=$10 WHERE id=$6 RETURNING *', // Добавлены поля norma_red и norma_green
+      'UPDATE dbo.tool_nom SET name=$1, parent_id=$2, property=$3, sklad=$4, norma=$5, group_id=$7, group_standard=$8, norma_red=$9, norma_green=$10 WHERE id=$6 RETURNING *',
       [
         name,
         parent_id,
@@ -415,24 +421,24 @@ async function editTool(req, res) {
         id,
         group_id,
         group_standard,
-        norma_red, // Добавлено значение norma_red
-        norma_green, // Добавлено значение norma_green
+        norma_red,
+        norma_green,
       ],
-    )
+    );
 
     if (result.rowCount > 0) {
       await pool.query(
         'INSERT INTO dbo.vue_log (message, tool_id, datetime_log, old_amount, new_amount) VALUES ($1, $2, NOW(), $3, $4)',
         [`Обновлен ID инструмента ${id}`, id, oldSklad, newSklad],
-      )
+      );
 
-      res.status(200).json({ success: 'OK', data: result.rows[0] })
+      res.status(200).json({ success: 'OK', data: result.rows[0] });
     } else {
-      res.status(404).json({ error: 'Tool with the specified ID not found.' })
+      res.status(404).json({ error: 'Tool with the specified ID not found.' });
     }
   } catch (err) {
-    console.error('Error:', err.message)
-    res.status(500).json({ error: 'Error updating tool: ' + err.message })
+    console.error('Error:', err.message);
+    res.status(500).json({ error: 'Error updating tool: ' + err.message });
   }
 }
 

@@ -1,4 +1,5 @@
 const { Pool } = require('pg')
+const fs = require('fs');
 const ExcelJS = require('exceljs')
 const nodemailer = require('nodemailer')
 const { emailConfig } = require('../../../../config/config')
@@ -8,69 +9,10 @@ const getDbConfig = require('../../../../config/databaseConfig')
 const dbConfig = getDbConfig()
 const pool = new Pool(dbConfig)
 
-// Функция для получения данных из базы данных
 async function getReportData() {
-  const query = `
-    WITH RECURSIVE
-      TreePath AS (SELECT id, CAST(name AS TEXT) AS path, parent_id
-                   FROM dbo.tool_tree
-                   WHERE parent_id = 1
-                   UNION ALL
-                   SELECT tt.id, CONCAT(tp.path, ' / ', tt.name) AS path, tt.parent_id
-                   FROM dbo.tool_tree tt
-                          JOIN TreePath tp ON tt.parent_id = tp.id),
-      totals AS (
-        SELECT group_id, SUM(sklad) AS group_total_sklad
-        FROM dbo.tool_nom
-        WHERE group_id IS NOT NULL AND group_id <> 0
-        GROUP BY group_id
-      ),
-      damaged AS (
-        SELECT tn.id AS id_tool,
-               tn.name,
-               tn.sklad,
-               tn.norma,
-               tn.parent_id,
-               tn.group_id,
-               tn.group_standard,
-               CASE
-                 WHEN tn.group_id IS NOT NULL AND tn.group_id <> 0 THEN
-                   GREATEST(tn.norma - t.group_total_sklad, 0)
-                 ELSE
-                   GREATEST(tn.norma - tn.sklad, 0)
-               END AS zakaz,
-               COALESCE(SUM(thd.quantity), 0) AS damaged_last_7_days,
-               t.group_total_sklad AS group_sum
-        FROM dbo.tool_nom tn
-        LEFT JOIN dbo.tool_history_damaged thd ON tn.id = thd.id_tool AND thd.timestamp >= CURRENT_DATE - INTERVAL '7 days'
-        LEFT JOIN totals t ON tn.group_id = t.group_id
-        GROUP BY tn.id, tn.parent_id, tn.name, tn.sklad, tn.norma, tn.group_id, tn.group_standard, t.group_total_sklad
-        HAVING CASE
-                 WHEN tn.group_id IS NOT NULL AND tn.group_id <> 0 THEN
-                   GREATEST(tn.norma - t.group_total_sklad, 0)
-                 ELSE
-                   GREATEST(tn.norma - tn.sklad, 0)
-               END > 0
-      )
-    SELECT d.id_tool,
-           d.name,
-           d.sklad,
-           d.norma,
-           d.zakaz,
-           tp.path AS tool_path,
-           CASE
-             WHEN d.group_id IS NULL THEN '0'
-             ELSE d.group_id
-           END AS group_display,
-           d.group_standard,
-           d.group_sum
-    FROM damaged d
-    LEFT JOIN TreePath tp ON d.parent_id = tp.id
-    ORDER BY tp.path, d.name;
-  `
-
-  const { rows } = await pool.query(query)
-  return rows
+  const sql = fs.readFileSync(__dirname + '/OrderToolsController.sql', 'utf-8');
+  const { rows } = await pool.query(sql);
+  return rows;
 }
 
 function getCurrentMonthDates() {
@@ -78,12 +20,12 @@ function getCurrentMonthDates() {
   const firstDayOfMonth = new Date(
     currentDate.getFullYear(),
     currentDate.getMonth(),
-    1
+    1,
   )
   const lastDayOfMonth = new Date(
     currentDate.getFullYear(),
     currentDate.getMonth() + 1,
-    0
+    0,
   )
 
   const firstDate = firstDayOfMonth.toISOString().split('T')[0]
@@ -123,6 +65,8 @@ async function createExcelFileStream(data) {
     { header: 'На складе', key: 'sklad', width: 10 },
     { header: 'Норма', key: 'norma', width: 10 },
     { header: 'Путь', key: 'tool_path', width: 30 },
+    { header: 'Норма Зеленая', key: 'norma_green', width: 30 },
+    { header: 'Норма Красная', key: 'norma_red', width: 30 },
     // { header: 'Группа ID', key: 'group_display', width: 15 },
     // { header: 'Стандарт', key: 'group_standard', width: 15 },
   ]
@@ -147,6 +91,8 @@ async function createExcelFileStream(data) {
       group_standard: item.group_standard ? 'Да' : 'Нет',
       tool_path: item.tool_path ? item.tool_path : 'Не указан',
       group_sum: Number(item.group_sum) || '',
+      norma_green: item.norma_green, // <-- добавлено поле "Норма Зеленая"
+      norma_red: item.norma_red,     // <-- добавлено поле "Норма Красная"
     })
   })
 
@@ -182,9 +128,11 @@ function generateHtmlTable(data) {
     { header: 'Группа ID', key: 'group_display' },
     { header: 'Стандарт', key: 'group_standard' },
     { header: 'Путь', key: 'tool_path' },
+    { header: 'Норма Зеленая', key: 'norma_green' },
+    { header: 'Норма Красная', key: 'norma_red' },
   ]
 
-  let htmlContent = `<h2>Заказ: Журнал инструмента за период</h2>`
+  let htmlContent = `<h2>Заказ: Журнал инструмента</h2>`
   htmlContent += `<table border='1' style='border-collapse: collapse;'><tr>`
 
   // Генерируем шапку таблицы
@@ -222,9 +170,7 @@ function generateHtmlTable(data) {
     })
     htmlContent += `</tr>`
   })
-
   htmlContent += `</table>`
-
   return htmlContent
 }
 
@@ -242,7 +188,7 @@ async function sendEmailWithExcelStream(email, text, excelStream, data) {
 
   const { firstDate, lastDate } = getCurrentMonthDates()
   const envPrefix = process.env.NODE_ENV === 'development' ? 'development ' : ''
-  const subject = `${envPrefix}Заказ: Журнал инструмента за неделю с ${firstDate} по ${lastDate}`
+  const subject = `${envPrefix}Заказ: Журнал инструмента`
 
   const htmlContent = generateHtmlTable(data) // Генерация HTML
 
@@ -254,10 +200,9 @@ async function sendEmailWithExcelStream(email, text, excelStream, data) {
     html: htmlContent, // Вставка сгенерированного HTML
     attachments: [
       {
-        filename: `Поврежденный инструмент ${firstDate} - ${lastDate}.xlsx`,
+        filename: 'Поврежденный инструмент.xlsx',
         content: excelStream,
-        contentType:
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       },
     ],
   }

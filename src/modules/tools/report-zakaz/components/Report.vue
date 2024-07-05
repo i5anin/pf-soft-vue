@@ -15,7 +15,12 @@
             <td>{{ report.name }}</td>
             <td>{{ report.info }}</td>
             <td>
-              <v-btn color='primary' @click='report.action(report)'>
+              <v-btn
+                color="primary"
+                :loading="report.loading"
+                :disabled="report.loading"
+                @click="sendEmailReport(report)"
+              >
                 Email
               </v-btn>
             </td>
@@ -43,7 +48,7 @@ export default {
         },
         {
           name: 'Отчет заявка на инструмент',
-          info: 'раз в неделю каждый ЧТ в 12:00 (за неделю)',
+          info: 'каждый четверг',
           action: this.genZayavInstrWeek,
         },
         {
@@ -56,16 +61,28 @@ export default {
   },
 
   methods: {
+    async sendEmailReport(report) {
+      report.loading = true; // Начинаем анимацию загрузки и блокируем кнопку
+      try {
+        await report.action(); // Вызываем соответствующую функцию генерации отчета
+        // Дополнительные действия после успешной отправки, например, сообщение об успехе
+      } catch (error) {
+        console.error('Ошибка при отправке отчета:', error);
+        // Обработка ошибки, например, сообщение об ошибке
+      } finally {
+        report.loading = false; // Останавливаем анимацию и разблокируем кнопку
+      }
+    },
     async genNalad() {
-      const token = localStorage.getItem('token')
+      const token = localStorage.getItem('token');
       if (!token) {
-        console.error('No token found in local storage.')
-        return
+        console.error('No token found in local storage.');
+        return;
       }
       try {
-        await reportApi.genNalad(token)
+        await reportApi.genNalad(token);
       } catch (error) {
-        console.error('Error while generating report:', error)
+        console.error('Error while generating report:', error);
       }
     },
 
