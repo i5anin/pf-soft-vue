@@ -6,116 +6,122 @@
   <!--    {{ snackbarText }}-->
   <!--    <v-btn color="white" text @click="snackbar = false"> Закрыть </v-btn>-->
   <!--  </v-snackbar>-->
-  <Modal :title="popupTitle" width-default="600px">
+  <Modal :title="popupTitle" :width-default="toolModel.operationType ? '1000px' : '600px'">
     <template #content>
       <v-container>
-        <div class="text-h6 pl-5 mb-2">Выбрать деталь:</div>
-        <v-row>
-          <v-col>
-            <v-text-field
-              variant="outlined"
-              label="поиск детали по партии"
-              required
-              @update:model-value="onIdChanged"
-            />
-            <v-select
-              v-model="toolModel.detailDescription"
-              label="Название Обозначение"
-              required
-              :disabled="!options.idNameDescription.length"
-              :items="options.idNameDescription"
-              @update:model-value="onIdSelected"
-            />
-            <!--todo:выведи id операции-->
+        <div style="display: flex">
+          <div>
+            <div class="text-h6 pl-5 mb-2">Выбрать деталь:</div>
+            <v-row>
+              <v-col>
+                <v-text-field
+                  variant="outlined"
+                  label="поиск детали по партии"
+                  required
+                  @update:model-value="onIdChanged"
+                />
+                <v-select
+                  v-model="toolModel.detailDescription"
+                  label="Название Обозначение"
+                  required
+                  :disabled="!options.idNameDescription.length"
+                  :items="options.idNameDescription"
+                  @update:model-value="onIdSelected"
+                />
+
+                <v-select
+                  v-model="toolModel.numberType"
+                  label="Номер Тип"
+                  required
+                  :disabled="!options.numberType.length"
+                  :items="options.numberType"
+                  item-value="id"
+                  item-text="text"
+                  @update:model-value="onOperationSelected"
+                />
+                <h2 class="text-h6 pl-5 mb-2">Кому выдать:</h2>
+                <v-combobox
+                  v-model="selectedFio"
+                  icon="mdi-account"
+                  :items="fioOptions"
+                  item-title="text"
+                  item-value="value"
+                  label="ФИО"
+                  @update:model-value="handleSelectionChange"
+                />
+                <!--fixme-->
+                <v-combobox
+                  v-model="toolModel.typeIssue"
+                  :items="typeIssueOptions"
+                  item-text="title"
+                  item-value="id"
+                  label="Тип выдачи"
+                  :rules="issueTypeRules"
+                  required
+                />
+              </v-col>
+            </v-row>
+            <v-table hover>
+              <thead>
+                <tr>
+                  <th />
+                  <th>Инструмент</th>
+                  <th>Кол-во</th>
+                  <th>Склад</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(cartItem, index) in cartItems" :key="cartItem.id">
+                  <td class="gray">{{ index + 1 }}</td>
+                  <td>{{ cartItem.name }}</td>
+                  <td>
+                    <div class="d-flex align-center">
+                      <v-btn
+                        class="hover-effect-red"
+                        icon="true"
+                        size="x-small"
+                        :disabled="cartItem.quantity <= 1"
+                        @click="decreaseQuantity(index)"
+                      >
+                        <v-icon icon="mdi-minus" />
+                      </v-btn>
+                      <div class="mx-2">
+                        {{ cartItem.quantity }}
+                      </div>
+                      <v-btn
+                        class="hover-effect-red"
+                        icon="true"
+                        size="x-small"
+                        :disabled="cartItem.quantity >= item.sklad"
+                        @click="increaseQuantity(index)"
+                      >
+                        <v-icon icon="mdi-plus" />
+                      </v-btn>
+                    </div>
+                  </td>
+                  <td>{{ cartItem.sklad }}</td>
+                  <td>
+                    <v-btn
+                      class="hover-effect-grey"
+                      icon="true"
+                      size="x-small"
+                      @click="removeFromCartAction(cartItem.toolId)"
+                    >
+                      <v-icon icon="mdi-delete" />
+                    </v-btn>
+                  </td>
+                </tr>
+              </tbody>
+            </v-table>
+          </div>
+          <div>
             <ModalTableOperaton
               v-if="toolModel.operationType"
               :operation-id="toolModel.operationType"
             />
-            <v-select
-              v-model="toolModel.numberType"
-              label="Номер Тип"
-              required
-              :disabled="!options.numberType.length"
-              :items="options.numberType"
-              item-value="id"
-              item-text="text"
-              @update:model-value="onOperationSelected"
-            />
-            <h2 class="text-h6 pl-5 mb-2">Кому выдать:</h2>
-            <v-combobox
-              v-model="selectedFio"
-              icon="mdi-account"
-              :items="fioOptions"
-              item-title="text"
-              item-value="value"
-              label="ФИО"
-              @update:model-value="handleSelectionChange"
-            />
-            <!--fixme-->
-            <v-combobox
-              v-model="toolModel.typeIssue"
-              :items="typeIssueOptions"
-              item-text="title"
-              item-value="id"
-              label="Тип выдачи"
-              :rules="issueTypeRules"
-              required
-            />
-          </v-col>
-        </v-row>
-        <v-table hover>
-          <thead>
-            <tr>
-              <th />
-              <th>Инструмент</th>
-              <th>Кол-во</th>
-              <th>Склад</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(cartItem, index) in cartItems" :key="cartItem.id">
-              <td class="gray">{{ index + 1 }}</td>
-              <td>{{ cartItem.name }}</td>
-              <td>
-                <div class="d-flex align-center">
-                  <v-btn
-                    class="hover-effect-red"
-                    icon="true"
-                    size="x-small"
-                    :disabled="cartItem.quantity <= 1"
-                    @click="decreaseQuantity(index)"
-                  >
-                    <v-icon icon="mdi-minus" />
-                  </v-btn>
-                  <div class="mx-2">
-                    {{ cartItem.quantity }}
-                  </div>
-                  <v-btn
-                    class="hover-effect-red"
-                    icon="true"
-                    size="x-small"
-                    :disabled="cartItem.quantity >= item.sklad"
-                    @click="increaseQuantity(index)"
-                  >
-                    <v-icon icon="mdi-plus" />
-                  </v-btn>
-                </div>
-              </td>
-              <td>{{ cartItem.sklad }}</td>
-              <td>
-                <v-btn
-                  class="hover-effect-grey"
-                  icon="true"
-                  size="x-small"
-                  @click="removeFromCartAction(cartItem.toolId)"
-                >
-                  <v-icon icon="mdi-delete" />
-                </v-btn>
-              </td>
-            </tr>
-          </tbody>
-        </v-table>
+          </div>
+        </div>
       </v-container>
     </template>
     <template #action>
