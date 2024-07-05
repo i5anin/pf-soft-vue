@@ -31,23 +31,50 @@ async function getReportData() {
                          tn.parent_id,
                          tn.group_id,
                          tn.group_standard,
+                         tn.norma_red,
+                         tn.norma_green,
                          CASE
                            WHEN tn.group_id IS NOT NULL AND tn.group_id <> 0 THEN
-                             GREATEST(tn.norma - t.group_total_sklad, 0)
+                             CASE
+                               WHEN tn.norma_green IS NOT NULL THEN
+                                 -- Дозаказ до norma_green, если склад меньше norma_green
+                                 GREATEST(tn.norma_green - t.group_total_sklad, 0)
+                               ELSE
+                                 -- Дозаказ до norma, если склад меньше norma
+                                 GREATEST(tn.norma - t.group_total_sklad, 0)
+                               END
                            ELSE
-                             GREATEST(tn.norma - tn.sklad, 0)
+                             CASE
+                               WHEN tn.norma_green IS NOT NULL THEN
+                                 -- Дозаказ до norma_green, если склад меньше norma_green
+                                 GREATEST(tn.norma_green - tn.sklad, 0)
+                               ELSE
+                                 -- Дозаказ до norma, если склад меньше norma
+                                 GREATEST(tn.norma - tn.sklad, 0)
+                               END
                            END               AS zakaz,
                          t.group_total_sklad AS group_sum
                   FROM dbo.tool_nom tn
                          LEFT JOIN totals t ON tn.group_id = t.group_id
                   WHERE (tn.group_id = 0 OR tn.group_id IS NULL OR tn.group_standard IS TRUE)
                   GROUP BY tn.id, tn.parent_id, tn.name, tn.sklad, tn.norma, tn.group_id, tn.group_standard,
-                           t.group_total_sklad
+                           t.group_total_sklad, tn.norma_red, tn.norma_green
+                  -- Условие HAVING изменено для корректного отображения заказов
                   HAVING CASE
                            WHEN tn.group_id IS NOT NULL AND tn.group_id <> 0 THEN
-                             GREATEST(tn.norma - t.group_total_sklad, 0)
+                             CASE
+                               WHEN tn.norma_green IS NOT NULL THEN
+                                 tn.norma_green - t.group_total_sklad
+                               ELSE
+                                 tn.norma - t.group_total_sklad
+                               END
                            ELSE
-                             GREATEST(tn.norma - tn.sklad, 0)
+                             CASE
+                               WHEN tn.norma_green IS NOT NULL THEN
+                                 tn.norma_green - tn.sklad
+                               ELSE
+                                 tn.norma - tn.sklad
+                               END
                            END > 0)
     SELECT d.id_tool,
            d.name,
@@ -60,7 +87,9 @@ async function getReportData() {
              ELSE d.group_id
              END   AS group_display,
            d.group_standard,
-           d.group_sum
+           d.group_sum,
+           d.norma_red,
+           d.norma_green
     FROM damaged d
            LEFT JOIN TreePath tp ON d.parent_id = tp.id
     ORDER BY tp.path, d.name;
@@ -120,6 +149,8 @@ async function createExcelFileStream(data) {
     { header: 'На складе', key: 'sklad', width: 10 },
     { header: 'Норма', key: 'norma', width: 10 },
     { header: 'Путь', key: 'tool_path', width: 30 },
+    { header: 'Норма Зеленая', key: 'norma_green', width: 30 },
+    { header: 'Норма Красная', key: 'norma_red', width: 30 },
     // { header: 'Группа ID', key: 'group_display', width: 15 },
     // { header: 'Стандарт', key: 'group_standard', width: 15 },
   ]
@@ -144,6 +175,8 @@ async function createExcelFileStream(data) {
       group_standard: item.group_standard ? 'Да' : 'Нет',
       tool_path: item.tool_path ? item.tool_path : 'Не указан',
       group_sum: Number(item.group_sum) || '',
+      norma_green: item.norma_green, // <-- добавлено поле "Норма Зеленая"
+      norma_red: item.norma_red,     // <-- добавлено поле "Норма Красная"
     })
   })
 
@@ -179,6 +212,8 @@ function generateHtmlTable(data) {
     { header: 'Группа ID', key: 'group_display' },
     { header: 'Стандарт', key: 'group_standard' },
     { header: 'Путь', key: 'tool_path' },
+    { header: 'Норма Зеленая', key: 'norma_green' },
+    { header: 'Норма Красная', key: 'norma_red' },
   ]
 
   let htmlContent = `<h2>Заказ: Журнал инструмента</h2>`
