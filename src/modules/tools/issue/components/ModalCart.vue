@@ -2,10 +2,6 @@
   <v-snackbar v-model="snackbar" :timeout="3000" color="error">
     {{ snackbarText }}
   </v-snackbar>
-  <!--  <v-snackbar v-model="snackbar" color="success" right>-->
-  <!--    {{ snackbarText }}-->
-  <!--    <v-btn color="white" text @click="snackbar = false"> Закрыть </v-btn>-->
-  <!--  </v-snackbar>-->
   <Modal :title="popupTitle" :width="modalWidth" transition="slide-x-reverse-transition">
     <template #content>
       <v-container>
@@ -332,10 +328,12 @@ export default {
         this.options.numberType = this.formatOperationOptions(filteredData)
         // Сбросить выбранное значение для "Номер Тип" каждый раз, когда выбирается новое "Название Обозначение"
         this.toolModel.operationType = null
+        this.toolModel.numberType = null // Сбросить выбранный "Номер Тип"
       } else {
         console.error('Не удалось найти ID для выбранного значения:', selectedValue)
         this.options.numberType = []
         this.toolModel.operationType = null
+        this.toolModel.numberType = null // Сбросить выбранный "Номер Тип"
       }
     },
     async onIdChanged(newId) {
