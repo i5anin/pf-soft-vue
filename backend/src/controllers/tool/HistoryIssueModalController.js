@@ -219,8 +219,6 @@ async function getToolHistoryByOperationId(req, res) {
     const idOperation = req.query.operationId // Исправлено: используем operationId
     const selectedDate = req.query.selectedDate // Получаем выбранную дату из параметров запроса
 
-    console.log(idOperation)
-
     let operationsQuery = `
    SELECT thn.id,
        sno.id AS specs_op_id,
