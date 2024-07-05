@@ -1,5 +1,5 @@
 <template>
-  <v-table hover v-if="historyItems.length > 0">
+  <v-table hover>
     <thead>
       <tr>
         <th v-for="(header, index) in tableStructure" :key="index">
@@ -19,9 +19,6 @@
       </tr>
     </tbody>
   </v-table>
-  <div v-else>
-    <p>История операций не найдена.</p>
-  </div>
 </template>
 
 <script>

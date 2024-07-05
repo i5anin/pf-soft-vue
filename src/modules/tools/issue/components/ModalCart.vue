@@ -10,7 +10,7 @@
     <template #content>
       <v-container>
         <div class="d-flex">
-          <div class="flex-grow-1 mr-4">
+          <div class="flex-grow-1 mr-6">
             <div class="text-h6 pl-5 mb-2">Выбрать деталь:</div>
             <v-row>
               <v-col>
@@ -19,6 +19,7 @@
                   label="поиск детали по партии"
                   required
                   @update:model-value="onIdChanged"
+                  clearable="true"
                 />
                 <v-select
                   v-model="toolModel.detailDescription"
@@ -27,6 +28,7 @@
                   :disabled="!options.idNameDescription.length"
                   :items="options.idNameDescription"
                   @update:model-value="onIdSelected"
+                  clearable="true"
                 />
 
                 <v-select
@@ -38,6 +40,7 @@
                   item-value="id"
                   item-text="text"
                   @update:model-value="onOperationSelected"
+                  clearable="true"
                 />
                 <h2 class="text-h6 pl-5 mb-2">Кому выдать:</h2>
                 <v-combobox
@@ -48,6 +51,7 @@
                   item-value="value"
                   label="ФИО"
                   @update:model-value="handleSelectionChange"
+                  clearable="true"
                 />
                 <!--fixme-->
                 <v-combobox
@@ -58,6 +62,7 @@
                   label="Тип выдачи"
                   :rules="issueTypeRules"
                   required
+                  clearable="true"
                 />
               </v-col>
             </v-row>
