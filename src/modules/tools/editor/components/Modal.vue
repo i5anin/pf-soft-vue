@@ -13,18 +13,19 @@
                   density='compact'
                   required
                   type='Text'
-                  :disabled='true'
+                  disabled
                 />
               </v-col>
               <v-col cols='6'>
                 <v-text-field
+                  v-model.number='parentCatalog.id'
+                  label='ID папки'
                   variant='solo'
                   density='compact'
-                  v-model='parentCatalog.id'
-                  label='ID папки'
                   required
                   type='Number'
                   :rules='parentIdRules'
+                  disabled
                 />
               </v-col>
             </v-row>
@@ -38,7 +39,7 @@
               </v-col>
               <v-col cols='6'>
                 <v-text-field
-                  v-model='toolModel.group_id'
+                  v-model.number='toolModel.group_id'
                   label='ID группы'
                   variant='solo'
                   density='compact'
@@ -47,19 +48,16 @@
                 />
               </v-col>
             </v-row>
-            <!--левый столбец -->
-            <div>
-              <v-combobox
-                v-model='toolModel.name'
-                variant='outlined'
-                label='Маркировка'
-                :items='toolNameOptions'
-                item-text='text'
-                item-value='value'
-                required
-                :rules='typeRules'
-              />
-            </div>
+            <v-combobox
+              v-model='toolModel.name'
+              variant='outlined'
+              label='Маркировка'
+              :items='toolNameOptions'
+              item-text='text'
+              item-value='value'
+              required
+              :rules='typeRules'
+            />
             <h2 class='text-h6'>Характеристики:</h2>
             <div v-for='(param, index) in selectedParamsInfo' :key='param.id'>
               <v-container>
@@ -71,7 +69,7 @@
                       density='compact'
                       :items='availableToolParamOptions'
                       label='Параметр'
-                      single-line='true'
+                      single-line
                       solo
                       @update:model-value='(value) => selectParam(value, index)'
                     />
@@ -83,20 +81,21 @@
                       :items='toolParamsOptions[param.id]'
                       label='Значение'
                       variant='outlined'
-                      clearable='true'
-                      single-line='true'
+                      clearable
+                      single-line
                       solo
                     />
                   </v-col>
-
                   <v-col cols='1'>
-                    <v-btn class='delete-icon' size='x-small' icon @click='removeParameter(param.id)'>
-                        <span>
-                          <v-icon>mdi-delete</v-icon>
-                        </span>
+                    <v-btn
+                      class='delete-icon'
+                      size='x-small'
+                      icon
+                      @click='removeParameter(param.id)'
+                    >
+                      <v-icon>mdi-delete</v-icon>
                     </v-btn>
                   </v-col>
-
                 </v-row>
               </v-container>
             </div>
@@ -111,17 +110,17 @@
                 </v-btn>
               </v-col>
             </v-row>
-
             <v-divider class='my-1' />
             <v-row>
               <v-col cols='3'>
                 <v-text-field
                   :disabled='toolModel.group_id && !toolModel.group_standard'
-                  v-model='toolModel.norma_green'
+                  v-model.number='toolModel.norma_green'
                   type='number'
                   color='green'
                   label='Норма макс'
-                  required>
+                  required
+                >
                   <template v-slot:append-inner>
                     <v-icon color='green'>mdi-alert-box</v-icon>
                   </template>
@@ -130,7 +129,7 @@
               <v-col cols='3'>
                 <v-text-field
                   :disabled='toolModel.group_id && !toolModel.group_standard'
-                  v-model='toolModel.norma'
+                  v-model.number='toolModel.norma'
                   type='number'
                   color='yellow'
                   label='Норма'
@@ -144,25 +143,24 @@
               <v-col cols='3'>
                 <v-text-field
                   :disabled='toolModel.group_id && !toolModel.group_standard'
-                  v-model='toolModel.norma_red'
+                  v-model.number='toolModel.norma_red'
                   type='number'
                   color='red'
-                  color-icon='red'
                   label='Норма мин'
-                  required>
+                  required
+                >
                   <template v-slot:append-inner>
                     <v-icon color='red'>mdi-alert-box</v-icon>
                   </template>
                 </v-text-field>
-
               </v-col>
               <v-col cols='3'>
                 <v-text-field
-                  append-inner-icon='mdi-package'
-                  v-model='toolModel.sklad'
+                  v-model.number='toolModel.sklad'
                   type='number'
                   label='Склад'
                   required
+                  append-inner-icon='mdi-package'
                 />
               </v-col>
             </v-row>
@@ -200,10 +198,11 @@
       </v-btn>
     </template>
   </Modal>
-  <!-- v-snackbar для отображения сообщений об ошибке -->
   <v-snackbar v-model='snackbar.show' :color='snackbar.color' bottom right>
     {{ snackbar.text }}
-    <v-btn color='white' text @click='snackbar.show = false'>Закрыть</v-btn>
+    <v-btn color='white' text @click='snackbar.show = false'>
+      Закрыть
+    </v-btn>
   </v-snackbar>
 </template>
 
@@ -211,7 +210,7 @@
 import Modal from '@/modules/tools/shared/components/Modal.vue'
 import { getToolParams } from '@/api'
 import { editorToolApi } from '../api/editor'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 
 export default {
   name: 'FillingModal',
@@ -239,14 +238,11 @@ export default {
         norma_red: null,
       },
       toolNameOptions: [],
-      parameterValuePairs: [{ parameter: null, value: null }],
       toolParamOptions: [],
       toolParamsOptions: {},
       selectedParams: [],
       toolParams: [],
       confirmDeleteDialog: false,
-      typeSelected: false,
-      selectedType: '',
       parentIdRules: [
         (v) => !!v || 'ID папки обязательно',
         (v) => v > 1 || 'ID папки должен быть больше 1',
@@ -261,7 +257,6 @@ export default {
   computed: {
     ...mapGetters('EditorToolStore', ['nameOptions', 'tool', 'parentCatalog']),
     availableToolParamOptions() {
-      // Фильтрация toolParamOptions, чтобы показывать только те, которые еще не выбраны
       return this.toolParamOptions.filter(
         (option) => !this.selectedParams.includes(option),
       )
@@ -274,7 +269,6 @@ export default {
       return uniqueSelectedParamsCount < totalAvailableParams
     },
     selectedParamsInfo() {
-      // Возвращаем информацию о выбранных параметрах на основе текущего состояния toolModel.property
       return Object.entries(this.toolModel.property)
         .map(([key, value]) => {
           const param = this.toolParams.find(
@@ -307,12 +301,9 @@ export default {
     await this.fetchToolParamsByParentId(this.parentCatalog.id)
     await this.fetchToolNamesByParentId(this.parentCatalog.id)
     try {
-      // Получение списка параметров инструмента
       const rawToolParams = await getToolParams()
       this.toolParams = [...rawToolParams]
-      this.toolParamOptions = rawToolParams.map((param) => param.label) // Предполагается, что каждый параметр содержит поле info
-
-      // Если модель инструмента уже содержит выбранные параметры, обновите selectedParams
+      this.toolParamOptions = rawToolParams.map((param) => param.label)
       if (
         this.toolModel.property &&
         Object.keys(this.toolModel.property).length > 0
@@ -325,8 +316,6 @@ export default {
     } catch (error) {
       console.error('Ошибка при загрузке параметров инструмента:', error)
     }
-
-    // this.initializeLocalState()
     if (this.toolId == null) {
       this.setTool({
         id: null,
@@ -342,8 +331,6 @@ export default {
   },
   methods: {
     ...mapActions('EditorToolStore', ['fetchToolsByFilter', 'fetchToolById']),
-    ...mapMutations('EditorToolStore', ['setTool']),
-
     showErrorSnackbar(message) {
       this.snackbar.text = message
       this.snackbar.color = 'error'
@@ -357,48 +344,32 @@ export default {
         console.error('Ошибка при получении названий инструментов:', error)
       }
     },
-
     async fetchToolParamsByParentId(parentId) {
       try {
         const paramsData = await editorToolApi.getToolParamsByParentId(parentId)
-        // Создаем новый объект для обновления, чтобы обеспечить реактивность
         let newToolParamsOptions = {}
         paramsData.forEach((item) => {
           newToolParamsOptions[item.id] = item.values
         })
-        // Прямое обновление toolParamsOptions
         this.toolParamsOptions = newToolParamsOptions
       } catch (error) {
         console.error('Ошибка при получении данных о параметрах:', error)
       }
     },
     removeParameter(id) {
-      // Запрашиваем подтверждение у пользователя
       if (window.confirm('Вы уверены, что хотите удалить этот параметр?')) {
-        // Удаляем параметр из toolModel.property, если пользователь подтвердил удаление
         delete this.toolModel.property[id]
-
-        // Обновляем состояние, чтобы Vue мог отреагировать на изменения
         this.toolModel.property = { ...this.toolModel.property }
-
-        // Обновляем selectedParams и selectedParamsInfo
         this.updateSelectedParams()
       }
     },
-
     selectParam(paramInfo) {
       const selectedParam = this.toolParams.find((p) => p.label === paramInfo)
       if (selectedParam) {
-        // Удаляем временный ключ, если он был использован
         const newProperty = { ...this.toolModel.property }
         delete newProperty[-1]
-
-        // Обновляем значение выбранного параметра
         newProperty[selectedParam.id] = this.toolModel.property[-1] || ''
-
         this.toolModel.property = newProperty
-
-        // Важно! Обновляем список selectedParams после выбора параметра
         this.updateSelectedParams()
       }
     },
@@ -422,15 +393,10 @@ export default {
       }
     },
     addParameterValuePair() {
-      // Проверяем, существует ли уже параметр с временным ID 0 в selectedParams
       if (!this.selectedParams.includes('-1')) {
         const newToolParam = { id: -1, label: null }
         this.toolParams.push(newToolParam)
-
-        // Обновляем toolModel.property для добавления нового параметра с временным значением
         this.toolModel.property[newToolParam.id] = null
-
-        // Обновляем selectedParams, чтобы включить новый временный параметр
         this.updateSelectedParams()
       }
     },
@@ -444,7 +410,6 @@ export default {
         this.onDelete()
     },
     async onDelete() {
-      // Предполагается, что метод onDelete вызывается, когда пользователь подтверждает удаление
       const { id } = this.toolModel
       if (id != null) {
         try {
@@ -465,7 +430,12 @@ export default {
       const toolDataToSend = {
         ...this.toolModel,
         parent_id: this.parentCatalog.id,
+        norma: this.toolModel.norma || null,
+        norma_green: this.toolModel.norma_green || null,
+        norma_red: this.toolModel.norma_red || null,
+        sklad: this.toolModel.sklad || null,
       }
+
       try {
         let response
         if (this.toolId) {
