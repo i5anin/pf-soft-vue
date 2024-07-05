@@ -40,6 +40,7 @@ async function getReportData() {
                          t.group_total_sklad AS group_sum
                   FROM dbo.tool_nom tn
                          LEFT JOIN totals t ON tn.group_id = t.group_id
+                  WHERE (tn.group_id = 0 OR tn.group_id IS NULL OR tn.group_standard IS TRUE)
                   GROUP BY tn.id, tn.parent_id, tn.name, tn.sklad, tn.norma, tn.group_id, tn.group_standard,
                            t.group_total_sklad
                   HAVING CASE
