@@ -99,7 +99,13 @@
                 <span v-else>{{ calcPercent(tool.sklad, tool.norma_green) }} %</span>
               </v-chip>
             </td>
-            <td>{{ tool.taken_coefficient.toFixed(4)}} </td>
+            <td>
+              <v-chip
+                :variant="getChipVariant(tool.taken_coefficient)"
+                :color="getChipColor(tool.taken_coefficient)">
+                {{ tool.taken_coefficient.toFixed(4) }}
+              </v-chip>
+            </td>
           </tr>
           </tbody>
         </v-table>
@@ -138,6 +144,30 @@ export default {
     },
   },
   methods: {
+    getChipVariant(coefficient) {
+      if (coefficient > 2) {
+        return 'filled';
+      } else if (coefficient > 1) {
+        return 'filled';
+      } else if (coefficient > 0.5) {
+        return 'text';
+      } else if (coefficient > 0) {
+        return 'plain';
+      } else {
+        return 'default';
+      }
+    },
+    getChipColor(coefficient) {
+      if (coefficient > 2) {
+        return 'red';
+      } else if (coefficient > 1) {
+        return 'secondary';
+      } else if (coefficient > 0.5) {
+        return 'primary'; // или любой другой цвет по вашему выбору
+      } else {
+        return ''; // без цвета
+      }
+    },
     onClosePopup() {
       this.openDialog = false
     },
@@ -217,11 +247,11 @@ export default {
     getNormaForCalculation(tool) {
       // Используем norma_green или norma_red только для расчета нехватки
       if (tool.norma_green && tool.sklad < tool.norma_green) {
-        return tool.norma_green;
+        return tool.norma_green
       } else if (tool.norma_red && tool.sklad < tool.norma_red) {
-        return tool.norma_red;
+        return tool.norma_red
       } else {
-        return tool.norma; // В остальных случаях используем tool.norma
+        return tool.norma // В остальных случаях используем tool.norma
       }
     },
 

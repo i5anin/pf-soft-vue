@@ -250,14 +250,14 @@ async function addTool(req, res) {
         .json({ error: 'parent_id must be greater than 1.' })
     }
 
-    if (sklad < 0)
-      return res.status(400).json({ error: 'Склад не может быть отрицательным.' })
+    // if (sklad < 0)
+    //   return res.status(400).json({ error: 'Склад не может быть отрицательным.' })
 
 
     // Проверка на корректность значений норм для светофора (изменено условие)
-    if (norma_green < norma || norma < norma_red)
-      return res.status(400).json({ error: 'Некорректные значения норм для светофора: green > norma > red.' })
-
+    // if (norma_green < norma || norma < norma_red)
+    //   return res.status(400).json({ error: 'Некорректные значения норм для светофора: green > norma > red.' })
+    //
 
     if (property && property.id) {
       const propertyIdCheckResult = await pool.query(
@@ -373,12 +373,12 @@ async function editTool(req, res) {
     }
 
     // Проверка на неотрицательное значение склада
-    if (newSklad < 0) return res.status(400).json({ error: 'Склад не может быть отрицательным.' })
+    // if (newSklad < 0) return res.status(400).json({ error: 'Склад не может быть отрицательным.' })
 
 
     // Проверка на корректность значений норм для светофора (изменено условие)
-    if (norma_green < norma || norma < norma_red)
-      return res.status(400).json({ error: 'Некорректные значения норм для светофора: green > norma > red.' })
+    // if (norma_green < norma || norma < norma_red)
+    //   return res.status(400).json({ error: 'Некорректные значения норм для светофора: green > norma > red.' })
 
 
     const currentSkladResult = await pool.query(
