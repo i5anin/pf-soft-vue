@@ -37,8 +37,8 @@
             <th class='text-left mw50'>Склад</th>
             <!-- <th class='text-left mw50'>Склад группы</th>-->
             <th class='text-left mw50'>Норма</th>
-            <th class='text-left mw50'>Не хватает</th>
             <th class='text-left mw50'>Коэф исп</th>
+            <th class='text-left mw50'>Не хватает</th>
           </tr>
           </thead>
           <tbody>
@@ -74,7 +74,7 @@
                     tool.zakaz !== getRoundedCount(tool.zakaz)
                   "
               >
-                ({{ tool.zakaz }})
+                <span class='grey'> ({{ tool.zakaz }})</span>
               </template>
             </td>
             <td class='grey'>{{ tool.sklad }}</td>
@@ -89,6 +89,14 @@
 
             </td>
             <td>
+              <v-chip
+                v-if='tool.taken_coefficient'
+                :variant='getChipVariant(tool.taken_coefficient)'
+                :color='getChipColor(tool.taken_coefficient)'>
+                {{ tool.taken_coefficient.toFixed(4) }}
+              </v-chip>
+            </td>
+            <td>
               <v-chip v-if='!tool.norma_red || !tool.norma_green' :color='getToolColor(tool.sklad / tool.norma)'>
                 <span v-if='tool.group_sklad'>{{ calcPercent(tool.group_sklad, tool.norma) }} %</span>
                 <span v-else>{{ calcPercent(tool.sklad, tool.norma) }} %</span>
@@ -99,14 +107,7 @@
                 <span v-else>{{ calcPercent(tool.sklad, tool.norma_green) }} %</span>
               </v-chip>
             </td>
-            <td>
-              <v-chip
-                v-if='tool.taken_coefficient'
-                :variant='getChipVariant(tool.taken_coefficient)'
-                :color='getChipColor(tool.taken_coefficient)'>
-                {{ tool.taken_coefficient.toFixed(4) }}
-              </v-chip>
-            </td>
+
           </tr>
           </tbody>
         </v-table>
