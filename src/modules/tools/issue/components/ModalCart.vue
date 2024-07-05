@@ -6,11 +6,11 @@
   <!--    {{ snackbarText }}-->
   <!--    <v-btn color="white" text @click="snackbar = false"> Закрыть </v-btn>-->
   <!--  </v-snackbar>-->
-  <Modal :title="popupTitle" :width-default="toolModel.operationType ? '1000px' : '600px'">
+  <Modal :title="popupTitle" :width="modalWidth" transition="slide-x-reverse-transition">
     <template #content>
       <v-container>
-        <div style="display: flex">
-          <div>
+        <div class="d-flex">
+          <div class="flex-grow-1 mr-4">
             <div class="text-h6 pl-5 mb-2">Выбрать деталь:</div>
             <v-row>
               <v-col>
@@ -198,6 +198,7 @@ export default {
     toolModel: {
       selectedOperationId: null,
       detailDescription: null,
+      operationType: null, // Добавьте свойство для хранения operationType
     },
     selectedParams: [],
     toolParams: [],
@@ -241,6 +242,9 @@ export default {
 
     popupTitle() {
       return 'Корзина'
+    },
+    modalWidth() {
+      return this.toolModel.operationType ? '1000px' : '600px'
     },
   },
   watch: {
