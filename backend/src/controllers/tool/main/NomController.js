@@ -335,8 +335,8 @@ async function editTool(req, res) {
     norma,
     group_id,
     group_standard,
-    norma_red, // Добавлено поле norma_red
-    norma_green, // Добавлено поле norma_green
+    norma_red,
+    norma_green,
   } = req.body
 
   replaceCommaWithDotInNumbers(property)
@@ -372,14 +372,15 @@ async function editTool(req, res) {
         .json({ error: 'Specified parent_id does not exist.' })
     }
 
-    // Проверка на неотрицательное значение склада
-    // if (newSklad < 0) return res.status(400).json({ error: 'Склад не может быть отрицательным.' })
-
-
-    // Проверка на корректность значений норм для светофора (изменено условие)
-    // if (norma_green < norma || norma < norma_red)
-    //   return res.status(400).json({ error: 'Некорректные значения норм для светофора: green > norma > red.' })
-
+    // Проверка на корректность значений норм для светофора
+    if (
+      (norma_green !== null && norma !== null && norma_green < norma) ||
+      (norma !== null && norma_red !== null && norma < norma_red)
+    ) {
+      return res.status(400).json({
+        error: 'Некорректные значения норм для светофора: green >= norma >= red.',
+      })
+    }
 
     const currentSkladResult = await pool.query(
       'SELECT sklad FROM dbo.tool_nom WHERE id = $1',
@@ -397,15 +398,20 @@ async function editTool(req, res) {
     const propertyString = JSON.stringify(propertyWithoutNull)
 
     if (group_standard) {
-      // Сброс флага group_standard для всех инструментов в группе
       await pool.query(
         'UPDATE dbo.tool_nom SET group_standard=false WHERE group_id=$1 AND id<>$2',
         [group_id, id],
       )
     }
 
+    // Преобразование пустых строк и нулей в null для полей norma, norma_red, norma_green и newSklad
+    norma = norma === '' || norma === 0 ? null : norma
+    norma_red = norma_red === '' || norma_red === 0 ? null : norma_red
+    norma_green = norma_green === '' || norma_green === 0 ? null : norma_green
+    newSklad = newSklad === '' || newSklad === 0 ? null : newSklad
+
     const result = await pool.query(
-      'UPDATE dbo.tool_nom SET name=$1, parent_id=$2, property=$3, sklad=$4, norma=$5, group_id=$7, group_standard=$8, norma_red=$9, norma_green=$10 WHERE id=$6 RETURNING *', // Добавлены поля norma_red и norma_green
+      'UPDATE dbo.tool_nom SET name=$1, parent_id=$2, property=$3, sklad=$4, norma=$5, group_id=$7, group_standard=$8, norma_red=$9, norma_green=$10 WHERE id=$6 RETURNING *',
       [
         name,
         parent_id,
@@ -415,8 +421,8 @@ async function editTool(req, res) {
         id,
         group_id,
         group_standard,
-        norma_red, // Добавлено значение norma_red
-        norma_green, // Добавлено значение norma_green
+        norma_red,
+        norma_green,
       ],
     )
 
