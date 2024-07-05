@@ -6,51 +6,57 @@ WITH RECURSIVE
                  SELECT tt.id, CONCAT(tp.path, ' / ', tt.name) AS path, tt.parent_id
                  FROM dbo.tool_tree tt
                           JOIN TreePath tp ON tt.parent_id = tp.id),
-    totals AS (
-        SELECT group_id, SUM(sklad) AS group_total_sklad
-        FROM dbo.tool_nom
-        WHERE group_id IS NOT NULL AND group_id <> 0
-        GROUP BY group_id
-    ),
-    damaged AS (
-        SELECT tn.id AS id_tool,
-               tn.name,
-               tn.sklad,
-               tn.norma,
-               tn.parent_id,
-               tn.group_id,
-               tn.group_standard,
-               CASE
-                   WHEN tn.group_id IS NOT NULL AND tn.group_id <> 0 THEN
-                       GREATEST(tn.norma - t.group_total_sklad, 0)
-                   ELSE
-                       GREATEST(tn.norma - tn.sklad, 0)
-                   END AS zakaz,
-               COALESCE(SUM(thd.quantity), 0) AS damaged_last_7_days,
-               t.group_total_sklad AS group_sum
-        FROM dbo.tool_nom tn
-                 LEFT JOIN dbo.tool_history_damaged thd ON tn.id = thd.id_tool AND thd.timestamp >= CURRENT_DATE - INTERVAL '7 days'
-                 LEFT JOIN totals t ON tn.group_id = t.group_id
-        GROUP BY tn.id, tn.parent_id, tn.name, tn.sklad, tn.norma, tn.group_id, tn.group_standard, t.group_total_sklad
-        HAVING CASE
-                   WHEN tn.group_id IS NOT NULL AND tn.group_id <> 0 THEN
-                       GREATEST(tn.norma - t.group_total_sklad, 0)
-                   ELSE
-                       GREATEST(tn.norma - tn.sklad, 0)
-                   END > 0
-    )
-SELECT d.id_tool,
-       d.name,
-       d.sklad,
-       d.norma,
-       d.zakaz,
-       tp.path AS tool_path,
+    totals AS (SELECT group_id, SUM(sklad) AS group_total_sklad
+               FROM dbo.tool_nom
+               WHERE group_id IS NOT NULL
+                 AND group_id <> 0
+               GROUP BY group_id)
+SELECT tn.id               AS id_tool,
+       tn.name,
+       tn.sklad,
+       tn.norma,
+       tp.path             AS tool_path,
        CASE
-           WHEN d.group_id IS NULL THEN '0'
-           ELSE d.group_id
-           END AS group_display,
-       d.group_standard,
-       d.group_sum
-FROM damaged d
-         LEFT JOIN TreePath tp ON d.parent_id = tp.id
-ORDER BY tp.path, d.name;
+           WHEN tn.group_id IS NULL THEN '0'
+           ELSE tn.group_id
+           END             AS group_display,
+       tn.group_standard,
+       t.group_total_sklad AS group_sum,
+       tn.norma_red,
+       tn.norma_green,
+       CASE
+           WHEN tn.group_id IS NOT NULL AND tn.group_id <> 0 THEN
+               CASE
+                   WHEN (tn.norma - t.group_total_sklad) < 10 THEN 10
+                   ELSE CEIL((tn.norma - t.group_total_sklad) / 10.0) * 10
+                   END
+           ELSE
+               CASE
+                   WHEN tn.norma_green IS NOT NULL AND tn.norma_red IS NOT NULL THEN
+                       CASE
+                           WHEN (tn.norma_green - tn.sklad) < 10 THEN 10
+                           ELSE CEIL((tn.norma_green - tn.sklad) / 10.0) * 10
+                           END
+                   ELSE
+                       CASE
+                           WHEN (tn.norma - tn.sklad) < 10 THEN 10
+                           ELSE CEIL((tn.norma - tn.sklad) / 10.0) * 10
+                           END
+                   END
+           END             AS zakaz
+FROM dbo.tool_nom tn
+         LEFT JOIN totals t ON tn.group_id = t.group_id
+         LEFT JOIN TreePath tp ON tn.parent_id = tp.id
+WHERE (
+    tn.group_id = 0
+        OR tn.group_id IS NULL
+        OR tn.group_standard IS TRUE
+    )
+  AND (
+    (tn.group_id IS NOT NULL AND tn.group_id <> 0 AND (tn.norma - t.group_total_sklad) > 0) OR
+    (tn.norma_green IS NOT NULL AND tn.norma_red IS NOT NULL AND (tn.norma_green - tn.sklad) > 0 AND
+     tn.sklad < tn.norma) OR
+    ((tn.norma - tn.sklad) > 0)
+    )
+ORDER BY tp.path,
+         tn.name;
