@@ -1,7 +1,9 @@
 import axios from 'axios'
 import { handleApiError } from '@/api/errorHandler'
 
-const axiosInstance = axios.create({ baseURL: import.meta.env.VITE_BASE_URL })
+const axiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_BASE_URL,
+})
 
 function handleResponse(response) {
   return response.data
@@ -23,7 +25,10 @@ export const issueToolApi = {
       .catch(handleApiError),
 
   fetchCncList: async () =>
-    axiosInstance.get('modal-form/cnc').then(handleResponse).catch(handleApiError),
+    axiosInstance
+      .get('modal-form/cnc')
+      .then(handleResponse)
+      .catch(handleApiError),
 
   // Функция для отправки данных об инструменте
   addHistoryTool: async (toolData) =>
@@ -45,5 +50,10 @@ export const issueToolApi = {
       .then(handleResponse)
       .catch(handleApiError),
 
-
+  // Получить историю по операции
+  getToolHistoryByOperationId: async (operationId) =>
+    axiosInstance
+      .get('history-operation', { params: { operationId } })
+      .then(handleResponse)
+      .catch(handleApiError),
 }

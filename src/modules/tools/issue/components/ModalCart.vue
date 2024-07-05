@@ -26,6 +26,13 @@
               :items="options.idNameDescription"
               @update:model-value="onIdSelected"
             />
+            <!--todo:выведи id операции-->
+            {{ toolModel.operationType }}
+            <!--todo:выведи id операции-->
+            <ModalTableOperaton
+              v-if="toolModel.operationType"
+              :operation-id="toolModel.operationType"
+            />
             <v-select
               v-model="toolModel.numberType"
               label="Номер Тип"
@@ -83,7 +90,9 @@
                   >
                     <v-icon icon="mdi-minus" />
                   </v-btn>
-                  <div class="mx-2">{{ cartItem.quantity }}</div>
+                  <div class="mx-2">
+                    {{ cartItem.quantity }}
+                  </div>
                   <v-btn
                     class="hover-effect-red"
                     icon="true"
@@ -133,9 +142,7 @@
       >
         Выдать
         <!-- Добавление класса ml-2 (margin left 2) для отступа -->
-        <v-chip color="red" variant="flat" class="ml-2">
-          {{ cartItemsTotalQuantity }} шт
-        </v-chip>
+        <v-chip color="red" variant="flat" class="ml-2"> {{ cartItemsTotalQuantity }} шт </v-chip>
       </v-btn>
     </template>
   </Modal>
@@ -143,13 +150,14 @@
 
 <script>
 import Modal from '@/modules/tools/shared/components/Modal.vue'
+import ModalTableOperaton from './ModalTableOperaton.vue'
 import { issueToolApi } from '@/modules/tools/issue/api/issue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { toolTreeApi } from '@/modules/tools/tree/api/tree'
 
 export default {
   name: 'CartModal',
-  components: { Modal },
+  components: { Modal, ModalTableOperaton },
   props: {
     persistent: { type: Boolean, default: false },
     toolId: { type: Number, default: null },
@@ -176,7 +184,12 @@ export default {
     originalData: [],
     idMapping: {},
     fioOptions: [],
-    selectedData: { name: null, description: null, no: null, type: null },
+    selectedData: {
+      name: null,
+      description: null,
+      no: null,
+      type: null,
+    },
     localParentId: null,
     toolModel: {
       selectedOperationId: null,
@@ -205,12 +218,7 @@ export default {
     },
   }),
   computed: {
-    ...mapGetters('IssueToolStore', [
-      'nameOptions',
-      'tool',
-      'parentCatalog',
-      'cartItems',
-    ]),
+    ...mapGetters('IssueToolStore', ['nameOptions', 'tool', 'parentCatalog', 'cartItems']),
     ...mapState('IssueToolStore', ['isModalOpen', 'parentCatalog']),
     selectedFioModel: {
       get() {
@@ -221,9 +229,7 @@ export default {
       },
     },
     cartItemsTotalQuantity() {
-      return this.cartItems
-        ? this.cartItems.reduce((total, item) => total + item.quantity, 0)
-        : 0
+      return this.cartItems ? this.cartItems.reduce((total, item) => total + item.quantity, 0) : 0
     },
     currentFolderName() {
       return this.toolId === null ? this.idParent.label : this.tool.folder_name
@@ -314,10 +320,7 @@ export default {
         // Сбросить выбранное значение для "Номер Тип" каждый раз, когда выбирается новое "Название Обозначение"
         this.toolModel.operationType = null
       } else {
-        console.error(
-          'Не удалось найти ID для выбранного значения:',
-          selectedValue
-        )
+        console.error('Не удалось найти ID для выбранного значения:', selectedValue)
         this.options.numberType = []
         this.toolModel.operationType = null
       }
@@ -356,8 +359,7 @@ export default {
           return true
         }
       } catch (error) {
-        this.snackbarText =
-          error.message || 'Произошла ошибка при отправке данных'
+        this.snackbarText = error.message || 'Произошла ошибка при отправке данных'
         this.snackbar = true
         this.submitButtonDisabled = true
         setTimeout(() => {
