@@ -43,7 +43,7 @@ export default {
         },
         {
           name: 'Отчет заявка на инструмент',
-          info: 'раз в неделю каждый ЧТ в 12:00 (за неделю)',
+          info: 'каждый четверг',
           action: this.genZayavInstrWeek,
         },
         {
