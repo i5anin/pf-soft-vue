@@ -75,12 +75,12 @@ function getCurrentMonthDates() {
   const firstDayOfMonth = new Date(
     currentDate.getFullYear(),
     currentDate.getMonth(),
-    1
+    1,
   )
   const lastDayOfMonth = new Date(
     currentDate.getFullYear(),
     currentDate.getMonth() + 1,
-    0
+    0,
   )
 
   const firstDate = firstDayOfMonth.toISOString().split('T')[0]
@@ -181,7 +181,7 @@ function generateHtmlTable(data) {
     { header: 'Путь', key: 'tool_path' },
   ]
 
-  let htmlContent = `<h2>Заказ: Журнал инструмента за период</h2>`
+  let htmlContent = `<h2>Заказ: Журнал инструмента</h2>`
   htmlContent += `<table border='1' style='border-collapse: collapse;'><tr>`
 
   // Генерируем шапку таблицы
@@ -219,9 +219,7 @@ function generateHtmlTable(data) {
     })
     htmlContent += `</tr>`
   })
-
   htmlContent += `</table>`
-
   return htmlContent
 }
 
@@ -239,7 +237,7 @@ async function sendEmailWithExcelStream(email, text, excelStream, data) {
 
   const { firstDate, lastDate } = getCurrentMonthDates()
   const envPrefix = process.env.NODE_ENV === 'development' ? 'development ' : ''
-  const subject = `${envPrefix}Заказ: Журнал инструмента за неделю с ${firstDate} по ${lastDate}`
+  const subject = `${envPrefix}Заказ: Журнал инструмента`
 
   const htmlContent = generateHtmlTable(data) // Генерация HTML
 
@@ -251,10 +249,9 @@ async function sendEmailWithExcelStream(email, text, excelStream, data) {
     html: htmlContent, // Вставка сгенерированного HTML
     attachments: [
       {
-        filename: `Поврежденный инструмент ${firstDate} - ${lastDate}.xlsx`,
+        filename: 'Поврежденный инструмент.xlsx',
         content: excelStream,
-        contentType:
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       },
     ],
   }
