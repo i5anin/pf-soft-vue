@@ -115,7 +115,7 @@
               </tbody>
             </v-table>
           </div>
-          <div>
+          <div class="flex-grow-1 mr-6">
             <ModalTableOperaton
               v-if="toolModel.operationType"
               :operation-id="toolModel.operationType"

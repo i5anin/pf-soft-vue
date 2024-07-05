@@ -265,8 +265,9 @@ WHERE thn.specs_op_id =  $1
 
     const operationsResult = await pool.query(operationsQuery, queryParams)
 
-    if (operationsResult.rows.length === 0)
-      return res.status(404).send('Операции для данной операции не найдены')
+    if (operationsResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Операции для данной операции не найдены' })
+    }
 
     const operationsData = operationsResult.rows.map((row) => {
       const typeIssueMap = {

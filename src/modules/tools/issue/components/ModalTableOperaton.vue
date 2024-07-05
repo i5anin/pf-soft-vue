@@ -1,5 +1,5 @@
 <template>
-  <v-table hover>
+  <v-table hover v-if="historyItems.length > 0">
     <thead>
       <tr>
         <th v-for="(header, index) in tableStructure" :key="index">
@@ -19,6 +19,9 @@
       </tr>
     </tbody>
   </v-table>
+  <div v-else>
+    <p>История операций не найдена.</p>
+  </div>
 </template>
 
 <script>
@@ -60,8 +63,13 @@ export default {
         const historyData = await issueToolApi.getToolHistoryByOperationId(this.operationId)
         this.historyItems = historyData // Здесь предполагается, что API возвращает массив объектов истории
       } catch (error) {
-        console.error('Ошибка при получении истории по операции:', error)
-        // Обработка ошибки при загрузке истории
+        // Обработка ошибки 404
+        if (error.response && error.response.status === 404) {
+          this.historyItems = [] // Очищаем массив, чтобы отображалось сообщение об отсутствии данных
+        } else {
+          console.error('Ошибка при получении истории по операции:', error)
+          // Обработка других ошибок
+        }
       }
     },
     formatDate(timestamp) {
