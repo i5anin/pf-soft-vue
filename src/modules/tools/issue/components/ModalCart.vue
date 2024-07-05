@@ -27,8 +27,6 @@
               @update:model-value="onIdSelected"
             />
             <!--todo:выведи id операции-->
-            {{ toolModel.operationType }}
-            <!--todo:выведи id операции-->
             <ModalTableOperaton
               v-if="toolModel.operationType"
               :operation-id="toolModel.operationType"
@@ -142,7 +140,7 @@
       >
         Выдать
         <!-- Добавление класса ml-2 (margin left 2) для отступа -->
-        <v-chip color="red" variant="flat" class="ml-2"> {{ cartItemsTotalQuantity }} шт </v-chip>
+        <v-chip color="red" variant="flat" class="ml-2"> {{ cartItemsTotalQuantity }} шт</v-chip>
       </v-btn>
     </template>
   </Modal>
