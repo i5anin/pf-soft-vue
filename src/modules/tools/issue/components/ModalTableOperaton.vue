@@ -1,23 +1,25 @@
 <template>
   <v-table hover>
-    <thead>
-      <tr>
-        <th v-for="(header, index) in tableStructure" :key="index">
-          {{ header.header }}
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="(historyItem, index) in historyItems" :key="index">
-        <td v-for="(field, fieldIndex) in tableStructure" :key="fieldIndex">
-          {{
-            field.data === 'timestamp'
-              ? formatDate(historyItem[field.data])
-              : historyItem[field.data]
-          }}
-        </td>
-      </tr>
-    </tbody>
+    <template v-slot:default>
+      <thead>
+        <tr>
+          <th v-for="(header, index) in tableStructure" :key="index">
+            {{ header.header }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(historyItem, index) in historyItems" :key="index">
+          <td v-for="(field, fieldIndex) in tableStructure" :key="fieldIndex">
+            {{
+              field.data === 'timestamp'
+                ? formatDate(historyItem[field.data])
+                : historyItem[field.data]
+            }}
+          </td>
+        </tr>
+      </tbody>
+    </template>
   </v-table>
 </template>
 
@@ -58,11 +60,11 @@ export default {
   methods: {
     async fetchToolHistory() {
       try {
-        this.historyItems = await issueToolApi.getToolHistoryByOperationId(this.operationId) // Здесь предполагается, что API возвращает массив объектов истории
+        this.historyItems = await issueToolApi.getToolHistoryByOperationId(this.operationId)
       } catch (error) {
         // Обработка ошибки 404
         if (error.response && error.response.status === 404) {
-          this.historyItems = [] // Очищаем массив, чтобы отображалось сообщение об отсутствии данных
+          this.historyItems = []
         } else {
           console.error('Ошибка при получении истории по операции:', error)
           // Обработка других ошибок
@@ -70,7 +72,6 @@ export default {
       }
     },
     formatDate(timestamp) {
-      // Преобразуем timestamp в дату в формате "ДД.ММ.ГГ ЧЧ:ММ"
       return format(new Date(timestamp), 'dd.MM.yy HH:mm')
     },
   },
@@ -78,5 +79,9 @@ export default {
 </script>
 
 <style scoped>
-/* Ваши стили для таблицы, если нужно */
+/* Добавляем скроллинг к таблице */
+.v-table {
+  height: 80vh; /* Задаем высоту таблицы в 85% от высоты экрана */
+  overflow-y: auto; /* Включаем скроллинг по вертикали */
+}
 </style>
