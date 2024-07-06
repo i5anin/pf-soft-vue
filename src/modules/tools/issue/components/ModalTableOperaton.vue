@@ -10,7 +10,11 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(historyItem, index) in historyItems" :key="index">
+        <tr
+          v-for="(historyItem, index) in historyItems"
+          :key="index"
+          :class="{ 'highlight-row': isToolInCart(historyItem.id_tool) }"
+        >
           <td v-for="(field, fieldIndex) in tableStructure" :key="fieldIndex">
             {{
               field.data === 'timestamp'
@@ -27,6 +31,7 @@
 <script>
 import { issueToolApi } from '@/modules/tools/issue/api/issue'
 import { format } from 'date-fns'
+import { mapGetters } from 'vuex'
 
 export default {
   props: {
@@ -47,6 +52,9 @@ export default {
         { header: 'Выдано', data: 'user_fio' },
       ],
     }
+  },
+  computed: {
+    ...mapGetters('IssueToolStore', ['cartItems']), // Получение cartItems из Vuex
   },
   async created() {
     await this.fetchToolHistory()
@@ -75,6 +83,11 @@ export default {
     formatDate(timestamp) {
       return format(new Date(timestamp), 'dd.MM.yy HH:mm')
     },
+    isToolInCart(toolId) {
+      // Проверка наличия инструмента в корзине
+      console.log(toolId)
+      return this.cartItems.some((item) => item.toolId === toolId)
+    },
   },
 }
 </script>
@@ -82,7 +95,12 @@ export default {
 <style scoped>
 /* Добавляем скроллинг к таблице */
 .v-table {
-  height: 80vh; /* Задаем высоту таблицы в 85% от высоты экрана */
-  overflow-y: auto; /* Включаем скроллинг по вертикали */
+  height: 80vh;
+  overflow-y: auto;
+}
+
+/* Стиль для подсветки строки */
+.highlight-row {
+  background-color: #bf6161; /* Цвет фона */
 }
 </style>
