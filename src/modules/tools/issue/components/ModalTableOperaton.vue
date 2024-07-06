@@ -1,36 +1,24 @@
 <template>
-  <v-container class="pa-0">
-    <v-row>
-      <v-col cols="12">
-        <v-scroll-y-transition>
-          <v-card height="90vh">
-            <v-card-text>
-              <v-table hover>
-                <thead>
-                  <tr>
-                    <th v-for="(header, index) in tableStructure" :key="index">
-                      {{ header.header }}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(historyItem, index) in historyItems" :key="index">
-                    <td v-for="(field, fieldIndex) in tableStructure" :key="fieldIndex">
-                      {{
-                        field.data === 'timestamp'
-                          ? formatDate(historyItem[field.data])
-                          : historyItem[field.data]
-                      }}
-                    </td>
-                  </tr>
-                </tbody>
-              </v-table>
-            </v-card-text>
-          </v-card>
-        </v-scroll-y-transition>
-      </v-col>
-    </v-row>
-  </v-container>
+  <v-table hover>
+    <thead>
+      <tr>
+        <th v-for="(header, index) in tableStructure" :key="index">
+          {{ header.header }}
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="(historyItem, index) in historyItems" :key="index">
+        <td v-for="(field, fieldIndex) in tableStructure" :key="fieldIndex">
+          {{
+            field.data === 'timestamp'
+              ? formatDate(historyItem[field.data])
+              : historyItem[field.data]
+          }}
+        </td>
+      </tr>
+    </tbody>
+  </v-table>
 </template>
 
 <script>
