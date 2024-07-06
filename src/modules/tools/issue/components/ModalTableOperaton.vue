@@ -41,6 +41,7 @@ export default {
         { header: 'Кол-во', data: 'quantity' },
         { header: 'Тип выдачи', data: 'type_issue' },
         { header: 'Выдал', data: 'issuer_fio' },
+        { header: 'Выдано', data: 'user_fio' },
       ],
     }
   },
@@ -57,8 +58,7 @@ export default {
   methods: {
     async fetchToolHistory() {
       try {
-        const historyData = await issueToolApi.getToolHistoryByOperationId(this.operationId)
-        this.historyItems = historyData // Здесь предполагается, что API возвращает массив объектов истории
+        this.historyItems = await issueToolApi.getToolHistoryByOperationId(this.operationId) // Здесь предполагается, что API возвращает массив объектов истории
       } catch (error) {
         // Обработка ошибки 404
         if (error.response && error.response.status === 404) {
@@ -70,7 +70,7 @@ export default {
       }
     },
     formatDate(timestamp) {
-      // Преобразуем timestamp в дату в формате "ДД.ММ.ГГГГ ЧЧ:ММ"
+      // Преобразуем timestamp в дату в формате "ДД.ММ.ГГ ЧЧ:ММ"
       return format(new Date(timestamp), 'dd.MM.yy HH:mm')
     },
   },
