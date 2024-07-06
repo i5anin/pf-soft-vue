@@ -1,4 +1,5 @@
 <template>
+  <div class="text-h6">Уже было выдано на операцию</div>
   <v-table hover>
     <template v-slot:default>
       <thead>
