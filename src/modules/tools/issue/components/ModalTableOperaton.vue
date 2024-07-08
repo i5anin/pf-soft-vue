@@ -95,7 +95,7 @@ export default {
 <style scoped>
 /* Добавляем скроллинг к таблице */
 .v-table {
-  height: 80vh;
+  height: 75vh;
   overflow-y: auto;
 }
 

@@ -16,7 +16,6 @@
                   required
                   clearable
                   @update:model-value="onIdChanged"
-                  clearable="true"
                 />
                 <v-select
                   v-model="toolModel.detailDescription"
@@ -26,7 +25,6 @@
                   :items="options.idNameDescription"
                   clearable
                   @update:model-value="onIdSelected"
-                  clearable="true"
                 />
 
                 <v-select
@@ -39,7 +37,6 @@
                   item-text="text"
                   clearable
                   @update:model-value="onOperationSelected"
-                  clearable="true"
                 />
                 <h2 class="text-h6 pl-5 mb-2">Кому выдать:</h2>
                 <v-combobox
@@ -51,7 +48,6 @@
                   label="ФИО"
                   clearable
                   @update:model-value="handleSelectionChange"
-                  clearable="true"
                 />
                 <!--fixme-->
                 <v-combobox
