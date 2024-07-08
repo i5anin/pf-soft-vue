@@ -1,5 +1,8 @@
-SELECT thn.id_tool, tn.name, SUM(thn.quantity) AS total_issued
-FROM dbo.tool_history_nom thn
-JOIN dbo.tool_nom tn ON thn.id_tool = tn.id
-GROUP BY thn.id_tool, tn.name
-ORDER BY total_issued DESC;
+SELECT dbo.tool_history_nom.id_tool,                                              -- Код инструмента
+       dbo.tool_nom.name,                                                         -- Название инструмента
+       SUM(dbo.tool_history_nom.quantity)               AS total_issued_per_tool, -- Количество выданного инструмента (по каждому типу)
+       (SELECT SUM(quantity) FROM dbo.tool_history_nom) AS total_issued_overall   -- Общее количество выданных инструментов (всех типов)
+FROM dbo.tool_history_nom
+         JOIN dbo.tool_nom ON dbo.tool_history_nom.id_tool = dbo.tool_nom.id
+GROUP BY dbo.tool_history_nom.id_tool, dbo.tool_nom.name
+ORDER BY total_issued_per_tool DESC;
