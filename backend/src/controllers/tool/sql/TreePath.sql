@@ -36,4 +36,4 @@ SELECT ToolDetails.id_tool, -- ID инструмента
        ToolDetails.norma    -- Норма
 FROM ToolDetails
          JOIN TreePath ON ToolDetails.parent_id = TreePath.id
-WHERE ToolDetails.id_tool = 1512; -- Фильтруем результаты по уникальному ID инструмента
+WHERE ToolDetails.id_tool = :id_tool; -- Фильтруем результаты по уникальному ID инструмента
