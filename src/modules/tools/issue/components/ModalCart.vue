@@ -6,7 +6,7 @@
     <template #content>
       <v-container>
         <div class="d-flex">
-          <div class="flex-grow-1 mr-6">
+          <div class="flex-grow-1 mr-2 ml-2" style="flex-basis: 40%">
             <div class="text-h6 pl-5 mb-2">Выбрать деталь:</div>
             <v-row>
               <v-col>
@@ -14,6 +14,7 @@
                   variant="outlined"
                   label="поиск детали по партии"
                   required
+                  clearable
                   @update:model-value="onIdChanged"
                   clearable="true"
                 />
@@ -23,6 +24,7 @@
                   required
                   :disabled="!options.idNameDescription.length"
                   :items="options.idNameDescription"
+                  clearable
                   @update:model-value="onIdSelected"
                   clearable="true"
                 />
@@ -35,6 +37,7 @@
                   :items="options.numberType"
                   item-value="id"
                   item-text="text"
+                  clearable
                   @update:model-value="onOperationSelected"
                   clearable="true"
                 />
@@ -46,6 +49,7 @@
                   item-title="text"
                   item-value="value"
                   label="ФИО"
+                  clearable
                   @update:model-value="handleSelectionChange"
                   clearable="true"
                 />
@@ -58,7 +62,7 @@
                   label="Тип выдачи"
                   :rules="issueTypeRules"
                   required
-                  clearable="true"
+                  clearable
                 />
               </v-col>
             </v-row>
@@ -116,11 +120,8 @@
               </tbody>
             </v-table>
           </div>
-          <div class="flex-grow-1 mr-6">
-            <ModalTableOperaton
-              v-if="toolModel.operationType"
-              :operation-id="toolModel.operationType"
-            />
+          <div v-if="toolModel.operationType" class="flex-grow-1 ml-2" style="flex-basis: 60%">
+            <ModalTableOperaton :operation-id="toolModel.operationType" />
           </div>
         </div>
       </v-container>
@@ -175,6 +176,7 @@ export default {
       { title: 'На ночь', id: 1 },
       { title: 'Наладка', id: 2 },
     ],
+    tree: [],
     issueToken: '',
     submitButtonDisabled: false,
     isSubmitting: false, // Для блокировки кнопки во время ожидания
@@ -208,16 +210,6 @@ export default {
     selectedType: '',
     operationMapping: {},
     issueTypeRules: [(v) => !!v || 'Тип выдачи обязателен для выбора'],
-    parentIdRules: [
-      (v) => !!v || 'ID папки обязательно',
-      (v) => v > 1 || 'ID папки должен быть больше 1',
-      (v) => v !== '' || 'ID папки не должен быть пустым',
-    ],
-    typeRules: [
-      (v) => !!v || 'Поле обязательно для заполнения',
-      (v) => (v && v.length >= 3) || 'Минимальная длина: 3 символа',
-    ],
-
     options: {
       idNameDescription: [],
       numberType: [],
@@ -245,7 +237,7 @@ export default {
       return 'Корзина'
     },
     modalWidth() {
-      return this.toolModel.operationType ? '1000px' : '600px'
+      return this.toolModel.operationType ? '1200px' : '600px'
     },
   },
   watch: {
@@ -278,7 +270,7 @@ export default {
     const toolsTree = await toolTreeApi.getTree()
     if (toolsTree && toolsTree.length > 0) {
       this.currentItem = toolsTree[0]
-      this.tree.push(this.currentItem)
+      if (this.currentItem) this.tree.push(this.currentItem)
     }
   },
   methods: {

@@ -1,29 +1,37 @@
 <template>
+  <div class="text-h6">Уже было выдано на операцию</div>
   <v-table hover>
-    <thead>
-      <tr>
-        <th v-for="(header, index) in tableStructure" :key="index">
-          {{ header.header }}
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="(historyItem, index) in historyItems" :key="index">
-        <td v-for="(field, fieldIndex) in tableStructure" :key="fieldIndex">
-          {{
-            field.data === 'timestamp'
-              ? formatDate(historyItem[field.data])
-              : historyItem[field.data]
-          }}
-        </td>
-      </tr>
-    </tbody>
+    <template v-slot:default>
+      <thead>
+        <tr>
+          <th v-for="(header, index) in tableStructure" :key="index">
+            {{ header.header }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          v-for="(historyItem, index) in historyItems"
+          :key="index"
+          :class="{ 'highlight-row': isToolInCart(historyItem.id_tool) }"
+        >
+          <td v-for="(field, fieldIndex) in tableStructure" :key="fieldIndex">
+            {{
+              field.data === 'timestamp'
+                ? formatDate(historyItem[field.data])
+                : historyItem[field.data]
+            }}
+          </td>
+        </tr>
+      </tbody>
+    </template>
   </v-table>
 </template>
 
 <script>
 import { issueToolApi } from '@/modules/tools/issue/api/issue'
 import { format } from 'date-fns'
+import { mapGetters } from 'vuex'
 
 export default {
   props: {
@@ -41,8 +49,12 @@ export default {
         { header: 'Кол-во', data: 'quantity' },
         { header: 'Тип выдачи', data: 'type_issue' },
         { header: 'Выдал', data: 'issuer_fio' },
+        { header: 'Выдано', data: 'user_fio' },
       ],
     }
+  },
+  computed: {
+    ...mapGetters('IssueToolStore', ['cartItems']), // Получение cartItems из Vuex
   },
   async created() {
     await this.fetchToolHistory()
@@ -57,12 +69,11 @@ export default {
   methods: {
     async fetchToolHistory() {
       try {
-        const historyData = await issueToolApi.getToolHistoryByOperationId(this.operationId)
-        this.historyItems = historyData // Здесь предполагается, что API возвращает массив объектов истории
+        this.historyItems = await issueToolApi.getToolHistoryByOperationId(this.operationId)
       } catch (error) {
         // Обработка ошибки 404
         if (error.response && error.response.status === 404) {
-          this.historyItems = [] // Очищаем массив, чтобы отображалось сообщение об отсутствии данных
+          this.historyItems = []
         } else {
           console.error('Ошибка при получении истории по операции:', error)
           // Обработка других ошибок
@@ -70,13 +81,26 @@ export default {
       }
     },
     formatDate(timestamp) {
-      // Преобразуем timestamp в дату в формате "ДД.ММ.ГГГГ ЧЧ:ММ"
       return format(new Date(timestamp), 'dd.MM.yy HH:mm')
+    },
+    isToolInCart(toolId) {
+      // Проверка наличия инструмента в корзине
+      console.log(toolId)
+      return this.cartItems.some((item) => item.toolId === toolId)
     },
   },
 }
 </script>
 
 <style scoped>
-/* Ваши стили для таблицы, если нужно */
+/* Добавляем скроллинг к таблице */
+.v-table {
+  height: 80vh;
+  overflow-y: auto;
+}
+
+/* Стиль для подсветки строки */
+.highlight-row {
+  background-color: #bf6161; /* Цвет фона */
+}
 </style>
