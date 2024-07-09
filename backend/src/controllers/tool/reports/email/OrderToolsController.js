@@ -1,5 +1,5 @@
 const { Pool } = require('pg')
-const fs = require('fs');
+const fs = require('fs')
 const ExcelJS = require('exceljs')
 const nodemailer = require('nodemailer')
 const { emailConfig } = require('../../../../config/config')
@@ -9,24 +9,33 @@ const getDbConfig = require('../../../../config/databaseConfig')
 const dbConfig = getDbConfig()
 const pool = new Pool(dbConfig)
 
-async function getReportData() {
-  const sql = fs.readFileSync(__dirname + '/OrderToolsController.sql', 'utf-8');
-  const { rows } = await pool.query(sql);
-  return rows;
+// SQL-запросы для разных типов отчетов
+const sqlQueries = {
+  '1_regular': fs.readFileSync(__dirname + '/OrderToolsController/1_regular.sql', 'utf-8'),
+  '2_group': fs.readFileSync(__dirname + '/OrderToolsController/2_group.sql', 'utf-8'),
+  '3_regular_3_norma': fs.readFileSync(
+    __dirname + '/OrderToolsController/3_regular_3_norma.sql',
+    'utf-8'
+  ),
+  '4_group_3_norma': fs.readFileSync(
+    __dirname + '/OrderToolsController/4_group_3_norma.sql',
+    'utf-8'
+  ),
+}
+
+async function getReportData(reportType) {
+  const sql = sqlQueries[reportType]
+  if (!sql) {
+    throw new Error(`Invalid report type: ${reportType}`)
+  }
+  const { rows } = await pool.query(sql)
+  return rows
 }
 
 function getCurrentMonthDates() {
   const currentDate = new Date()
-  const firstDayOfMonth = new Date(
-    currentDate.getFullYear(),
-    currentDate.getMonth(),
-    1,
-  )
-  const lastDayOfMonth = new Date(
-    currentDate.getFullYear(),
-    currentDate.getMonth() + 1,
-    0,
-  )
+  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+  const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
 
   const firstDate = firstDayOfMonth.toISOString().split('T')[0]
   const lastDate = lastDayOfMonth.toISOString().split('T')[0]
@@ -39,7 +48,7 @@ async function createExcelFileStream(data) {
   const workbook = new ExcelJS.Workbook()
   const worksheet = workbook.addWorksheet('Отчёт')
 
-  // Добавляем заголовки
+  // Добавляем заголовки (адаптируйте под ваш отчет)
   worksheet.columns = [
     { header: '# Excel', key: 'index', width: 5 },
     { header: 'ID', key: 'id_tool', width: 5 },
@@ -67,11 +76,9 @@ async function createExcelFileStream(data) {
     { header: 'Путь', key: 'tool_path', width: 30 },
     { header: 'Норма Зеленая', key: 'norma_green', width: 30 },
     { header: 'Норма Красная', key: 'norma_red', width: 30 },
-    // { header: 'Группа ID', key: 'group_display', width: 15 },
-    // { header: 'Стандарт', key: 'group_standard', width: 15 },
   ]
 
-  // Добавляем данные
+  // Добавляем данные (адаптируйте под ваш отчет)
   let index = 1
   data.forEach((item) => {
     let zakazRounded = item.zakaz
@@ -87,12 +94,11 @@ async function createExcelFileStream(data) {
       sklad: Number(item.sklad) || Number(0),
       norma: Number(item.norma) || '',
       zakaz: Number(zakazRounded) || '',
-      group_display: Number(item.group_display) || '',
-      group_standard: item.group_standard ? 'Да' : 'Нет',
-      tool_path: item.tool_path ? item.tool_path : 'Не указан',
+      tool_path: item.tool_path || 'Не указан',
       group_sum: Number(item.group_sum) || '',
-      norma_green: item.norma_green, // <-- добавлено поле "Норма Зеленая"
-      norma_red: item.norma_red,     // <-- добавлено поле "Норма Красная"
+      norma_green: item.norma_green,
+      norma_red: item.norma_red,
+      // ... другие поля отчета
     })
   })
 
@@ -105,7 +111,7 @@ async function createExcelFileStream(data) {
         maxLength = cellLength
       }
     })
-    column.width = maxLength < 10 ? 10 : maxLength // Устанавливаем минимальную ширину 10
+    column.width = maxLength < 10 ? 10 : maxLength
   })
 
   const stream = new require('stream').PassThrough()
@@ -114,93 +120,27 @@ async function createExcelFileStream(data) {
   return stream
 }
 
-// Функция для генерации HTML таблицы
-function generateHtmlTable(data) {
-  // Определение заголовков для таблицы
-  const headers = [
-    { header: '# HTML', key: 'index' },
-    { header: 'ID', key: 'id_tool' },
-    { header: 'Название', key: 'name' },
-    { header: 'Заказ', key: 'zakaz' },
-    { header: 'Склад группы', key: 'group_sum' },
-    { header: 'На складе', key: 'sklad' },
-    { header: 'Норма', key: 'norma' },
-    { header: 'Группа ID', key: 'group_display' },
-    { header: 'Стандарт', key: 'group_standard' },
-    { header: 'Путь', key: 'tool_path' },
-    { header: 'Норма Зеленая', key: 'norma_green' },
-    { header: 'Норма Красная', key: 'norma_red' },
-  ]
-
-  let htmlContent = `<h2>Заказ: Журнал инструмента</h2>`
-  htmlContent += `<table border='1' style='border-collapse: collapse;'><tr>`
-
-  // Генерируем шапку таблицы
-  headers.forEach((header) => {
-    htmlContent += `<th>${header.header}</th>`
-  })
-
-  htmlContent += `</tr>`
-
-  // Генерация строк таблицы
-  data.forEach((item, index) => {
-    let zakazValue = item.zakaz
-    // Round only if the tool path includes "пластины"
-    if (item.tool_path && item.tool_path.toLowerCase().includes('пластины')) {
-      zakazValue = getRoundedCount(item.zakaz)
-    }
-
-    htmlContent += `<tr>`
-    headers.forEach(({ key }) => {
-      let value = ''
-      switch (key) {
-        case 'index':
-          value = index + 1
-          break
-        case 'sklad':
-          value = item[key] || 0
-          break
-        case 'zakaz': // Use zakazValue for rounded value
-          value = zakazValue
-          break
-        default:
-          value = item[key] || ''
-      }
-      htmlContent += `<td>${value}</td>`
-    })
-    htmlContent += `</tr>`
-  })
-  htmlContent += `</table>`
-  return htmlContent
-}
-
-// Функция для отправки сообщения с файлом на почту, использующая generateHtmlTable
-async function sendEmailWithExcelStream(email, text, excelStream, data) {
-  // Используем переменные emailConfig, как раньше
-
-  // Использование значений из переменных окружения, если они определены, иначе из config
+// Функция для отправки сообщения с файлом на почту
+async function sendEmailWithExcelStream(email, text, excelStream, data, reportType) {
   const transporter = nodemailer.createTransport({
     host: emailConfig.host,
     port: emailConfig.port,
-    secure: emailConfig.secure, // В зависимости от вашего сервера это может быть true
+    secure: emailConfig.secure,
     auth: { user: emailConfig.user, pass: emailConfig.pass },
   })
 
   const { firstDate, lastDate } = getCurrentMonthDates()
   const envPrefix = process.env.NODE_ENV === 'development' ? 'development ' : ''
-  const subject = `${envPrefix}Заказ: Журнал инструмента`
-
-  const htmlContent = generateHtmlTable(data) // Генерация HTML
+  const subject = `${envPrefix}Заказ: Журнал инструмента (${reportType})`
 
   const mailOptions = {
     from: process.env.MAIL_USER,
     to: email,
     subject: subject,
     text: text,
-    html: htmlContent, // Вставка сгенерированного HTML
     attachments: [
       {
-        filename: 'Поврежденный инструмент.xlsx',
+        filename: `Поврежденный инструмент (${reportType}).xlsx`,
         content: excelStream,
         contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       },
@@ -209,7 +149,7 @@ async function sendEmailWithExcelStream(email, text, excelStream, data) {
 
   // Отправка письма
   try {
-    console.log(`\nЗаказ: Журнал инструмента за неделю`)
+    console.log(`\nЗаказ: Журнал инструмента (${reportType})`)
     console.log(`Отчет будет отправлен на email: ${email}`)
     await transporter.sendMail(mailOptions)
     console.log(`Отчет успешно отправлен на email: ${email}.\n`)
@@ -230,51 +170,45 @@ async function getUserEmailByToken(token) {
 // Объединение функционала
 async function genZayavInstr(req, res) {
   try {
-    // Check if the Authorization header is present and correctly formatted
-    if (
-      !req.headers.authorization ||
-      !req.headers.authorization.startsWith('Bearer ')
-    ) {
-      res.status(400).send('Authorization token is missing or invalid.')
-      return
+    // Проверка токена авторизации
+    if (!req.headers.authorization || !req.headers.authorization.startsWith('Bearer ')) {
+      return res.status(401).send('Authorization token is missing or invalid.')
     }
-
-    // Safely extract the token
     const token = req.headers.authorization.split(' ')[1]
     if (!token) {
-      res.status(400).send('Bearer token is malformed.')
-      return
+      return res.status(401).send('Bearer token is malformed.')
+    }
+
+    // Получение типа отчета из тела запроса
+    const { reportType } = req.body
+    if (!reportType) {
+      return res.status(400).send('Report type is required.')
+    }
+    if (!sqlQueries[reportType]) {
+      return res.status(400).send(`Invalid report type: ${reportType}`)
     }
 
     const email = await getUserEmailByToken(token)
-
-    const data = await getReportData()
+    const data = await getReportData(reportType)
     if (data.length === 0) {
-      res.status(404).send('No data available for the report.')
-      return
+      return res.status(404).send('No data available for the report.')
     }
 
     const excelStream = await createExcelFileStream(data)
     const emailText = 'Please find the attached Excel report.'
-    await sendEmailWithExcelStream(email, emailText, excelStream, data)
+    await sendEmailWithExcelStream(email, emailText, excelStream, data, reportType)
 
-    res
-      .status(200)
-      .send('The report has been successfully sent to the specified email.')
+    res.status(200).send('The report has been successfully sent.')
   } catch (error) {
     console.error('Error in generating and sending the report:', error)
-    res
-      .status(500)
-      .send(`Error in generating and sending the report: ${error.message}`)
+    res.status(500).send(`Error in generating and sending the report: ${error.message}`)
   }
 }
 
 // Функция для округления заказа
 function getRoundedCount(count) {
   if (count < 10) return 10
-  return count % 10 < 5
-    ? Math.floor(count / 10) * 10
-    : Math.ceil(count / 10) * 10
+  return count % 10 < 5 ? Math.floor(count / 10) * 10 : Math.ceil(count / 10) * 10
 }
 
 module.exports = {
