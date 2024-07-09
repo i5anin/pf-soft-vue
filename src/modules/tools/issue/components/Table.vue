@@ -1,11 +1,5 @@
 <template>
-  <v-snackbar
-    v-model="snackbarVisible"
-    :timeout="8000"
-    bottom
-    right
-    color="blue-grey"
-  >
+  <v-snackbar v-model="snackbarVisible" :timeout="8000" bottom right color="blue-grey">
     {{ snackbarText }}
   </v-snackbar>
   <v-container>
@@ -64,12 +58,12 @@
       <!--name-->
       <template #item.name="{ item }">
         <td :class="colorClassGrey(item)" style="white-space: nowrap">
-          {{ item.name }}
+          <v-chip size="large" variant="text"> {{ item.name }}</v-chip>
         </td>
       </template>
       <template #item.sklad="{ item }">
         <td :class="colorClassRed(item)" style="white-space: nowrap">
-          {{ item.sklad }}
+          <v-chip size="large" color="primary" variant="flat"> {{ item.sklad }}</v-chip>
         </td>
       </template>
       <template #item.norma="{ item }">
@@ -78,11 +72,11 @@
       <template #item.zakaz="{ item }">
         <td style="white-space: nowrap">{{ calculateOrder(item) }}</td>
       </template>
-      <template #item.issue="{ item }">
-        <v-btn color="primary" @click="(event) => onIssueTool(event, item)">
-          <v-icon icon="mdi-hand-extended" />
-        </v-btn>
-      </template>
+      <!--      <template #item.issue="{ item }">-->
+      <!--        <v-btn color="primary" @click="(event) => onIssueTool(event, item)">-->
+      <!--          <v-icon icon="mdi-hand-extended" />-->
+      <!--        </v-btn>-->
+      <!--      </template>-->
       <template #item.damaged="{ item }">
         <v-btn color="red" @click="(event) => onDamagedTool(event, item)">
           <v-icon icon="mdi-image-broken-variant" />
@@ -90,10 +84,7 @@
       </template>
       <template #item.cart="{ item }">
         <v-btn color="yellow" @click="addToolToCart(item.id, 1)">
-          <template #prepend>
-            <v-icon start icon="mdi-cart-arrow-down" />
-          </template>
-          В корзину
+          <v-icon icon="mdi-cart-arrow-down" />
         </v-btn>
       </template>
     </v-data-table-server>
@@ -104,7 +95,7 @@
 import ModalDamaged from './ModalDamaged.vue'
 import ToolFilter from './ToolFilter.vue'
 
-import { mapActions, mapMutations, mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default {
   components: {
@@ -155,6 +146,8 @@ export default {
         this.toolTableHeaders = [
           { title: '№', key: 'index', sortable: false },
           { title: 'Маркировка', key: 'name', sortable: false },
+          { title: '⭐Склад', key: 'sklad', sortable: false },
+          { title: 'Норма', key: 'norma', sortable: false },
 
           ...(dynamicFilters && dynamicFilters.length > 0
             ? dynamicFilters.map(({ label: title, key }) => ({
@@ -167,10 +160,8 @@ export default {
           // { title: 'Заказ', key: 'zakaz', sortable: false },
           // { title: 'Лимит', key: 'limit', sortable: fals
           // { title: 'Выдать', key: 'issue', sortable: false },
-          { title: 'Поврежден', key: 'damaged', sortable: false },
           { title: 'Выдать', key: 'cart', sortable: false },
-          { title: 'Норма', key: 'norma', sortable: false },
-          { title: 'Склад', key: 'sklad', sortable: false },
+          { title: 'Поврежден', key: 'damaged', sortable: false },
         ]
       },
     },
@@ -182,10 +173,7 @@ export default {
   },
 
   methods: {
-    ...mapActions('IssueToolStore', [
-      'fetchToolsDynamicFilters',
-      'fetchToolsByFilter',
-    ]),
+    ...mapActions('IssueToolStore', ['fetchToolsDynamicFilters', 'fetchToolsByFilter']),
     ...mapMutations('IssueToolStore', [
       'setCurrentPage',
       'setItemsPerPage',
@@ -212,18 +200,16 @@ export default {
         return
       }
 
-      const existingCartItem = this.cartItems.find(
-        (item) => item.toolId === toolId
-      )
+      const existingCartItem = this.cartItems.find((item) => item.toolId === toolId)
       const totalQuantityInCart = existingCartItem
         ? existingCartItem.quantity + quantityToAdd
         : quantityToAdd
 
       if (totalQuantityInCart > tool.sklad) {
         this.showSnackbar(
-          `Невозможно добавить. На складе доступно только ${
-            tool.sklad
-          }, в корзине уже ${existingCartItem ? existingCartItem.quantity : 0}.`
+          `Невозможно добавить. На складе доступно только ${tool.sklad}, в корзине уже ${
+            existingCartItem ? existingCartItem.quantity : 0
+          }.`
         )
         return
       }
@@ -241,9 +227,7 @@ export default {
       }
 
       this.showSnackbar(
-        `${
-          tool.name
-        } добавлен в корзину. В корзине ${totalQuantityInCart}, на складе ${
+        `${tool.name} добавлен в корзину. В корзине ${totalQuantityInCart}, на складе ${
           tool.sklad - totalQuantityInCart
         }.`
       )
