@@ -1,20 +1,17 @@
--- заказ группа инструмента "1 норма" "в группе"
-SELECT tool_nom.id                     AS id_tool,
+SELECT tool_nom.id                               AS id_tool,
        tool_nom.name,
-       -- заказ
-       tool_nom.norma - tool_nom.sklad AS zakaz,
+       tool_nom.norma - group_totals.group_sklad AS zakaz,
        tool_nom.sklad,
        tool_nom.norma,
-       -- группа
        tool_nom.group_id,
        tool_nom.group_standard,
-       -- 3 нормы
-       tool_nom.norma_green,
-       tool_nom.norma_red
+       group_totals.group_sklad
 FROM dbo.tool_nom
+         LEFT JOIN (SELECT group_id,
+                           SUM(sklad) AS group_sklad
+                    FROM dbo.tool_nom
+                    GROUP BY group_id)
+    AS group_totals ON tool_nom.group_id = group_totals.group_id
 WHERE tool_nom.norma - tool_nom.sklad > 0
-  AND (group_id <> 0
-    AND tool_nom.group_standard
-    --AND (tool_nom.norma_green ISNULL OR tool_nom.norma_green = 0)
-    --AND (tool_nom.norma_red ISNULL OR tool_nom.norma_red = 0)
-    AND tool_nom.norma_red ISNULL);
+  AND tool_nom.group_id <> 0
+  AND (tool_nom.norma - group_totals.group_sklad) > 0;
