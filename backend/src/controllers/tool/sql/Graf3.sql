@@ -1,7 +1,7 @@
 SELECT
     DATE(datetime_log) AS date,
-    SUM(old_amount - new_amount) AS total_kolvo
+    SUM(new_amount - old_amount ) AS total_kolvo
 FROM dbo.vue_log
-WHERE old_amount - new_amount > 0
+WHERE new_amount - old_amount  > 0
 GROUP BY DATE(datetime_log)
 ORDER BY date;
