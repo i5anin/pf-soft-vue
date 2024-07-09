@@ -1,3 +1,4 @@
+-- 4.группы 3 нормы
 SELECT tool_nom.id AS id_tool,
        tool_nom.name,
        CASE

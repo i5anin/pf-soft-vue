@@ -1,3 +1,4 @@
+-- группы
 SELECT tool_nom.id                               AS id_tool,
        tool_nom.name,
        tool_nom.norma - group_totals.group_sklad AS zakaz,
