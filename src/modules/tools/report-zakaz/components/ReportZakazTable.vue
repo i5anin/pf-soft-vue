@@ -1,114 +1,112 @@
 <template>
   <zakaz-tool-modal
-    v-if='openDialog'
-    :persistent='true'
-    :tool-id='editingToolId'
-    @canceled='onClosePopup'
+    v-if="openDialog"
+    :persistent="true"
+    :tool-id="editingToolId"
+    @canceled="onClosePopup"
   />
   <div>
-    <div class='d-flex justify-end'>
-      <v-btn variant='text' @click='toggleAllVisibility'>
+    <div class="d-flex justify-end">
+      <v-btn variant="text" @click="toggleAllVisibility">
         {{ isAllVisible ? 'Свернуть все' : 'Развернуть все' }}
         ({{ totalToolCount }})
       </v-btn>
     </div>
-    <div v-for='(group, index) in toolGroups' :key='index' class='tool-group'>
-      <v-chip variant='text' size='large' @click='toggleVisibility(index)'>
+    <div v-for="(group, index) in toolGroups" :key="index" class="tool-group">
+      <v-chip variant="text" size="large" @click="toggleVisibility(index)">
         <template #prepend>
-          <v-icon v-if='!checkTools(group)' color='green' icon='mdi-folder' start />
+          <v-icon v-if="!checkTools(group)" color="green" icon="mdi-folder" start />
           <v-icon
-            v-if='checkTools(group)'
-            icon='mdi-folder-alert'
+            v-if="checkTools(group)"
+            icon="mdi-folder-alert"
             start
-            :color='getLowestGroupColor(group)'
-            title='Есть позиции с низким запасом'
+            :color="getLowestGroupColor(group)"
+            title="Есть позиции с низким запасом"
           />
         </template>
         {{ group.path }}
       </v-chip>
-      <v-chip color='while'>{{ group.tools.length }}</v-chip>
-      <div v-if='visibleGroups.includes(index)'>
+      <v-chip color="while">{{ group.tools.length }}</v-chip>
+      <div v-if="visibleGroups.includes(index)">
         <v-table hover dense>
           <thead>
-          <tr>
-            <th class='text-left mw50'>#</th>
-            <th class='text-left mw300'>Название</th>
-            <th class='text-left mw50'>Заказ</th>
-            <th class='text-left mw50'>Склад</th>
-            <!-- <th class='text-left mw50'>Склад группы</th>-->
-            <th class='text-left mw50'>Норма</th>
-            <th class='text-left mw50'>Коэф исп</th>
-            <th class='text-left mw50'>Не хватает</th>
-          </tr>
+            <tr>
+              <th class="text-left mw50">#</th>
+              <th class="text-left mw300">Название</th>
+              <th class="text-left mw50">Заказ</th>
+              <th class="text-left mw50">Склад</th>
+              <!-- <th class='text-left mw50'>Склад группы</th>-->
+              <th class="text-left mw50">Норма</th>
+              <!--            <th class='text-left mw50'>Коэф исп</th>-->
+              <th class="text-left mw50">Не хватает</th>
+            </tr>
           </thead>
           <tbody>
-          <tr
-            v-for='(tool, toolIndex) in group.tools'
-            :key='toolIndex'
-            @click='openToolModal(tool.id_tool)'
-          >
-            <td class='grey'>{{ toolIndex + 1 }}</td>
-            <td>
-              {{ tool.name }}
-              <v-chip
-                v-if='tool.group_id'
-                size='x-small'
-                :color='getColorForGroup(tool.group_id)'
-                :title="'Группа ' + tool.group_id"
-              >
-              <span v-if='tool.group_standard' style='color: yellow'>
-                ★
-              </span> G{{ tool.group_id }}
-              </v-chip>
-            </td>
-            <td>
-              {{
-                group.path.includes('Пластины') && tool.zakaz !== 0
-                  ? getRoundedCount(tool.zakaz)
-                  : tool.zakaz
-              }}
-              <template
-                v-if="
+            <tr
+              v-for="(tool, toolIndex) in group.tools"
+              :key="toolIndex"
+              @click="openToolModal(tool.id_tool)"
+            >
+              <td class="grey">{{ toolIndex + 1 }}</td>
+              <td>
+                {{ tool.name }}
+                <v-chip
+                  v-if="tool.group_id"
+                  size="x-small"
+                  :color="getColorForGroup(tool.group_id)"
+                  :title="'Группа ' + tool.group_id"
+                >
+                  <span v-if="tool.group_standard" style="color: yellow"> ★ </span> G{{
+                    tool.group_id
+                  }}
+                </v-chip>
+              </td>
+              <td>
+                {{
+                  group.path.includes('Пластины') && tool.zakaz !== 0
+                    ? getRoundedCount(tool.zakaz)
+                    : tool.zakaz
+                }}
+                <template
+                  v-if="
                     group.path.includes('Пластины') &&
                     tool.zakaz !== 0 &&
                     tool.zakaz !== getRoundedCount(tool.zakaz)
                   "
-              >
-                <span class='grey'> ({{ tool.zakaz }})</span>
-              </template>
-            </td>
-            <td class='grey'>{{ tool.sklad }}</td>
+                >
+                  <span class="grey"> ({{ tool.zakaz }})</span>
+                </template>
+              </td>
+              <td class="grey">{{ tool.sklad }}</td>
 
-            <td class='grey'>
-
-              {{ tool.norma_green }}
-              <span v-if='tool.norma_green'> | </span>
-              {{ tool.norma }}
-              <span v-if='tool.norma_green'> | </span>
-              {{ tool.norma_red }}
-
-            </td>
-            <td>
-              <v-chip
-                v-if='tool.taken_coefficient'
-                :variant='getChipVariant(tool.taken_coefficient)'
-                :color='getChipColor(tool.taken_coefficient)'>
-                {{ tool.taken_coefficient.toFixed(4) }}
-              </v-chip>
-            </td>
-            <td>
-              <v-chip v-if='!tool.norma_red || !tool.norma_green' :color='getToolColor(tool.sklad / tool.norma)'>
-                <span v-if='tool.group_sklad'>{{ calcPercent(tool.group_sklad, tool.norma) }} %</span>
-                <span v-else>{{ calcPercent(tool.sklad, tool.norma) }} %</span>
-              </v-chip>
-              <v-chip v-if='tool.norma_red || tool.norma_green'
-                      :color='getToolColorLight(tool.sklad, tool.norma_red,tool.norma, tool.norma_red)'>
-                <span v-if='tool.group_sklad'>{{ calcPercent(tool.group_sklad, tool.norma_green) }} %</span>
-                <span v-else>{{ calcPercent(tool.sklad, tool.norma_green) }} %</span>
-              </v-chip>
-            </td>
-
-          </tr>
+              <td class="grey">
+                {{ tool.norma_green }}
+                <span v-if="tool.norma_green"> | </span>
+                {{ tool.norma }}
+                <span v-if="tool.norma_green"> | </span>
+                {{ tool.norma_red }}
+              </td>
+              <td>
+                <v-chip
+                  v-if="!tool.norma_red || !tool.norma_green"
+                  :color="getToolColor(tool.sklad / tool.norma)"
+                >
+                  <span v-if="tool.group_sklad"
+                    >{{ calcPercent(tool.group_sklad, tool.norma) }} %</span
+                  >
+                  <span v-else>{{ calcPercent(tool.sklad, tool.norma) }} %</span>
+                </v-chip>
+                <v-chip
+                  v-if="tool.norma_red || tool.norma_green"
+                  :color="getToolColorLight(tool.sklad, tool.norma_red, tool.norma, tool.norma_red)"
+                >
+                  <span v-if="tool.group_sklad"
+                    >{{ calcPercent(tool.group_sklad, tool.norma_green) }} %</span
+                  >
+                  <span v-else>{{ calcPercent(tool.sklad, tool.norma_green) }} %</span>
+                </v-chip>
+              </td>
+            </tr>
           </tbody>
         </v-table>
       </div>
@@ -183,12 +181,10 @@ export default {
     },
     getRoundedCount(count) {
       if (count < 10) return 10
-      return count % 10 < 5
-        ? Math.floor(count / 10) * 10
-        : Math.ceil(count / 10) * 10
+      return count % 10 < 5 ? Math.floor(count / 10) * 10 : Math.ceil(count / 10) * 10
     },
     calcPercent(sklad, norma) {
-      return ((1 - (sklad) / norma) * 100).toFixed(0)
+      return ((1 - sklad / norma) * 100).toFixed(0)
     },
 
     async fetchZakazData() {
@@ -225,7 +221,6 @@ export default {
       }
       return '' // Если никакие условия не совпадают, возвращает пустую строку
     },
-
 
     getLowestGroupColor(group) {
       let lowestRatio = 1 // Начальное значение для максимального запаса

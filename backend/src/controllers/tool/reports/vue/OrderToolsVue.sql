@@ -38,17 +38,7 @@ WITH RECURSIVE
                           ELSE CASE WHEN tn.norma_green > 0 THEN tn.norma_green ELSE tn.norma END - tn.sklad > 0
                           END
                 GROUP BY tn.id, tn.parent_id, tn.name, tn.sklad, tn.norma, tn.group_id,
-                         tn.group_standard, t.group_total_sklad, tn.norma_green, tn.norma_red),
-    ToolUsage
-        AS (SELECT CASE WHEN tn.group_standard THEN tn.group_id ELSE tn.id END AS tool_group_id, -- Группируем по group_id, если инструмент эталонный
-                   SUM(vl.new_amount)                                          AS total_taken
-            FROM dbo.vue_log vl
-                     JOIN dbo.tool_nom tn ON vl.tool_id = tn.id
-            WHERE vl.datetime_log >= CURRENT_DATE - INTERVAL '14 days'
-            GROUP BY tool_group_id),
-    TotalTaken AS (SELECT SUM(new_amount) as total_taken_all
-                   FROM dbo.vue_log
-                   WHERE datetime_log >= CURRENT_DATE - INTERVAL '14 days')
+                         tn.group_standard, t.group_total_sklad, tn.norma_green, tn.norma_red)
 SELECT d.parent_id,
        tp.path,
        JSON_AGG(
@@ -62,19 +52,11 @@ SELECT d.parent_id,
                        'zakaz', d.zakaz,
                        'group_id', d.group_id,
                        'group_standard', d.group_standard,
-                       'group_sklad', d.group_sklad,
-                       'total_taken', COALESCE(tu.total_taken, 0),
-                       'taken_coefficient', (COALESCE(tu.total_taken, 0)::DECIMAL / tt.total_taken_all) * 100
+                       'group_sklad', d.group_sklad
                )
        ) AS tools
 FROM damaged d
-         JOIN
-     TreePath tp ON d.parent_id = tp.id
-         LEFT JOIN
-     ToolUsage tu ON CASE WHEN d.group_standard THEN d.group_id ELSE d.id_tool END =
-                     tu.tool_group_id -- Используем tool_group_id для объединения
-         CROSS JOIN
-     TotalTaken tt
+         JOIN TreePath tp ON d.parent_id = tp.id
 GROUP BY d.parent_id, tp.path
 HAVING SUM(d.zakaz) > 0
 ORDER BY tp.path;
