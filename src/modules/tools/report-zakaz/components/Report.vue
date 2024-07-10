@@ -1,30 +1,30 @@
 <template>
   <v-container>
     <v-row>
-      <v-col cols='12'>
+      <v-col cols="12">
         <v-table>
           <thead>
-          <tr>
-            <th class='text-left'>Название</th>
-            <th class='text-left'>Информация</th>
-            <th class='text-left'>На почту</th>
-          </tr>
+            <tr>
+              <th class="text-left">Название</th>
+              <th class="text-left">Информация</th>
+              <th class="text-left">На почту</th>
+            </tr>
           </thead>
           <tbody>
-          <tr v-for='(report, index) in reports' :key='index'>
-            <td>{{ report.name }}</td>
-            <td>{{ report.info }}</td>
-            <td>
-              <v-btn
-                color="primary"
-                :loading="report.loading"
-                :disabled="report.loading"
-                @click="sendEmailReport(report)"
-              >
-                Email
-              </v-btn>
-            </td>
-          </tr>
+            <tr v-for="(report, index) in reports" :key="index">
+              <td>{{ report.name }}</td>
+              <td>{{ report.info }}</td>
+              <td>
+                <v-btn
+                  color="primary"
+                  :loading="report.loading"
+                  :disabled="report.loading"
+                  @click="sendEmailReport(report)"
+                >
+                  Email
+                </v-btn>
+              </td>
+            </tr>
           </tbody>
         </v-table>
       </v-col>
@@ -34,7 +34,7 @@
 </template>
 <script>
 import { reportApi } from '../api/report'
-import ReportZakaz from './ReportZakazTable.vue'
+import ReportZakaz from './ReportZakazFolder.vue'
 
 export default {
   components: { ReportZakaz },
@@ -62,27 +62,27 @@ export default {
 
   methods: {
     async sendEmailReport(report) {
-      report.loading = true; // Начинаем анимацию загрузки и блокируем кнопку
+      report.loading = true // Начинаем анимацию загрузки и блокируем кнопку
       try {
-        await report.action(); // Вызываем соответствующую функцию генерации отчета
+        await report.action() // Вызываем соответствующую функцию генерации отчета
         // Дополнительные действия после успешной отправки, например, сообщение об успехе
       } catch (error) {
-        console.error('Ошибка при отправке отчета:', error);
+        console.error('Ошибка при отправке отчета:', error)
         // Обработка ошибки, например, сообщение об ошибке
       } finally {
-        report.loading = false; // Останавливаем анимацию и разблокируем кнопку
+        report.loading = false // Останавливаем анимацию и разблокируем кнопку
       }
     },
     async genNalad() {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token')
       if (!token) {
-        console.error('No token found in local storage.');
-        return;
+        console.error('No token found in local storage.')
+        return
       }
       try {
-        await reportApi.genNalad(token);
+        await reportApi.genNalad(token)
       } catch (error) {
-        console.error('Error while generating report:', error);
+        console.error('Error while generating report:', error)
       }
     },
 
