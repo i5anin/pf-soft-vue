@@ -83,12 +83,6 @@ export default {
     async fetchZakazData() {
       try {
         this.toolGroups = await reportApi.getZakaz()
-        // Calculate hasLowStock for each group immediately
-        this.toolGroups = fetchedToolGroups.map((group) => ({
-          ...group,
-          hasLowStock: this.checkGroupForLowStock(group.tools),
-          lowestColor: this.getLowestGroupColor(group.tools), // Calculate initial color
-        }))
       } catch (error) {
         console.error('Ошибка при получении данных: ', error)
       }
