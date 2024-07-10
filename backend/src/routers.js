@@ -14,8 +14,8 @@ const historyControllerModal = require('./controllers/tool/HistoryIssueModalCont
 const damagedController = require('./controllers/tool/HistoryDamagedController')
 const issueController = require('./controllers/tool/IssueController')
 
-const reportBuchEndPartController = require('./controllers/tool/reports/email/OrderToolsController/cron/BuchEndPartController')
-const reportRedAlertController = require('./controllers/tool/reports/email/OrderToolsController/cron/RedAlertToolsController')
+const reportBuchEndPartController = require('./controllers/tool/reports/email/cron/BuchEndPartController')
+const reportRedAlertController = require('./controllers/tool/reports/email/cron/RedAlertToolsController')
 
 const reportZakazController = require('./controllers/tool/reports/email/OrderToolsController')
 const reportSetupController = require('./controllers/tool/reports/email/NaladReportController')

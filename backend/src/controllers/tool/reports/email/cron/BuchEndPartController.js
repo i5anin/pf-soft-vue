@@ -1,9 +1,9 @@
 const nodemailer = require('nodemailer')
 const { Pool } = require('pg')
-const { emailConfig } = require('../../../../../../config/config')
+const { emailConfig } = require('../../../../../config/config')
 const { htmlToText } = require('nodemailer-html-to-text')
-const getEmailRecipients = require('../../getEmailRecipients')
-const getDbConfig = require('../../../../../../config/databaseConfig')
+const getEmailRecipients = require('../getEmailRecipients')
+const getDbConfig = require('../../../../../config/databaseConfig')
 const cron = require('node-cron')
 
 const dbConfig = getDbConfig()

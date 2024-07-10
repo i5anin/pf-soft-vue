@@ -11,7 +11,7 @@ const dbConfig = getDbConfig()
 const pool = new Pool(dbConfig)
 
 async function getReportData() {
-  const sql = fs.readFileSync(__dirname + '/OrderToolsController/5_general.sql', 'utf-8')
+  const sql = fs.readFileSync(__dirname + '/OrderToolsEmail.sql', 'utf-8')
   const { rows } = await pool.query(sql)
   return rows
 }
