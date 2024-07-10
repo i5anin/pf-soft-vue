@@ -69,7 +69,6 @@ export default {
     },
     updateGroupLowestColor(index, color) {
       this.toolGroups[index].lowestColor = color
-      // Update hasLowStock based on the new color
       this.toolGroups[index].hasLowStock = color !== '#28a745'
     },
 
@@ -80,13 +79,56 @@ export default {
       })
     },
 
+    calcRatio(tool) {
+      let sklad = tool.sklad
+      if (tool.group_id && tool.group_sklad) sklad = tool.group_sklad
+      const norma = this.getNormaForCalculation(tool)
+      return sklad / norma
+    },
+
+    getNormaForCalculation(tool) {
+      if (tool.norma_green && tool.sklad < tool.norma_green) {
+        return tool.norma_green
+      } else if (tool.norma_red && tool.sklad < tool.norma_red) {
+        return tool.norma_red
+      } else {
+        return tool.norma
+      }
+    },
+
     async fetchZakazData() {
       try {
-        this.toolGroups = await reportApi.getZakaz()
+        const data = await reportApi.getZakaz()
+        // Calculate color and hasLowStock for each group immediately
+        this.toolGroups = data.map((group) => ({
+          ...group,
+          lowestColor: this.getLowestGroupColor(group.tools),
+          hasLowStock: this.checkGroupForLowStock(group.tools),
+        }))
       } catch (error) {
         console.error('Ошибка при получении данных: ', error)
       }
     },
+
+    getLowestGroupColor(tools) {
+      let lowestRatio = 1
+      tools.forEach((tool) => {
+        const ratio = this.calcRatio(tool)
+        if (ratio < lowestRatio) lowestRatio = ratio
+      })
+      return this.getToolColor(lowestRatio)
+    },
+
+    getToolColor(ratio) {
+      if (ratio >= 0.8) {
+        return '#28a745' // Green
+      } else if (ratio >= 0.4) {
+        return '#ffc107' // Yellow
+      } else {
+        return '#dc3545' // Red
+      }
+    },
+
     toggleVisibility(index) {
       const visibleIndex = this.visibleGroups.indexOf(index)
       if (visibleIndex === -1) {
