@@ -1,32 +1,25 @@
 const { Pool } = require('pg')
-const fs = require('fs');
+const fs = require('fs')
 const ExcelJS = require('exceljs')
 const nodemailer = require('nodemailer')
 const { emailConfig } = require('../../../../config/config')
 const getDbConfig = require('../../../../config/databaseConfig')
+const { format } = require('date-fns')
 
 // Настройка подключения к базе данных
 const dbConfig = getDbConfig()
 const pool = new Pool(dbConfig)
 
 async function getReportData() {
-  const sql = fs.readFileSync(__dirname + '/OrderToolsController.sql', 'utf-8');
-  const { rows } = await pool.query(sql);
-  return rows;
+  const sql = fs.readFileSync(__dirname + '/OrderToolsController/5_general.sql', 'utf-8')
+  const { rows } = await pool.query(sql)
+  return rows
 }
 
 function getCurrentMonthDates() {
   const currentDate = new Date()
-  const firstDayOfMonth = new Date(
-    currentDate.getFullYear(),
-    currentDate.getMonth(),
-    1,
-  )
-  const lastDayOfMonth = new Date(
-    currentDate.getFullYear(),
-    currentDate.getMonth() + 1,
-    0,
-  )
+  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+  const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
 
   const firstDate = firstDayOfMonth.toISOString().split('T')[0]
   const lastDate = lastDayOfMonth.toISOString().split('T')[0]
@@ -64,7 +57,7 @@ async function createExcelFileStream(data) {
     { header: 'Склад группы', key: 'group_sum', width: 20 },
     { header: 'На складе', key: 'sklad', width: 10 },
     { header: 'Норма', key: 'norma', width: 10 },
-    { header: 'Путь', key: 'tool_path', width: 30 },
+    // { header: 'Путь', key: 'tool_path', width: 30 },
     { header: 'Норма Зеленая', key: 'norma_green', width: 30 },
     { header: 'Норма Красная', key: 'norma_red', width: 30 },
     // { header: 'Группа ID', key: 'group_display', width: 15 },
@@ -92,7 +85,7 @@ async function createExcelFileStream(data) {
       tool_path: item.tool_path ? item.tool_path : 'Не указан',
       group_sum: Number(item.group_sum) || '',
       norma_green: item.norma_green, // <-- добавлено поле "Норма Зеленая"
-      norma_red: item.norma_red,     // <-- добавлено поле "Норма Красная"
+      norma_red: item.norma_red, // <-- добавлено поле "Норма Красная"
     })
   })
 
@@ -127,12 +120,13 @@ function generateHtmlTable(data) {
     { header: 'Норма', key: 'norma' },
     { header: 'Группа ID', key: 'group_display' },
     { header: 'Стандарт', key: 'group_standard' },
-    { header: 'Путь', key: 'tool_path' },
+    // { header: 'Путь', key: 'tool_path' },
+    // { header: 'Путь', key: 'tool_path' },
     { header: 'Норма Зеленая', key: 'norma_green' },
     { header: 'Норма Красная', key: 'norma_red' },
   ]
-
-  let htmlContent = `<h2>Заказ: Журнал инструмента</h2>`
+  const currentDateTime = format(new Date(), 'yyyy-MM-dd_HH-mm-ss')
+  let htmlContent = `<h2>Заказ: Журнал инструмента ${currentDateTime}</h2>`
   htmlContent += `<table border='1' style='border-collapse: collapse;'><tr>`
 
   // Генерируем шапку таблицы
@@ -188,7 +182,8 @@ async function sendEmailWithExcelStream(email, text, excelStream, data) {
 
   const { firstDate, lastDate } = getCurrentMonthDates()
   const envPrefix = process.env.NODE_ENV === 'development' ? 'development ' : ''
-  const subject = `${envPrefix}Заказ: Журнал инструмента`
+  const currentDateTime = format(new Date(), 'yyyy-MM-dd_HH-mm-ss')
+  const subject = `${envPrefix}Заказ: Журнал инструмента ${currentDateTime}`
 
   const htmlContent = generateHtmlTable(data) // Генерация HTML
 
@@ -200,7 +195,7 @@ async function sendEmailWithExcelStream(email, text, excelStream, data) {
     html: htmlContent, // Вставка сгенерированного HTML
     attachments: [
       {
-        filename: 'Поврежденный инструмент.xlsx',
+        filename: `Заказ инструмента ${currentDateTime}.xlsx`,
         content: excelStream,
         contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       },
@@ -231,10 +226,7 @@ async function getUserEmailByToken(token) {
 async function genZayavInstr(req, res) {
   try {
     // Check if the Authorization header is present and correctly formatted
-    if (
-      !req.headers.authorization ||
-      !req.headers.authorization.startsWith('Bearer ')
-    ) {
+    if (!req.headers.authorization || !req.headers.authorization.startsWith('Bearer ')) {
       res.status(400).send('Authorization token is missing or invalid.')
       return
     }
@@ -258,23 +250,17 @@ async function genZayavInstr(req, res) {
     const emailText = 'Please find the attached Excel report.'
     await sendEmailWithExcelStream(email, emailText, excelStream, data)
 
-    res
-      .status(200)
-      .send('The report has been successfully sent to the specified email.')
+    res.status(200).send('The report has been successfully sent to the specified email.')
   } catch (error) {
     console.error('Error in generating and sending the report:', error)
-    res
-      .status(500)
-      .send(`Error in generating and sending the report: ${error.message}`)
+    res.status(500).send(`Error in generating and sending the report: ${error.message}`)
   }
 }
 
 // Функция для округления заказа
 function getRoundedCount(count) {
   if (count < 10) return 10
-  return count % 10 < 5
-    ? Math.floor(count / 10) * 10
-    : Math.ceil(count / 10) * 10
+  return count % 10 < 5 ? Math.floor(count / 10) * 10 : Math.ceil(count / 10) * 10
 }
 
 module.exports = {
