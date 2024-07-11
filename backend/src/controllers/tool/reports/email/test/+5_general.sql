@@ -1,15 +1,38 @@
--- Соединяем результаты всех 4 запросов с помощью UNION ALL
+WITH RECURSIVE TreePath AS (
+    SELECT
+        id,
+        name,
+        parent_id,
+        name AS path
+    FROM dbo.tool_tree
+    WHERE parent_id = 1
+    UNION ALL
+    SELECT
+        tool_tree.id,
+        tool_tree.name,
+        tool_tree.parent_id,
+        CONCAT(TreePath.path, ' / ', tool_tree.name)
+    FROM dbo.tool_tree
+    JOIN TreePath ON tool_tree.parent_id = TreePath.id
+)
 SELECT
     id_tool,
-    name,
-    zakaz,
+    subquery.name,  -- Исправлено: добавлено имя подзапроса
+    CASE
+        WHEN TreePath.path LIKE '%Пластины%' THEN CEIL(zakaz / 10) * 10
+        ELSE zakaz
+    END AS zakaz,
     sklad,
     norma,
     group_id,
     group_standard,
     group_sum,
     norma_green,
-    norma_red
+    norma_red,
+    CASE
+        WHEN TreePath.path LIKE '%Пластины%' THEN 'true'
+        ELSE 'false'
+    END AS is_plate
 FROM (
     -- заказ обычный инструмент "1 норма" "нет группы"
     SELECT
@@ -23,7 +46,8 @@ FROM (
         NULL::TEXT AS group_standard,
         NULL::INTEGER AS group_sum,
         NULL::INTEGER AS norma_green,
-        NULL::INTEGER AS norma_red
+        NULL::INTEGER AS norma_red,
+        tool_nom.parent_id
     FROM dbo.tool_nom
     WHERE tool_nom.norma - tool_nom.sklad > 0
       AND (group_id = 0 OR group_id isnull)
@@ -39,7 +63,8 @@ FROM (
         CASE WHEN tool_nom.group_standard THEN 'true' ELSE 'false' END AS group_standard, -- Приведение boolean к text
         group_totals.group_sklad AS group_sum,
         NULL::INTEGER AS norma_green,
-        NULL::INTEGER AS norma_red
+        NULL::INTEGER AS norma_red,
+        tool_nom.parent_id
     FROM dbo.tool_nom
     LEFT JOIN (
         SELECT group_id, SUM(sklad) AS group_sklad
@@ -63,7 +88,8 @@ FROM (
         NULL::INTEGER AS group_sum,
         -- 3 нормы
         tool_nom.norma_green,
-        tool_nom.norma_red
+        tool_nom.norma_red,
+        tool_nom.parent_id
     FROM dbo.tool_nom
     WHERE tool_nom.norma - tool_nom.sklad > 0
       AND (tool_nom.norma_green <> 0)
@@ -85,7 +111,8 @@ FROM (
         CASE WHEN tool_nom.group_standard THEN 'true' ELSE 'false' END AS group_standard, -- Приведение boolean к text
         group_totals.group_sklad AS group_sum,
         tool_nom.norma_green,
-        tool_nom.norma_red
+        tool_nom.norma_red,
+        tool_nom.parent_id
     FROM dbo.tool_nom
     LEFT JOIN (
         SELECT group_id, SUM(sklad) AS group_sklad
@@ -104,3 +131,4 @@ FROM (
           END) > 0
       AND tool_nom.group_standard = 'true'
 ) AS subquery
+JOIN TreePath ON subquery.parent_id = TreePath.id;
