@@ -14,10 +14,11 @@ WITH RECURSIVE TreePath AS (
         CONCAT(TreePath.path, ' / ', tool_tree.name)
     FROM dbo.tool_tree
     JOIN TreePath ON tool_tree.parent_id = TreePath.id
-)
+),
+FinalData AS (
 SELECT
     id_tool,
-    subquery.name,  -- Исправлено: добавлено имя подзапроса
+    subquery.name,
     CASE
         WHEN TreePath.path LIKE '%Пластины%' THEN CEIL(zakaz / 10) * 10
         ELSE zakaz
@@ -60,7 +61,7 @@ FROM (
         tool_nom.sklad,
         tool_nom.norma,
         tool_nom.group_id::TEXT,
-        CASE WHEN tool_nom.group_standard THEN 'true' ELSE 'false' END AS group_standard, -- Приведение boolean к text
+        CASE WHEN tool_nom.group_standard THEN 'true' ELSE 'false' END AS group_standard,
         group_totals.group_sklad AS group_sum,
         NULL::INTEGER AS norma_green,
         NULL::INTEGER AS norma_red,
@@ -108,7 +109,7 @@ FROM (
         tool_nom.sklad,
         tool_nom.norma,
         CAST(tool_nom.group_id AS TEXT) AS group_id,
-        CASE WHEN tool_nom.group_standard THEN 'true' ELSE 'false' END AS group_standard, -- Приведение boolean к text
+        CASE WHEN tool_nom.group_standard THEN 'true' ELSE 'false' END AS group_standard,
         group_totals.group_sklad AS group_sum,
         tool_nom.norma_green,
         tool_nom.norma_red,
@@ -131,4 +132,6 @@ FROM (
           END) > 0
       AND tool_nom.group_standard = 'true'
 ) AS subquery
-JOIN TreePath ON subquery.parent_id = TreePath.id;
+JOIN TreePath ON subquery.parent_id = TreePath.id
+)
+SELECT * FROM FinalData WHERE zakaz <> 0;

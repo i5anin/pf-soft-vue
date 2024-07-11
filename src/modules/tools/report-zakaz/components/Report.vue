@@ -42,18 +42,19 @@ export default {
     return {
       reports: [
         {
-          name: 'Ревизия',
-          info: 'весь инструмент',
-          action: this.genRevisionInstrWeek,
-        },
-        {
-          name: 'Отчет заявка на инструмент',
+          name: '⭐ Заявка на инструмент',
           info: 'каждый четверг',
           action: this.genZayavInstrWeek,
         },
         {
-          name: 'Отчет по наладкам',
-          info: '',
+          name: 'Ревизия',
+          info: 'весь инструмент',
+          action: this.genRevisionInstrWeek,
+        },
+
+        {
+          name: 'По наладкам',
+          info: 'Дополнительно',
           action: this.genNalad,
         },
       ],

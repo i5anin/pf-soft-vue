@@ -60,6 +60,7 @@ async function createExcelFileStream(data) {
     // { header: 'Путь', key: 'tool_path', width: 30 },
     { header: 'Норма Зеленая', key: 'norma_green', width: 30 },
     { header: 'Норма Красная', key: 'norma_red', width: 30 },
+    { header: 'Пластина', key: 'is_plate', width: 30 },
     // { header: 'Группа ID', key: 'group_display', width: 15 },
     // { header: 'Стандарт', key: 'group_standard', width: 15 },
   ]
@@ -118,12 +119,13 @@ function generateHtmlTable(data) {
     { header: 'Склад группы', key: 'group_sum' },
     { header: 'На складе', key: 'sklad' },
     { header: 'Норма', key: 'norma' },
-    { header: 'Группа ID', key: 'group_display' },
+    // { header: 'Группа ID', key: 'group_display' },
     { header: 'Стандарт', key: 'group_standard' },
     // { header: 'Путь', key: 'tool_path' },
     // { header: 'Путь', key: 'tool_path' },
     { header: 'Норма Зеленая', key: 'norma_green' },
     { header: 'Норма Красная', key: 'norma_red' },
+    { header: 'Пластина', key: 'is_plate' },
   ]
   const currentDateTime = format(new Date(), 'yyyy-MM-dd_HH-mm-ss')
   let htmlContent = `<h2>Заказ: Журнал инструмента ${currentDateTime}</h2>`
