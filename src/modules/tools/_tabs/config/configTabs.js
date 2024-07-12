@@ -76,7 +76,7 @@ const tabs = [
     name: 'Заказ',
     url: '#report',
     component: markRaw(Report),
-    access: ['Admin', 'Editor', 'Issue'],
+    access: ['Admin', 'Editor'],
     ico: 'mdi-package-variant',
   },
   // {
