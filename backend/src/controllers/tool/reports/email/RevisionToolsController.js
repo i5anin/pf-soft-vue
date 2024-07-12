@@ -38,7 +38,7 @@ async function createExcelFileStream(data) {
       style: { font: { bold: true } },
     },
     { header: 'Склад группы', key: 'group_sum', width: 20 },
-    { header: 'Группа ID', key: 'group_display', width: 15 },
+    { header: 'Группа ID', key: 'group_id', width: 15 },
     { header: 'Стандарт', key: 'group_standard', width: 15 },
     { header: 'Путь', key: 'tool_path', width: 30 },
     {
@@ -56,15 +56,21 @@ async function createExcelFileStream(data) {
   data.forEach((item) => {
     worksheet.addRow({
       index: index++,
-      id_tool: item.id_tool, // Удаляем  id_tool, так как он пуст
+      id_tool: item.id_tool, // Удаляем id_tool, так как он пуст
       name: item.name,
+
       sklad: Number(item.sklad) || Number(0),
-      norma: Number(item.norma) || '',
       zakaz: Number(item.zakaz) || '',
-      group_display: Number(item.group_display) || '',
-      group_standard: item.group_standard ? 'Да' : 'Нет',
+
+      group_id: Number(item.group_id) || '',
+      group_sum: Number(item.group_sum) || 0,
+      group_standard: item.group_standard ? 'Да' : '',
+
+      norma: Number(item.norma) || '',
+      norma_red: Number(item.norma_red) || '',
+      norma_green: Number(item.norma_green) || '',
+
       tool_path: item.tool_path ? item.tool_path : 'Не указан',
-      group_sum: Number(item.group_sum) || '',
     })
   })
 
@@ -95,7 +101,7 @@ function generateHtmlTable(data) {
     { header: 'Название', key: 'name' },
     { header: 'Склад группы', key: 'group_sum' },
     { header: 'На складе', key: 'sklad' },
-    { header: 'Группа ID', key: 'group_display' },
+    { header: 'Группа ID', key: 'group_id' },
     { header: 'Стандарт', key: 'group_standard' },
     { header: 'Путь', key: 'tool_path' },
     { header: 'Заказ', key: 'zakaz' },
