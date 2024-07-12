@@ -17,7 +17,7 @@ const issueController = require('./controllers/tool/IssueController')
 const reportBuchEndPartController = require('./controllers/tool/reports/email/cron/BuchEndPartController')
 const reportRedAlertController = require('./controllers/tool/reports/email/cron/RedAlertToolsController')
 
-const reportZakazController = require('./controllers/tool/reports/email/OrderToolsController')
+const reportZakazController = require('./controllers/tool/reports/email/order/OrderToolsController')
 const reportSetupController = require('./controllers/tool/reports/email/NaladReportController')
 
 const reportRevisionController = require('./controllers/tool/reports/email/RevisionToolsController')
