@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-row>
+    <v-row v-if="hasAccess">
       <v-col cols="12">
         <v-table>
           <thead>
@@ -32,9 +32,11 @@
   </v-container>
   <ReportZakaz />
 </template>
+
 <script>
 import { reportApi } from '../api/report'
 import ReportZakaz from './ReportZakazFolder.vue'
+import { authApi } from '@/api/login'
 
 export default {
   components: { ReportZakaz },
@@ -58,9 +60,13 @@ export default {
           action: this.genNalad,
         },
       ],
+      hasAccess: false, // Флаг для проверки прав доступа
     }
   },
-
+  mounted() {
+    // Проверяем права доступа
+    this.checkAccess()
+  },
   methods: {
     async sendEmailReport(report) {
       report.loading = true // Начинаем анимацию загрузки и блокируем кнопку
@@ -109,6 +115,20 @@ export default {
         await reportApi.genRevisionInstr(token)
       } catch (error) {
         console.error('Error while generating report:', error)
+      }
+    },
+    async checkLogin() {
+      const token = localStorage.getItem('token')
+      try {
+        const response = await authApi.checkLogin(token)
+        if (response.status === 'ok') {
+          this.userRole = response.role
+          if (this.userRole === 'Editor' || userRole === 'Admin') {
+            this.hasAccess = true
+          }
+        }
+      } catch (error) {
+        console.error('Ошибка при проверке логина:', error)
       }
     },
   },
