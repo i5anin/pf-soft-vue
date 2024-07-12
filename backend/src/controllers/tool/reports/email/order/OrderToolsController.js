@@ -71,9 +71,9 @@ async function createExcelFileStream(data) {
   data.forEach((item) => {
     let zakazRounded = item.zakaz
     // Round only if the tool path includes "пластины"
-    if (item.tool_path && item.tool_path.toLowerCase().includes('пластины')) {
-      zakazRounded = getRoundedCount(item.zakaz)
-    }
+    // if (item.tool_path && item.tool_path.toLowerCase().includes('пластины')) {
+    //   zakazRounded = getRoundedCount(item.zakaz)
+    // }
 
     worksheet.addRow({
       index: index++,
@@ -84,10 +84,11 @@ async function createExcelFileStream(data) {
       zakaz: Number(zakazRounded) || '',
       group_display: Number(item.group_display) || '',
       group_standard: item.group_standard ? 'Да' : 'Нет',
-      tool_path: item.tool_path ? item.tool_path : 'Не указан',
+      // tool_path: item.tool_path ? item.tool_path : 'Не указан',
       group_sum: Number(item.group_sum) || '',
       norma_green: item.norma_green, // <-- добавлено поле "Норма Зеленая"
       norma_red: item.norma_red, // <-- добавлено поле "Норма Красная"
+      is_plate: item.is_plate, // <-- добавлено поле "Норма Красная"
     })
   })
 
