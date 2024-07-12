@@ -11,7 +11,7 @@ SELECT tool_nom.id AS id_tool,
        tool_nom.group_id,
        tool_nom.group_standard,
        tool_nom.is_plate,
-       NULL AS group_sklad -- Placeholder for consistency
+       NULL        AS group_sklad -- Placeholder for consistency
 FROM dbo.tool_nom
 WHERE tool_nom.norma - tool_nom.sklad > 0
   AND (group_id = 0 OR group_id IS NULL)
@@ -56,7 +56,7 @@ SELECT tool_nom.id AS id_tool,
        CASE
            WHEN tool_nom.is_plate THEN CEIL((tool_nom.norma_green - tool_nom.sklad) / 10) * 10
            ELSE tool_nom.norma_green - tool_nom.sklad
-           END AS zakaz,
+           END     AS zakaz,
        tool_nom.sklad,
        tool_nom.norma,
        tool_nom.norma_red,
@@ -64,7 +64,7 @@ SELECT tool_nom.id AS id_tool,
        tool_nom.group_id,
        tool_nom.group_standard,
        tool_nom.is_plate,
-       NULL AS group_sklad -- Placeholder for consistency
+       NULL        AS group_sklad -- Placeholder for consistency
 FROM dbo.tool_nom
 WHERE tool_nom.norma - tool_nom.sklad > 0
   AND tool_nom.norma_green <> 0
@@ -79,7 +79,7 @@ SELECT tool_nom.id AS id_tool,
            WHEN tool_nom.is_plate THEN CEIL((tool_nom.norma_green - tool_nom.sklad) / 10) * 10
            WHEN tool_nom.group_id <> 0 THEN tool_nom.norma - group_totals.group_sklad
            ELSE tool_nom.norma_green - tool_nom.sklad
-           END AS zakaz,
+           END     AS zakaz,
        tool_nom.sklad,
        tool_nom.norma,
        tool_nom.norma_red,
@@ -101,4 +101,6 @@ WHERE (tool_nom.norma - tool_nom.sklad > 0 OR tool_nom.norma_green - tool_nom.sk
            WHEN tool_nom.group_id <> 0 THEN tool_nom.norma - group_totals.group_sklad
            ELSE tool_nom.norma_green - tool_nom.sklad
     END) > 0
+  AND (norma_red <> 0)
+  AND (norma_green <> 0)
   AND tool_nom.group_standard = 'true';
