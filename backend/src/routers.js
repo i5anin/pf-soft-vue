@@ -14,8 +14,10 @@ const historyControllerModal = require('./controllers/tool/HistoryIssueModalCont
 const damagedController = require('./controllers/tool/HistoryDamagedController')
 const issueController = require('./controllers/tool/IssueController')
 
-const reportBuchEndPartController = require('./controllers/tool/reports/email/BuchEndPartController')
-const reportZakazController = require('./controllers/tool/reports/email/OrderToolsController')
+const reportBuchEndPartController = require('./controllers/tool/reports/email/cron/BuchEndPartController')
+const reportRedAlertController = require('./controllers/tool/reports/email/cron/RedAlertToolsController')
+
+const reportZakazController = require('./controllers/tool/reports/email/order/OrderToolsController')
 const reportSetupController = require('./controllers/tool/reports/email/NaladReportController')
 
 const reportRevisionController = require('./controllers/tool/reports/email/RevisionToolsController')
@@ -91,6 +93,7 @@ router.get('/report/setup', reportSetupController.genSetupReport) // заявк�
 router.get('/report/revision-instr', reportRevisionController.genRevisionInstr) // заявка на инструмент	раз в неделю каждый ЧТ в 12:00 (за неделю)
 // "Email report Buch *CRON"
 router.get('/report/buch-end-op', reportBuchEndPartController.checkStatusChanges) //в режиме CRON
+router.get('/report/red-alert', reportRedAlertController.genRedAlert) //в режиме CRON
 
 // "Vue"
 router.get('/report/get-zakaz', reportVueZakazController.getTableReportData) // заявка на инструмент	раз в неделю каждый ЧТ в 12:00 (за неделю)

@@ -1,9 +1,9 @@
 const nodemailer = require('nodemailer')
 const { Pool } = require('pg')
-const { emailConfig } = require('../../../../config/config')
+const { emailConfig } = require('../../../../../config/config')
 const { htmlToText } = require('nodemailer-html-to-text')
-const getEmailRecipients = require('./getEmailRecipients')
-const getDbConfig = require('../../../../config/databaseConfig')
+const getEmailRecipients = require('../getEmailRecipients')
+const getDbConfig = require('../../../../../config/databaseConfig')
 const cron = require('node-cron')
 
 const dbConfig = getDbConfig()
@@ -95,21 +95,14 @@ async function sendReportForPart(partId) {
       return
     }
 
-    const htmlContent = createMailContent(
-      tools,
-      partId,
-      partName,
-      partDesignation
-    )
+    const htmlContent = createMailContent(tools, partId, partName, partDesignation)
 
     // Получаем email адреса для роли finance в build-режиме
     let financeUserEmail
     if (process.env.VITE_NODE_ENV === 'build') {
       financeUserEmail = await getEmailRecipients('finance')
       if (!financeUserEmail) {
-        console.error(
-          "Не удалось получить адрес электронной почты для роли 'finance'."
-        )
+        console.error("Не удалось получить адрес электронной почты для роли 'finance'.")
         return
       }
     }
@@ -190,9 +183,7 @@ async function checkStatusChanges() {
             `,
             [partId]
           )
-          console.log(
-            `Запись для партии ${partId} обновлена в tool_part_archive.`
-          )
+          console.log(`Запись для партии ${partId} обновлена в tool_part_archive.`)
         } else {
           // Добавляем новую запись
           await pool.query(
@@ -202,9 +193,7 @@ async function checkStatusChanges() {
             `,
             [partId]
           )
-          console.log(
-            `Запись для партии ${partId} добавлена в tool_part_archive.`
-          )
+          console.log(`Запись для партии ${partId} добавлена в tool_part_archive.`)
         }
       }
     } else {
