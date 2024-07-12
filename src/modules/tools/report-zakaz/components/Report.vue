@@ -65,7 +65,7 @@ export default {
   },
   mounted() {
     // Проверяем права доступа
-    this.checkAccess()
+    this.checkLogin()
   },
   methods: {
     async sendEmailReport(report) {
@@ -119,16 +119,24 @@ export default {
     },
     async checkLogin() {
       const token = localStorage.getItem('token')
+      if (!token) {
+        // Если токена нет, пользователь не авторизован, доступ запрещен
+        this.hasAccess = false
+        return
+      }
       try {
         const response = await authApi.checkLogin(token)
         if (response.status === 'ok') {
           this.userRole = response.role
-          if (this.userRole === 'Editor' || userRole === 'Admin') {
-            this.hasAccess = true
-          }
+          // Проверяем роль и устанавливаем hasAccess в true, если это необходимо
+          this.hasAccess = this.userRole === 'Editor' || this.userRole === 'Admin'
+        } else {
+          // Если checkLogin вернул ошибку или не 'ok', доступ запрещен
+          this.hasAccess = false
         }
       } catch (error) {
         console.error('Ошибка при проверке логина:', error)
+        this.hasAccess = false // В случае ошибки доступ запрещен
       }
     },
   },
