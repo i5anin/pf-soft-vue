@@ -3,87 +3,17 @@ const ExcelJS = require('exceljs')
 const nodemailer = require('nodemailer')
 const { emailConfig } = require('../../../../config/config')
 const getDbConfig = require('../../../../config/databaseConfig')
+const fs = require('fs')
 
 // Настройка подключения к базе данных
 const dbConfig = getDbConfig()
 const pool = new Pool(dbConfig)
 
-// Функция для получения данных из базы данных
 async function getReportData() {
-  const query = `WITH RECURSIVE
-                   TreePath AS (SELECT id, CAST(name AS TEXT) AS path, parent_id
-                                FROM dbo.tool_tree
-                                WHERE parent_id = 1
-                                UNION ALL
-                                SELECT tt.id, CONCAT(tp.path, ' / ', tt.name) AS path, tt.parent_id
-                                FROM dbo.tool_tree tt
-                                       JOIN TreePath tp ON tt.parent_id = tp.id),
-                   totals AS (SELECT group_id, SUM(sklad) AS group_total_sklad
-                              FROM dbo.tool_nom
-                              WHERE group_id IS NOT NULL
-                                AND group_id <> 0
-                              GROUP BY group_id),
-                   damaged AS (SELECT tn.id                          AS id_tool, -- Explicitly alias as id_tool
-                                      tn.name,
-                                      tn.sklad,
-                                      tn.norma,
-                                      tn.parent_id,
-                                      tn.group_id,
-                                      tn.group_standard,
-                                      CASE
-                                        WHEN tn.group_id IS NOT NULL AND tn.group_id <> 0 THEN
-                                          GREATEST(tn.norma - t.group_total_sklad, 0)
-                                        ELSE
-                                          GREATEST(tn.norma - tn.sklad, 0)
-                                        END                          AS zakaz,
-                                      COALESCE(SUM(thd.quantity), 0) AS damaged_last_7_days,
-                                      t.group_total_sklad            AS group_sum
-                               FROM dbo.tool_nom tn
-                                      LEFT JOIN dbo.tool_history_damaged thd
-                                                ON tn.id = thd.id_tool AND thd.timestamp >= CURRENT_DATE - INTERVAL '7 days'
-                                      LEFT JOIN totals t ON tn.group_id = t.group_id
-                               GROUP BY tn.id, tn.parent_id, tn.name, tn.sklad, tn.norma, tn.group_id,
-                                        tn.group_standard, t.group_total_sklad)
-                 SELECT tn.id                              AS id_tool, -- Alias it again here for consistency
-                        tn.name,
-                        tn.sklad,
-                        tn.norma,
-                        tn.parent_id,
-                        tn.group_id,
-                        tn.group_standard,
-                        tp.path                            AS tool_path,
-                        COALESCE(d.zakaz, 0)               AS zakaz,
-                        COALESCE(d.damaged_last_7_days, 0) AS damaged_last_7_days,
-                        COALESCE(d.group_sum, 0)           AS group_sum
-                 FROM dbo.tool_nom tn
-                        LEFT JOIN TreePath tp ON tn.parent_id = tp.id
-                        LEFT JOIN damaged d ON tn.id = d.id_tool
-                 ORDER BY tp.path, tn.name;
-  `
-
-  const { rows } = await pool.query(query)
+  const sql = fs.readFileSync(__dirname + '/RevisionToolsController.sql', 'utf-8')
+  const { rows } = await pool.query(sql)
   return rows
 }
-
-// Функция для получения первого и последнего дня текущего месяца
-// function getCurrentMonthDates() {
-//   const currentDate = new Date()
-//   const firstDayOfMonth = new Date(
-//     currentDate.getFullYear(),
-//     currentDate.getMonth(),
-//     1
-//   )
-//   const lastDayOfMonth = new Date(
-//     currentDate.getFullYear(),
-//     currentDate.getMonth() + 1,
-//     0
-//   )
-//
-//   const firstDate = firstDayOfMonth.toISOString().split('T')[0]
-//   const lastDate = lastDayOfMonth.toISOString().split('T')[0]
-//
-//   return { firstDate, lastDate }
-// }
 
 //  Функция для создания Excel файла и возврата его как потока данных
 async function createExcelFileStream(data) {
@@ -117,6 +47,8 @@ async function createExcelFileStream(data) {
       width: 10,
     },
     { header: 'Норма', key: 'norma', width: 10 },
+    { header: 'Норма зеленая', key: 'norma_green', width: 10 },
+    { header: 'Норма красная', key: 'norma_red', width: 10 },
   ]
 
   // Добавляем данные
@@ -168,6 +100,8 @@ function generateHtmlTable(data) {
     { header: 'Путь', key: 'tool_path' },
     { header: 'Заказ', key: 'zakaz' },
     { header: 'Норма', key: 'norma' },
+    { header: 'Норма зеленая', key: 'norma_green' },
+    { header: 'Норма красная', key: 'norma_red' },
   ]
 
   let htmlContent = `<h2>Ревизия</h2>`
@@ -236,8 +170,7 @@ async function sendEmailWithExcelStream(email, text, excelStream, data) {
       {
         filename: `Инструмент весь ${formattedDate}.xlsx`, // Добавляем дату в имя файла
         content: excelStream,
-        contentType:
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       },
     ],
   }
@@ -266,10 +199,7 @@ async function getUserEmailByToken(token) {
 async function genRevisionInstr(req, res) {
   try {
     // Check if the Authorization header is present and correctly formatted
-    if (
-      !req.headers.authorization ||
-      !req.headers.authorization.startsWith('Bearer ')
-    ) {
+    if (!req.headers.authorization || !req.headers.authorization.startsWith('Bearer ')) {
       res.status(400).send('Authorization token is missing or invalid.')
       return
     }
@@ -293,15 +223,11 @@ async function genRevisionInstr(req, res) {
     const emailText = 'Please find the attached Excel report.'
     await sendEmailWithExcelStream(email, emailText, excelStream, data)
 
-    res
-      .status(200)
-      .send('The report has been successfully sent to the specified email.')
+    res.status(200).send('The report has been successfully sent to the specified email.')
   } catch (error) {
     console.error('Error in generating and sending the report:', error)
     // throw error // Не бросаем ошибку, оставляем поток выполнения
-    res
-      .status(500)
-      .send(`Error in generating and sending the report: ${error.message}`)
+    res.status(500).send(`Error in generating and sending the report: ${error.message}`)
   }
 }
 
