@@ -10,6 +10,8 @@ SELECT tool_nom.id                     AS id_tool,
        -- 3 нормы
        tool_nom.norma_green,
        tool_nom.norma_red,
+       tool_nom.group_id,
+       tool_nom.group_standard,
        tool_nom.is_plate
 FROM dbo.tool_nom
 WHERE tool_nom.norma - tool_nom.sklad > 0
