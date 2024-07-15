@@ -61,9 +61,10 @@
           <v-chip size="large" variant="text"> {{ item.name }}</v-chip>
         </td>
       </template>
-      <template #item.sklad="{ item }">
+      <template #item.sklad="{ item }" #item.norma="{ item }">
         <td :class="colorClassRed(item)" style="white-space: nowrap">
           <v-chip size="large" color="primary" variant="flat"> {{ item.sklad }}</v-chip>
+          <span v-if="item.norma" class="grey"> / {{ item.norma }} </span>
         </td>
       </template>
       <template #item.norma="{ item }">
@@ -146,8 +147,8 @@ export default {
         this.toolTableHeaders = [
           { title: '№', key: 'index', sortable: false },
           { title: 'Маркировка', key: 'name', sortable: false },
-          { title: '⭐Склад', key: 'sklad', sortable: false },
-          { title: 'Норма', key: 'norma', sortable: false },
+          { title: '⭐Склад / Норма', key: 'sklad', sortable: false },
+          // { title: 'Норма', key: 'norma', sortable: false },
           { title: 'Выдать', key: 'cart', sortable: false },
           { title: 'Поврежден', key: 'damaged', sortable: false },
           ...(dynamicFilters && dynamicFilters.length > 0
