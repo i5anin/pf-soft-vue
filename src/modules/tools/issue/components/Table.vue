@@ -148,7 +148,8 @@ export default {
           { title: 'Маркировка', key: 'name', sortable: false },
           { title: '⭐Склад', key: 'sklad', sortable: false },
           { title: 'Норма', key: 'norma', sortable: false },
-
+          { title: 'Выдать', key: 'cart', sortable: false },
+          { title: 'Поврежден', key: 'damaged', sortable: false },
           ...(dynamicFilters && dynamicFilters.length > 0
             ? dynamicFilters.map(({ label: title, key }) => ({
                 title,
@@ -156,12 +157,9 @@ export default {
                 sortable: false,
               }))
             : []),
-
           // { title: 'Заказ', key: 'zakaz', sortable: false },
           // { title: 'Лимит', key: 'limit', sortable: fals
           // { title: 'Выдать', key: 'issue', sortable: false },
-          { title: 'Выдать', key: 'cart', sortable: false },
-          { title: 'Поврежден', key: 'damaged', sortable: false },
         ]
       },
     },
