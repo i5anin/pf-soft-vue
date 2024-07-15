@@ -2,32 +2,17 @@ const { Pool } = require('pg')
 const fs = require('fs')
 const ExcelJS = require('exceljs')
 const nodemailer = require('nodemailer')
-const { emailConfig } = require('../../../../config/config')
-const getDbConfig = require('../../../../config/databaseConfig')
+const { emailConfig } = require('../../../../../config/config')
+const getDbConfig = require('../../../../../config/databaseConfig')
+const { format } = require('date-fns')
 
 // Настройка подключения к базе данных
 const dbConfig = getDbConfig()
 const pool = new Pool(dbConfig)
 
-// SQL-запросы для разных типов отчетов
-const sqlQueries = {
-  '1_regular': fs.readFileSync(__dirname + '/OrderToolsController/1_regular.sql', 'utf-8'),
-  '2_group': fs.readFileSync(__dirname + '/OrderToolsController/2_group.sql', 'utf-8'),
-  '3_regular_3_norma': fs.readFileSync(
-    __dirname + '/OrderToolsController/3_regular_3_norma.sql',
-    'utf-8'
-  ),
-  '4_group_3_norma': fs.readFileSync(
-    __dirname + '/OrderToolsController/4_group_3_norma.sql',
-    'utf-8'
-  ),
-}
-
-async function getReportData(reportType) {
-  const sql = sqlQueries[reportType]
-  if (!sql) {
-    throw new Error(`Invalid report type: ${reportType}`)
-  }
+async function getReportData() {
+  await pool.query(fs.readFileSync(__dirname + '/isPlate.sql', 'utf-8'))
+  const sql = fs.readFileSync(__dirname + '/OrderToolsEmail.sql', 'utf-8')
   const { rows } = await pool.query(sql)
   return rows
 }
@@ -48,7 +33,7 @@ async function createExcelFileStream(data) {
   const workbook = new ExcelJS.Workbook()
   const worksheet = workbook.addWorksheet('Отчёт')
 
-  // Добавляем заголовки (адаптируйте под ваш отчет)
+  // Добавляем заголовки
   worksheet.columns = [
     { header: '# Excel', key: 'index', width: 5 },
     { header: 'ID', key: 'id_tool', width: 5 },
@@ -73,19 +58,22 @@ async function createExcelFileStream(data) {
     { header: 'Склад группы', key: 'group_sum', width: 20 },
     { header: 'На складе', key: 'sklad', width: 10 },
     { header: 'Норма', key: 'norma', width: 10 },
-    { header: 'Путь', key: 'tool_path', width: 30 },
+    // { header: 'Путь', key: 'tool_path', width: 30 },
     { header: 'Норма Зеленая', key: 'norma_green', width: 30 },
     { header: 'Норма Красная', key: 'norma_red', width: 30 },
+    { header: 'Пластина', key: 'is_plate', width: 30 },
+    // { header: 'Группа ID', key: 'group_display', width: 15 },
+    // { header: 'Стандарт', key: 'group_standard', width: 15 },
   ]
 
-  // Добавляем данные (адаптируйте под ваш отчет)
+  // Добавляем данные
   let index = 1
   data.forEach((item) => {
     let zakazRounded = item.zakaz
     // Round only if the tool path includes "пластины"
-    if (item.tool_path && item.tool_path.toLowerCase().includes('пластины')) {
-      zakazRounded = getRoundedCount(item.zakaz)
-    }
+    // if (item.tool_path && item.tool_path.toLowerCase().includes('пластины')) {
+    //   zakazRounded = getRoundedCount(item.zakaz)
+    // }
 
     worksheet.addRow({
       index: index++,
@@ -94,11 +82,13 @@ async function createExcelFileStream(data) {
       sklad: Number(item.sklad) || Number(0),
       norma: Number(item.norma) || '',
       zakaz: Number(zakazRounded) || '',
-      tool_path: item.tool_path || 'Не указан',
+      group_display: Number(item.group_display) || '',
+      group_standard: item.group_standard ? 'Да' : 'Нет',
+      // tool_path: item.tool_path ? item.tool_path : 'Не указан',
       group_sum: Number(item.group_sum) || '',
-      norma_green: item.norma_green,
-      norma_red: item.norma_red,
-      // ... другие поля отчета
+      norma_green: item.norma_green, // <-- добавлено поле "Норма Зеленая"
+      norma_red: item.norma_red, // <-- добавлено поле "Норма Красная"
+      is_plate: item.is_plate, // <-- добавлено поле "Норма Красная"
     })
   })
 
@@ -111,7 +101,7 @@ async function createExcelFileStream(data) {
         maxLength = cellLength
       }
     })
-    column.width = maxLength < 10 ? 10 : maxLength
+    column.width = maxLength < 10 ? 10 : maxLength // Устанавливаем минимальную ширину 10
   })
 
   const stream = new require('stream').PassThrough()
@@ -120,27 +110,96 @@ async function createExcelFileStream(data) {
   return stream
 }
 
-// Функция для отправки сообщения с файлом на почту
-async function sendEmailWithExcelStream(email, text, excelStream, data, reportType) {
+// Функция для генерации HTML таблицы
+function generateHtmlTable(data) {
+  // Определение заголовков для таблицы
+  const headers = [
+    { header: '# HTML', key: 'index' },
+    { header: 'ID', key: 'id_tool' },
+    { header: 'Название', key: 'name' },
+    { header: 'Заказ', key: 'zakaz' },
+    { header: 'Склад группы', key: 'group_sum' },
+    { header: 'На складе', key: 'sklad' },
+    { header: 'Норма', key: 'norma' },
+    // { header: 'Группа ID', key: 'group_display' },
+    { header: 'Стандарт', key: 'group_standard' },
+    // { header: 'Путь', key: 'tool_path' },
+    // { header: 'Путь', key: 'tool_path' },
+    { header: 'Норма Зеленая', key: 'norma_green' },
+    { header: 'Норма Красная', key: 'norma_red' },
+    { header: 'Пластина', key: 'is_plate' },
+  ]
+  const currentDateTime = format(new Date(), 'yyyy-MM-dd_HH-mm-ss')
+  let htmlContent = `<h2>Заказ: Журнал инструмента ${currentDateTime}</h2>`
+  htmlContent += `<table border='1' style='border-collapse: collapse;'><tr>`
+
+  // Генерируем шапку таблицы
+  headers.forEach((header) => {
+    htmlContent += `<th>${header.header}</th>`
+  })
+
+  htmlContent += `</tr>`
+
+  // Генерация строк таблицы
+  data.forEach((item, index) => {
+    let zakazValue = item.zakaz
+    // Round only if the tool path includes "пластины"
+    if (item.tool_path && item.tool_path.toLowerCase().includes('пластины')) {
+      zakazValue = getRoundedCount(item.zakaz)
+    }
+
+    htmlContent += `<tr>`
+    headers.forEach(({ key }) => {
+      let value = ''
+      switch (key) {
+        case 'index':
+          value = index + 1
+          break
+        case 'sklad':
+          value = item[key] || 0
+          break
+        case 'zakaz': // Use zakazValue for rounded value
+          value = zakazValue
+          break
+        default:
+          value = item[key] || ''
+      }
+      htmlContent += `<td>${value}</td>`
+    })
+    htmlContent += `</tr>`
+  })
+  htmlContent += `</table>`
+  return htmlContent
+}
+
+// Функция для отправки сообщения с файлом на почту, использующая generateHtmlTable
+async function sendEmailWithExcelStream(email, text, excelStream, data) {
+  // Используем переменные emailConfig, как раньше
+
+  // Использование значений из переменных окружения, если они определены, иначе из config
   const transporter = nodemailer.createTransport({
     host: emailConfig.host,
     port: emailConfig.port,
-    secure: emailConfig.secure,
+    secure: emailConfig.secure, // В зависимости от вашего сервера это может быть true
     auth: { user: emailConfig.user, pass: emailConfig.pass },
   })
 
   const { firstDate, lastDate } = getCurrentMonthDates()
   const envPrefix = process.env.NODE_ENV === 'development' ? 'development ' : ''
-  const subject = `${envPrefix}Заказ: Журнал инструмента (${reportType})`
+  const currentDateTime = format(new Date(), 'yyyy-MM-dd_HH-mm-ss')
+  const subject = `${envPrefix}Заказ: Журнал инструмента ${currentDateTime}`
+
+  const htmlContent = generateHtmlTable(data) // Генерация HTML
 
   const mailOptions = {
     from: process.env.MAIL_USER,
     to: email,
     subject: subject,
     text: text,
+    html: htmlContent, // Вставка сгенерированного HTML
     attachments: [
       {
-        filename: `Поврежденный инструмент (${reportType}).xlsx`,
+        filename: `Заказ инструмента ${currentDateTime}.xlsx`,
         content: excelStream,
         contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       },
@@ -149,7 +208,7 @@ async function sendEmailWithExcelStream(email, text, excelStream, data, reportTy
 
   // Отправка письма
   try {
-    console.log(`\nЗаказ: Журнал инструмента (${reportType})`)
+    console.log(`\nЗаказ: Журнал инструмента за неделю`)
     console.log(`Отчет будет отправлен на email: ${email}`)
     await transporter.sendMail(mailOptions)
     console.log(`Отчет успешно отправлен на email: ${email}.\n`)
@@ -170,35 +229,32 @@ async function getUserEmailByToken(token) {
 // Объединение функционала
 async function genZayavInstr(req, res) {
   try {
-    // Проверка токена авторизации
+    // Check if the Authorization header is present and correctly formatted
     if (!req.headers.authorization || !req.headers.authorization.startsWith('Bearer ')) {
-      return res.status(401).send('Authorization token is missing or invalid.')
-    }
-    const token = req.headers.authorization.split(' ')[1]
-    if (!token) {
-      return res.status(401).send('Bearer token is malformed.')
+      res.status(400).send('Authorization token is missing or invalid.')
+      return
     }
 
-    // Получение типа отчета из тела запроса
-    const { reportType } = req.body
-    if (!reportType) {
-      return res.status(400).send('Report type is required.')
-    }
-    if (!sqlQueries[reportType]) {
-      return res.status(400).send(`Invalid report type: ${reportType}`)
+    // Safely extract the token
+    const token = req.headers.authorization.split(' ')[1]
+    if (!token) {
+      res.status(400).send('Bearer token is malformed.')
+      return
     }
 
     const email = await getUserEmailByToken(token)
-    const data = await getReportData(reportType)
+
+    const data = await getReportData()
     if (data.length === 0) {
-      return res.status(404).send('No data available for the report.')
+      res.status(404).send('No data available for the report.')
+      return
     }
 
     const excelStream = await createExcelFileStream(data)
     const emailText = 'Please find the attached Excel report.'
-    await sendEmailWithExcelStream(email, emailText, excelStream, data, reportType)
+    await sendEmailWithExcelStream(email, emailText, excelStream, data)
 
-    res.status(200).send('The report has been successfully sent.')
+    res.status(200).send('The report has been successfully sent to the specified email.')
   } catch (error) {
     console.error('Error in generating and sending the report:', error)
     res.status(500).send(`Error in generating and sending the report: ${error.message}`)
