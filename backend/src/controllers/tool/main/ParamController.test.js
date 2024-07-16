@@ -51,12 +51,14 @@ it('Изменение созданного параметра инструме�
 
 it('Удаление созданного параметра инструмента', async () => {
   console.log('--- Удаление созданного параметра инструмента ---')
-  const response = await axios.delete(`${baseUrl}/tools-params/${createdParamId}`)
-  expect(response.status).toBe(200)
+  const deleteResponse = await axios.delete(`${baseUrl}/tools-params/${createdParamId}`)
+  expect(deleteResponse.status).toBe(200)
 
-  console.log(response)
+  // Получаем список всех параметров
+  const getResponse = await axios.get(`${baseUrl}/tools-params/`)
+  expect(getResponse.status).toBe(200) // Ожидаем успешный ответ со списком
 
-  // Дополнительная проверка на подтверждение удаления
-  await axios.get(`${baseUrl}/tools-params/${createdParamId}`)
-  expect(response.status).toBe(200)
+  // Проверяем, что удалённый параметр отсутствует в списке
+  const params = getResponse.data // Предполагаем, что бэкенд возвращает массив параметров
+  expect(params).not.toContainEqual(expect.objectContaining({ id: createdParamId }))
 })
