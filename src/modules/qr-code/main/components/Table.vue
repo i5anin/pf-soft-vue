@@ -38,7 +38,7 @@
 <script>
 import { format, parseISO } from 'date-fns'
 import HistoryDamagedModal from './Modal.vue'
-import { damagedHistoryApi } from '../api/damaged'
+import { QrCodeApi } from '../api/qr-code'
 
 export default {
   components: {
@@ -59,23 +59,32 @@ export default {
       editingToolId: null,
       totalCount: 0,
       headers: [
+        { title: 'ID', value: 'id', sortable: false },
+        { title: 'ID Спецификации', value: 'specs_nom_id', sortable: false },
         {
-          title: 'Название инструмента',
-          value: 'tool_name',
+          title: 'ID Операции',
+          value: 'specs_nom_operations_id',
           sortable: false,
-          width: '200px',
         },
-        { title: 'ФИО', value: 'user_name', sortable: false, width: '320px' },
+        { title: 'Цвет', value: 'color', sortable: false },
+        { title: 'Статус', value: 'status', sortable: false },
+        { title: 'Смена', value: 'smena', sortable: false },
+        { title: 'Размеры', value: 'sizes', sortable: false },
         {
-          title: 'Станок',
-          value: 'cnc_name',
+          title: 'Дата создания',
+          value: 'created_at',
           sortable: false,
-          width: '200px',
         },
-        { title: 'Комментарий', value: 'comment', sortable: false },
-        { title: 'Кол-во', key: 'quantity', sortable: false, width: '80px' },
-        { title: 'Дата', key: 'timestamp', sortable: false, width: '150px' },
-        { title: 'Цвет', value: 'color', sortable: false, width: '80px' },
+        {
+          title: 'Кол-во коробок',
+          value: 'quantity_box',
+          sortable: false,
+        },
+        {
+          title: 'Кол-во произведенного',
+          value: 'quantity_prod',
+          sortable: false,
+        },
       ],
     }
   },
@@ -96,33 +105,36 @@ export default {
     },
 
     formatDate(date) {
-      return format(parseISO(date), 'dd.MM.yyyy hh:mm')
+      return format(parseISO(date), 'dd.MM.yyyy HH:mm') // Используйте HH для часов в 24-часовом формате
     },
 
     async fetchAndFormatToolHistory() {
       try {
-        const response = await damagedHistoryApi.fetchDamagedHistory(
-          '',
+        this.isLoading = true
+        const response = await QrCodeApi.getQrCodeData(
           this.filters.currentPage,
           this.filters.itemsPerPage
         )
-        this.toolsHistory = response.toolsHistory.map((tool) => ({
-          ...tool,
-          timestamp: tool.timestamp ? this.formatDate(tool.timestamp) : null,
-        }))
-        this.totalCount = response.totalCount
+
+        // Проверка response и response.data на undefined
+        if (response) {
+          this.toolsHistory = response.data.map((tool) => ({
+            ...tool,
+            created_at: tool.created_at ? this.formatDate(tool.created_at) : null,
+          }))
+          this.totalCount = response.totalCount
+        } else {
+          console.error('API request returned empty or invalid data:', response)
+        }
       } catch (error) {
         console.error('Error fetching tool history:', error)
+      } finally {
+        this.isLoading = false
       }
     },
 
     onClosePopup() {
       this.openDialog = false
-    },
-
-    onInfoRow(event, { item: tool }) {
-      this.editingToolId = tool.id_part
-      this.openDialog = true
     },
 
     onSaveChanges() {

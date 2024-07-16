@@ -1,7 +1,7 @@
 // axiosConfig.js
 import axios from 'axios'
 
-const getBaseUrl = (serverType) => {
+export const getBaseUrl = (serverType) => {
   switch (serverType) {
     case 'node':
       return import.meta.env.VITE_BASE_URL || 'http://localhost:4000/api'
