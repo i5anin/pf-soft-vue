@@ -14,59 +14,60 @@ async function checkToolExists(toolId) {
 }
 
 beforeAll(async () => {
-  // Logic to get the authentication token
   try {
+    // 1. Получение токена аутентификации
     const loginResponse = await axios.post(`${baseUrl}/login`, {
       login: 'Тест API',
       password: 'pfforum',
     })
 
-    token = loginResponse.data.token // Token should be available now
-    console.log('Token obtained:', token)
-  } catch (error) {
-    console.error('Error obtaining token:', error.message)
-    throw error // Fail the tests if token retrieval fails
-  }
-})
+    token = loginResponse.data.token
+    console.log('Получен токен:', token)
 
-it('Выдача инструментов', async () => {
-  const headers = {
-    Authorization: `Bearer ${token}`,
-  }
-
-  try {
-    // Получение данных об инструментах
-    const response = await axios.get(`${baseUrl}/tools`, { headers })
-    const tools = response.data.tools
-
-    // Извлечение двух первых ID
-    const toolIds = tools.slice(0, 2).map((tool) => tool.id)
-    console.log('ID инструментов:', toolIds)
-
-    console.log('--- Выдача инструментов ---')
-    const issueData = {
-      date_issue: '2024-01-30T21:00:00.000Z',
-      cnc: 1,
-      party: 1,
-      operator: 1,
-      taken: [
-        { tool_id: toolIds[0], amount: 1 },
-        { tool_id: toolIds[1], amount: 2 },
-      ],
-      issueToken: token, // Include token in request body
+    const headers = {
+      Authorization: `Bearer ${token}`,
     }
 
-    const issueResponse = await axios.post(`${baseUrl}/issues`, issueData, { headers })
-    console.log('Получен ответ:', issueResponse.data)
+    // 2. Получение данных об инструментах и извлечение ID
+    const toolsResponse = await axios.get(`${baseUrl}/tools`, { headers })
+    const tools = toolsResponse.data.tools
 
+    // Проверка наличия инструментов
+    if (tools.length < 2) {
+      throw new Error('Недостаточно инструментов для теста.')
+    }
+
+    const toolId1 = tools[0].id
+    const toolId2 = tools[1].id
+
+    console.log('Ответ на запрос инструментов:', toolsResponse.data)
+
+    // 3. Подготовка данных для выдачи (включая issueToken)
+    const issueData = {
+      issueToken: token, // Токен в теле запроса
+      operationId: 99021,
+      tools: [
+        { toolId: toolId1, quantity: 2 },
+        { toolId: toolId2, quantity: 2 },
+      ],
+      typeIssue: 0,
+      userId: 58,
+    }
+
+    console.log('Данные для выдачи инструментов:', issueData)
+
+    // 4. Выдача инструментов
+    const issueResponse = await axios.post(`${baseUrl}/issues`, issueData, { headers })
+    console.log('Получен ответ на выдачу:', issueResponse.data)
+
+    // 5. Ассерты (проверки)
     expect(issueResponse.status).toBe(200)
     expect(issueResponse.data).toHaveProperty('id')
     const createdIssueId = issueResponse.data.id
-
     console.log('ID созданного выпуска:', createdIssueId)
   } catch (error) {
     console.error('Ошибка при выполнении запроса:', error.message)
-    throw error // Re-throw to fail the test
+    throw error // Прекращение тестов в случае ошибки
   }
 })
 
