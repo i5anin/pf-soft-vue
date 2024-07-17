@@ -19,8 +19,16 @@ async function getReportData() {
 
 function getCurrentMonthDates() {
   const currentDate = new Date()
-  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
-  const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
+  const firstDayOfMonth = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    1
+  )
+  const lastDayOfMonth = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() + 1,
+    0
+  )
 
   const firstDate = firstDayOfMonth.toISOString().split('T')[0]
   const lastDate = lastDayOfMonth.toISOString().split('T')[0]
@@ -201,7 +209,8 @@ async function sendEmailWithExcelStream(email, text, excelStream, data) {
       {
         filename: `Заказ инструмента ${currentDateTime}.xlsx`,
         content: excelStream,
-        contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        contentType:
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       },
     ],
   }
@@ -230,7 +239,10 @@ async function getUserEmailByToken(token) {
 async function genZayavInstr(req, res) {
   try {
     // Check if the Authorization header is present and correctly formatted
-    if (!req.headers.authorization || !req.headers.authorization.startsWith('Bearer ')) {
+    if (
+      !req.headers.authorization ||
+      !req.headers.authorization.startsWith('Bearer ')
+    ) {
       res.status(400).send('Authorization token is missing or invalid.')
       return
     }
@@ -254,10 +266,14 @@ async function genZayavInstr(req, res) {
     const emailText = 'Please find the attached Excel report.'
     await sendEmailWithExcelStream(email, emailText, excelStream, data)
 
-    res.status(200).send('The report has been successfully sent to the specified email.')
+    res
+      .status(200)
+      .send('The report has been successfully sent to the specified email.')
   } catch (error) {
     console.error('Error in generating and sending the report:', error)
-    res.status(500).send(`Error in generating and sending the report: ${error.message}`)
+    res
+      .status(500)
+      .send(`Error in generating and sending the report: ${error.message}`)
   }
 }
 

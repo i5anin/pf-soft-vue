@@ -186,9 +186,7 @@ async function getAllIssuedToolIdsWithNames(req, res) {
       ORDER BY tn.name;
     `
     const result = await pool.query(query)
-    res.json(
-      result.rows.map((row) => ({ id_tool: row.id_tool, name: row.name }))
-    )
+    res.json(result.rows.map((row) => ({ id_tool: row.id_tool, name: row.name })))
   } catch (err) {
     console.error('Ошибка при получении идентификаторов инструмента:', err)
     res.status(500).send('Ошибка сервера')

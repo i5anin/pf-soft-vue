@@ -1,19 +1,23 @@
-const { Pool } = require('pg');
-const ExcelJS = require('exceljs');
-const nodemailer = require('nodemailer');
-const { emailConfig } = require('../../../../config/config');
-const getDbConfig = require('../../../../config/databaseConfig');
+const { Pool } = require('pg')
+const ExcelJS = require('exceljs')
+const nodemailer = require('nodemailer')
+const { emailConfig } = require('../../../../config/config')
+const getDbConfig = require('../../../../config/databaseConfig')
 
 // Настройка подключения к базе данных
-const dbConfig = getDbConfig();
-const pool = new Pool(dbConfig);
+const dbConfig = getDbConfig()
+const pool = new Pool(dbConfig)
 
 // Функция для получения данных из базы данных
 // Функция для получения данных из базы данных
 async function getReportData() {
-  const currentDate = new Date();
-  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-  const firstDayOfMonthStr = firstDayOfMonth.toISOString().slice(0, 10) + ' 00:00:00'; // Форматируем дату для SQL запроса
+  const currentDate = new Date()
+  const firstDayOfMonth = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    1
+  )
+  const firstDayOfMonthStr = firstDayOfMonth.toISOString().slice(0, 10) + ' 00:00:00' // Форматируем дату для SQL запроса
 
   const query = `
     WITH RankedRecords AS (
@@ -48,42 +52,44 @@ async function getReportData() {
     ORDER BY
         CAST(datetime_nal AS DATE),
         rn;
-  `;
+  `
 
   try {
-    const { rows } = await pool.query(query);
-    console.log('Данные из базы данных (getReportData):', rows);
-    return rows;
+    const { rows } = await pool.query(query)
+    console.log('Данные из базы данных (getReportData):', rows)
+    return rows
   } catch (error) {
-    console.error('Ошибка при получении данных из базы данных (getReportData):', error);
-    throw error;
+    console.error(
+      'Ошибка при получении данных из базы данных (getReportData):',
+      error
+    )
+    throw error
   }
 }
 
-
 function getCurrentMonthDates() {
-  const currentDate = new Date();
+  const currentDate = new Date()
   const firstDayOfMonth = new Date(
     currentDate.getFullYear(),
     currentDate.getMonth(),
-    1,
-  );
+    1
+  )
   const lastDayOfMonth = new Date(
     currentDate.getFullYear(),
     currentDate.getMonth() + 1,
-    0,
-  );
+    0
+  )
 
-  const firstDate = firstDayOfMonth.toISOString().split('T')[0];
-  const lastDate = lastDayOfMonth.toISOString().split('T')[0];
+  const firstDate = firstDayOfMonth.toISOString().split('T')[0]
+  const lastDate = lastDayOfMonth.toISOString().split('T')[0]
 
-  return { firstDate, lastDate };
+  return { firstDate, lastDate }
 }
 
 //  Функция для создания Excel файла и возврата его как потока данных
 async function createExcelFileStream(data) {
-  const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('Отчёт');
+  const workbook = new ExcelJS.Workbook()
+  const worksheet = workbook.addWorksheet('Отчёт')
 
   // Добавляем заголовки
   worksheet.columns = [
@@ -91,46 +97,46 @@ async function createExcelFileStream(data) {
     { header: 'Наименование', key: 'Наименование', width: 50 },
     { header: 'Наладчик', key: 'Нададчик', width: 20 },
     { header: 'Дата', key: 'Дата', width: 15 },
-  ];
+  ]
 
   // Добавляем данные
   data.forEach((item) => {
-    worksheet.addRow(item);
-  });
+    worksheet.addRow(item)
+  })
 
   // Автонастройка ширины ячеек
   worksheet.columns.forEach((column) => {
-    let maxLength = 0;
+    let maxLength = 0
     column.eachCell({ includeEmpty: true }, (cell) => {
-      let cellLength = cell.value ? cell.value.toString().length : 10;
+      let cellLength = cell.value ? cell.value.toString().length : 10
       if (cellLength > maxLength) {
-        maxLength = cellLength;
+        maxLength = cellLength
       }
-    });
-    column.width = maxLength < 10 ? 10 : maxLength; // Устанавливаем минимальную ширину 10
-  });
+    })
+    column.width = maxLength < 10 ? 10 : maxLength // Устанавливаем минимальную ширину 10
+  })
 
-  const stream = new require('stream').PassThrough();
-  await workbook.xlsx.write(stream);
-  stream.end();
-  return stream;
+  const stream = new require('stream').PassThrough()
+  await workbook.xlsx.write(stream)
+  stream.end()
+  return stream
 }
 
 // Функция для генерации HTML таблицы
 function generateHtmlTable(data) {
-  let htmlContent = `<h2>Отчет по наладкам</h2>`;
-  htmlContent += `<table border='1' style='border-collapse: collapse;'><tr>`;
-  htmlContent += `<th>Станок</th><th>Наименование</th><th>Наладчик</th><th>Дата</th>`;
-  htmlContent += `</tr>`;
+  let htmlContent = `<h2>Отчет по наладкам</h2>`
+  htmlContent += `<table border='1' style='border-collapse: collapse;'><tr>`
+  htmlContent += `<th>Станок</th><th>Наименование</th><th>Наладчик</th><th>Дата</th>`
+  htmlContent += `</tr>`
 
   data.forEach((item) => {
-    htmlContent += `<tr>`;
-    htmlContent += `<td>${item.Станок}</td><td>${item.Наименование}</td><td>${item.Нададчик}</td><td>${item.Дата}</td>`;
-    htmlContent += `</tr>`;
-  });
+    htmlContent += `<tr>`
+    htmlContent += `<td>${item.Станок}</td><td>${item.Наименование}</td><td>${item.Нададчик}</td><td>${item.Дата}</td>`
+    htmlContent += `</tr>`
+  })
 
-  htmlContent += `</table>`;
-  return htmlContent;
+  htmlContent += `</table>`
+  return htmlContent
 }
 
 // Функция для отправки сообщения с файлом на почту
@@ -143,13 +149,13 @@ async function sendEmailWithExcelStream(email, text, excelStream, data) {
       user: emailConfig.user,
       pass: emailConfig.pass,
     },
-  });
+  })
 
-  const { firstDate, lastDate } = getCurrentMonthDates();
-  const envPrefix = process.env.NODE_ENV === 'development' ? 'development ' : '';
-  const subject = `${envPrefix}Отчет по наладкам за неделю с ${firstDate} по ${lastDate}`;
+  const { firstDate, lastDate } = getCurrentMonthDates()
+  const envPrefix = process.env.NODE_ENV === 'development' ? 'development ' : ''
+  const subject = `${envPrefix}Отчет по наладкам за неделю с ${firstDate} по ${lastDate}`
 
-  const htmlContent = generateHtmlTable(data); // Генерация HTML
+  const htmlContent = generateHtmlTable(data) // Генерация HTML
 
   const mailOptions = {
     from: process.env.MAIL_USER,
@@ -165,71 +171,69 @@ async function sendEmailWithExcelStream(email, text, excelStream, data) {
           'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       },
     ],
-  };
+  }
 
   try {
-    console.log(`\nОтчет по наладкам за неделю`);
-    console.log(`Отчет будет отправлен на email: ${email}`);
-    await transporter.sendMail(mailOptions);
-    console.log(`Отчет успешно отправлен на email: ${email}.\n`);
+    console.log(`\nОтчет по наладкам за неделю`)
+    console.log(`Отчет будет отправлен на email: ${email}`)
+    await transporter.sendMail(mailOptions)
+    console.log(`Отчет успешно отправлен на email: ${email}.\n`)
   } catch (error) {
-    console.error('Ошибка при отправке письма:', error);
-    throw error;
+    console.error('Ошибка при отправке письма:', error)
+    throw error
   }
 }
 
 // Функция для определения пользователя по токену и получения его email
 async function getUserEmailByToken(token) {
-  const query = 'SELECT email FROM dbo.vue_users WHERE token = $1;';
-  const { rows } = await pool.query(query, [token]);
-  if (rows.length === 0) throw new Error('Пользователь не найден.');
-  return rows[0].email;
+  const query = 'SELECT email FROM dbo.vue_users WHERE token = $1;'
+  const { rows } = await pool.query(query, [token])
+  if (rows.length === 0) throw new Error('Пользователь не найден.')
+  return rows[0].email
 }
 
 // Объединение функционала
 async function genSetupReport(req, res) {
   try {
-    console.log('--- genSetupReport() вызвана ---');
+    console.log('--- genSetupReport() вызвана ---')
     if (
       !req.headers.authorization ||
       !req.headers.authorization.startsWith('Bearer ')
     ) {
-      res.status(400).send('Authorization token is missing or invalid.');
-      return;
+      res.status(400).send('Authorization token is missing or invalid.')
+      return
     }
 
-    const token = req.headers.authorization.split(' ')[1];
-    console.log('Полученный токен (genSetupReport):', token);
+    const token = req.headers.authorization.split(' ')[1]
+    console.log('Полученный токен (genSetupReport):', token)
     if (!token) {
-      res.status(400).send('Bearer token is malformed.');
-      return;
+      res.status(400).send('Bearer token is malformed.')
+      return
     }
 
-    const email = await getUserEmailByToken(token);
-    console.log('Email пользователя (genSetupReport):', email);
+    const email = await getUserEmailByToken(token)
+    console.log('Email пользователя (genSetupReport):', email)
 
-    const data = await getReportData();
-    console.log('Данные отчета (genSetupReport):', data);
+    const data = await getReportData()
+    console.log('Данные отчета (genSetupReport):', data)
 
     if (data.length === 0) {
-      console.warn('Нет данных для отчета (genSetupReport).');
-      res.status(404).send('No data available for the report.');
-      return;
+      console.warn('Нет данных для отчета (genSetupReport).')
+      res.status(404).send('No data available for the report.')
+      return
     }
 
-    const excelStream = await createExcelFileStream(data);
-    const emailText = 'Please find the attached Excel report.';
-    await sendEmailWithExcelStream(email, emailText, excelStream, data);
+    const excelStream = await createExcelFileStream(data)
+    const emailText = 'Please find the attached Excel report.'
+    await sendEmailWithExcelStream(email, emailText, excelStream, data)
 
     res
       .status(200)
-      .send('The report has been successfully sent to the specified email.');
+      .send('The report has been successfully sent to the specified email.')
   } catch (error) {
-    console.error('Ошибка при генерации и отправке отчета:', error);
-    res
-      .status(500)
-      .send(`Ошибка: ${error.message}`);
+    console.error('Ошибка при генерации и отправке отчета:', error)
+    res.status(500).send(`Ошибка: ${error.message}`)
   }
 }
 
-module.exports = { genSetupReport };
+module.exports = { genSetupReport }

@@ -102,7 +102,9 @@ async function sendReportForPart(partId) {
     if (process.env.VITE_NODE_ENV === 'build') {
       financeUserEmail = await getEmailRecipients('finance')
       if (!financeUserEmail) {
-        console.error("Не удалось получить адрес электронной почты для роли 'finance'.")
+        console.error(
+          "Не удалось получить адрес электронной почты для роли 'finance'."
+        )
         return
       }
     }

@@ -6,7 +6,7 @@ const baseUrl = config.api.baseUrl
 console.log(baseUrl)
 
 let createdRecordId
-let createdParamId // Для хранения ID созданного параметра
+let createdParamId
 let createdTreeFolderId
 let createdIssueId
 

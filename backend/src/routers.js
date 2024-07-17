@@ -38,7 +38,7 @@ router.post('/tool', nomController.addTool)
 router.put('/tool/:id', nomController.editTool)
 router.delete('/tool/:id', nomController.deleteTool)
 // "Главный фильтр"
-router.get('/tools/params/:parent_id/filter', nomController.getFilterParamsByParentId)
+router.get('/tools/params/:parent_id/filter', nomController.filterParamsParentId)
 // "Инструмент Modal"
 router.get('/tool/modal-form/:id', nomController.getToolById) //1 элемент router.get('/tool/:id', nomController.getToolById)
 router.get('/tools/modal-form/:id/names', nomController.getToolNameId) // router.get('/tools-params-name/:id', paramController.getToolNameId)

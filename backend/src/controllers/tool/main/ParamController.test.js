@@ -41,7 +41,10 @@ it('Изменение созданного параметра инструме�
   console.log('--- Изменение созданного параметра инструмента ---')
   const updateParamData = { label: 'Ширина' }
   console.log('Проверка:', createdParamId)
-  const response = await axios.put(`${baseUrl}/tools-params/${createdParamId}`, updateParamData)
+  const response = await axios.put(
+    `${baseUrl}/tools-params/${createdParamId}`,
+    updateParamData
+  )
   console.log('Получен ответ:', response.data)
 
   expect(response.status).toBe(200)
@@ -51,7 +54,9 @@ it('Изменение созданного параметра инструме�
 
 it('Удаление созданного параметра инструмента', async () => {
   console.log('--- Удаление созданного параметра инструмента ---')
-  const deleteResponse = await axios.delete(`${baseUrl}/tools-params/${createdParamId}`)
+  const deleteResponse = await axios.delete(
+    `${baseUrl}/tools-params/${createdParamId}`
+  )
   expect(deleteResponse.status).toBe(200)
 
   // Получаем список всех параметров

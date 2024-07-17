@@ -67,13 +67,19 @@ describe('Работа с создание номенклатур', () => {
     }
 
     console.log('Отправляю данные:', updatedRecordData)
-    const response = await axios.put(`${baseUrl}/tool/${createdRecordId}`, updatedRecordData)
+    const response = await axios.put(
+      `${baseUrl}/tool/${createdRecordId}`,
+      updatedRecordData
+    )
     console.log('Получен ответ:', response.data)
 
     expect(response.status).toBe(200)
     expect(response.data.data).toHaveProperty('id', createdRecordId)
     expect(response.data.data).toHaveProperty('name', updatedRecordData.name)
-    expect(response.data.data).toHaveProperty('parent_id', updatedRecordData.parent_id)
+    expect(response.data.data).toHaveProperty(
+      'parent_id',
+      updatedRecordData.parent_id
+    )
     expect(response.data.data).toHaveProperty('property', updatedRecordData.property)
   })
 

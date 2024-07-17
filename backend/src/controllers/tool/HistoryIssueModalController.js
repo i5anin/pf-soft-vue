@@ -192,7 +192,8 @@ async function getToolHistoryByPartId(req, res) {
     Object.keys(operationsData).forEach((no_oper) => {
       operationsData[no_oper].sort((a, b) => {
         return (
-          new Date(b.timestamp) - new Date(a.timestamp) || a.name_tool.localeCompare(b.name_tool)
+          new Date(b.timestamp) - new Date(a.timestamp) ||
+          a.name_tool.localeCompare(b.name_tool)
         )
       })
     })
@@ -265,7 +266,9 @@ ORDER BY thn.timestamp DESC;
     const operationsResult = await pool.query(operationsQuery, queryParams)
 
     if (operationsResult.rows.length === 0) {
-      return res.status(404).json({ message: 'Операции для данной операции не найдены' })
+      return res
+        .status(404)
+        .json({ message: 'Операции для данной операции не найдены' })
     }
 
     const operationsData = operationsResult.rows.map((row) => {
@@ -314,9 +317,14 @@ async function addToArchive(req, res) {
 
     if (
       userRoleResult.rows.length === 0 ||
-      !(userRoleResult.rows[0].role === 'Editor' || userRoleResult.rows[0].role === 'Admin')
+      !(
+        userRoleResult.rows[0].role === 'Editor' ||
+        userRoleResult.rows[0].role === 'Admin'
+      )
     ) {
-      return res.status(403).send('Доступ запрещен. Требуется роль Editor или Admin.')
+      return res
+        .status(403)
+        .send('Доступ запрещен. Требуется роль Editor или Admin.')
     }
 
     // Проверка на существование записи
@@ -345,7 +353,9 @@ async function addToArchive(req, res) {
     }
 
     await client.query('COMMIT')
-    res.send(newArchiveState ? 'Запись добавлена в архив.' : 'Запись удалена из архива.')
+    res.send(
+      newArchiveState ? 'Запись добавлена в архив.' : 'Запись удалена из архива.'
+    )
   } catch (err) {
     await client.query('ROLLBACK')
     console.error('Ошибка при изменении архивного состояния', err.stack)

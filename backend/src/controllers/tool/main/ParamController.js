@@ -31,8 +31,7 @@ async function moveToolParam(req, res) {
 
   try {
     // Получаем текущий порядок параметра
-    const currentOrderQuery =
-      'SELECT param_order FROM dbo.tool_params WHERE id = $1'
+    const currentOrderQuery = 'SELECT param_order FROM dbo.tool_params WHERE id = $1'
     const currentOrderResult = await pool.query(currentOrderQuery, [id])
     if (currentOrderResult.rows.length === 0) {
       res.status(404).send('Parameter not found')
@@ -87,38 +86,42 @@ async function getToolParams(req, res) {
 }
 
 async function deleteToolParam(req, res) {
-  const id = req.params.id;
+  const id = req.params.id
   try {
-    const query = 'DELETE FROM dbo.tool_params WHERE id = $1';
-    const result = await pool.query(query, [id]);
+    const query = 'DELETE FROM dbo.tool_params WHERE id = $1'
+    const result = await pool.query(query, [id])
 
     if (result.rowCount === 0) {
-      res.status(404).json({ success: false, message: 'Parameter not found' });
+      res.status(404).json({ success: false, message: 'Parameter not found' })
     } else {
-      res.status(200).json({ success: true, message: 'Parameter deleted successfully' });
+      res
+        .status(200)
+        .json({ success: true, message: 'Parameter deleted successfully' })
     }
   } catch (error) {
-    console.error('Error deleting tool parameter:', error);
-    res.status(500).json({ success: false, message: 'Internal Server Error' });
+    console.error('Error deleting tool parameter:', error)
+    res.status(500).json({ success: false, message: 'Internal Server Error' })
   }
 }
 
 async function updateToolParam(req, res) {
-  const id = req.params.id;
-  const { label } = req.body;
+  const id = req.params.id
+  const { label } = req.body
 
   try {
-    const query = 'UPDATE dbo.tool_params SET label = $1 WHERE id = $2';
-    const result = await pool.query(query, [label, id]);
+    const query = 'UPDATE dbo.tool_params SET label = $1 WHERE id = $2'
+    const result = await pool.query(query, [label, id])
 
     if (result.rowCount === 0) {
-      res.status(404).json({ success: false, message: 'Parameter not found' });
+      res.status(404).json({ success: false, message: 'Parameter not found' })
     } else {
-      res.status(200).json({ success: true, message: 'Parameter updated successfully' });
+      res
+        .status(200)
+        .json({ success: true, message: 'Parameter updated successfully' })
     }
   } catch (error) {
-    console.error('Error updating tool parameter:', error);
-    res.status(500).json({ success: false, message: 'Internal Server Error' });
+    console.error('Error updating tool parameter:', error)
+    res.status(500).json({ success: false, message: 'Internal Server Error' })
   }
 }
 
@@ -163,8 +166,6 @@ async function getToolParamsParentId(req, res) {
     res.status(500).send('Server error')
   }
 }
-
-
 
 module.exports = {
   getToolParamsParentId,

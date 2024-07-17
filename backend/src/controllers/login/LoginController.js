@@ -26,10 +26,7 @@ async function login(req, res) {
     const userQuery = 'SELECT * FROM dbo.vue_users WHERE login = $1'
     const userResult = await pool.query(userQuery, [login])
 
-    if (
-      userResult.rows.length > 0 &&
-      userResult.rows[0].password === password
-    ) {
+    if (userResult.rows.length > 0 && userResult.rows[0].password === password) {
       // Пользователь найден и пароль совпадает, генерируем токен
       const token = uuidv4()
       const now = new Date()
@@ -40,12 +37,7 @@ async function login(req, res) {
 
       const updateTokenAndLoginInfoQuery =
         'UPDATE dbo.vue_users SET token = $1, last_login_date = $2, last_login_ip = $3 WHERE login = $4'
-      await pool.query(updateTokenAndLoginInfoQuery, [
-        token,
-        now,
-        userIP,
-        login,
-      ])
+      await pool.query(updateTokenAndLoginInfoQuery, [token, now, userIP, login])
 
       res.json({ status: 'ok', token })
     } else {
@@ -55,9 +47,7 @@ async function login(req, res) {
     }
   } catch (error) {
     console.error('Ошибка при логине:', error)
-    res
-      .status(500)
-      .json({ status: 'error', message: 'Внутренняя ошибка сервера' })
+    res.status(500).json({ status: 'error', message: 'Внутренняя ошибка сервера' })
   }
 }
 
@@ -76,15 +66,11 @@ async function checkLogin(req, res) {
 
       res.json({ status: 'ok', user: user.login, role: role })
     } else {
-      res
-        .status(401)
-        .json({ status: 'error', message: 'Недействительный токен' })
+      res.status(401).json({ status: 'error', message: 'Недействительный токен' })
     }
   } catch (error) {
     console.error('Ошибка при проверке токена:', error)
-    res
-      .status(500)
-      .json({ status: 'error', message: 'Внутренняя ошибка сервера' })
+    res.status(500).json({ status: 'error', message: 'Внутренняя ошибка сервера' })
   }
 }
 

@@ -84,10 +84,10 @@ async function issueTool(req, res) {
       [specs_op_id, id_user, id_tool, type_issue, quantity, issuerId]
     )
 
-    await pool.query(
-      'UPDATE dbo.tool_nom SET sklad = sklad - $1 WHERE id = $2',
-      [quantity, id_tool]
-    )
+    await pool.query('UPDATE dbo.tool_nom SET sklad = sklad - $1 WHERE id = $2', [
+      quantity,
+      id_tool,
+    ])
 
     res.status(200).json({
       success: true,
@@ -116,8 +116,7 @@ async function issueTool(req, res) {
 async function issueTools(req, res) {
   const { operationId, userId, tools, typeIssue, issueToken } = req.body
 
-  if (!issueToken)
-    return res.status(401).send('Authentication token is required.')
+  if (!issueToken) return res.status(401).send('Authentication token is required.')
 
   try {
     await pool.query('BEGIN')
@@ -138,10 +137,7 @@ async function issueTools(req, res) {
       const selectQuery = 'SELECT sklad FROM dbo.tool_nom WHERE id = $1'
       const stockResult = await pool.query(selectQuery, [toolId])
 
-      if (
-        stockResult.rows.length === 0 ||
-        stockResult.rows[0].sklad < quantity
-      ) {
+      if (stockResult.rows.length === 0 || stockResult.rows[0].sklad < quantity) {
         insufficientTools.push({
           toolId,
           available: stockResult.rows[0]?.sklad || 0,
@@ -201,13 +197,7 @@ async function issueTools(req, res) {
       const logMessage = `Выдача инструмента ${toolId}: ${quantity} ед. Пользователь: ${userId}, Осталось на складе: ${newStock}.`
       const logQuery =
         'INSERT INTO dbo.vue_log (message, tool_id, user_id, datetime_log, old_amount, new_amount) VALUES ($1, $2, $3, NOW(), $4, $5)'
-      await pool.query(logQuery, [
-        logMessage,
-        toolId,
-        issuerId,
-        oldStock,
-        newStock,
-      ])
+      await pool.query(logQuery, [logMessage, toolId, issuerId, oldStock, newStock])
     }
 
     await pool.query('COMMIT')
@@ -250,9 +240,7 @@ async function cancelOperationAdmin(req, res) {
   const { issueToken, cancelQuantity } = req.body // Token and cancellation quantity passed in the request body
 
   if (!id) {
-    return res
-      .status(400)
-      .send('Отсутствует обязательный параметр: id операции')
+    return res.status(400).send('Отсутствует обязательный параметр: id операции')
   }
 
   if (!issueToken) {
@@ -297,9 +285,7 @@ async function cancelOperationAdmin(req, res) {
     const stockQuery = `SELECT sklad
                         FROM dbo.tool_nom
                         WHERE id = $1`
-    const stockResult = await pool.query(stockQuery, [
-      operation.rows[0].id_tool,
-    ])
+    const stockResult = await pool.query(stockQuery, [operation.rows[0].id_tool])
     const oldQuantity = parseInt(stockResult.rows[0].sklad, 10)
 
     const currentDate = new Date()
@@ -371,9 +357,7 @@ async function cancelOperation(req, res) {
   const { issueToken, cancelQuantity } = req.body // Token and cancellation quantity passed in the request body
 
   if (!id) {
-    return res
-      .status(400)
-      .send('Отсутствует обязательный параметр: id операции')
+    return res.status(400).send('Отсутствует обязательный параметр: id операции')
   }
 
   if (!issueToken) {
@@ -418,9 +402,7 @@ async function cancelOperation(req, res) {
     const stockQuery = `SELECT sklad
                         FROM dbo.tool_nom
                         WHERE id = $1`
-    const stockResult = await pool.query(stockQuery, [
-      operation.rows[0].id_tool,
-    ])
+    const stockResult = await pool.query(stockQuery, [operation.rows[0].id_tool])
     const oldQuantity = parseInt(stockResult.rows[0].sklad, 10)
 
     const currentDate = new Date()

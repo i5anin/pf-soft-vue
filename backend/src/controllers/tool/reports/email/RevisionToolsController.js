@@ -176,7 +176,8 @@ async function sendEmailWithExcelStream(email, text, excelStream, data) {
       {
         filename: `Инструмент весь ${formattedDate}.xlsx`, // Добавляем дату в имя файла
         content: excelStream,
-        contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        contentType:
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       },
     ],
   }
@@ -205,7 +206,10 @@ async function getUserEmailByToken(token) {
 async function genRevisionInstr(req, res) {
   try {
     // Check if the Authorization header is present and correctly formatted
-    if (!req.headers.authorization || !req.headers.authorization.startsWith('Bearer ')) {
+    if (
+      !req.headers.authorization ||
+      !req.headers.authorization.startsWith('Bearer ')
+    ) {
       res.status(400).send('Authorization token is missing or invalid.')
       return
     }
@@ -229,11 +233,15 @@ async function genRevisionInstr(req, res) {
     const emailText = 'Please find the attached Excel report.'
     await sendEmailWithExcelStream(email, emailText, excelStream, data)
 
-    res.status(200).send('The report has been successfully sent to the specified email.')
+    res
+      .status(200)
+      .send('The report has been successfully sent to the specified email.')
   } catch (error) {
     console.error('Error in generating and sending the report:', error)
     // throw error // Не бросаем ошибку, оставляем поток выполнения
-    res.status(500).send(`Error in generating and sending the report: ${error.message}`)
+    res
+      .status(500)
+      .send(`Error in generating and sending the report: ${error.message}`)
   }
 }
 

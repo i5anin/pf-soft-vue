@@ -3,16 +3,6 @@ const config = require('../../config/config-test')
 
 const baseUrl = config.api.baseUrl
 
-// Функция для проверки существования инструмента
-async function checkToolExists(toolId) {
-  try {
-    const response = await axios.get(`${baseUrl}/tool/${toolId}`)
-    return response.status === 200
-  } catch (error) {
-    return false
-  }
-}
-
 let token
 
 beforeAll(async () => {
@@ -74,7 +64,11 @@ it('Выдача инструментов', async () => {
 
 it('Получение данных для модального окна выдачи', async () => {
   const testData = [
-    { url: '/modal-form/parties', params: { id: 40487 }, description: 'Поиск партий' },
+    {
+      url: '/modal-form/parties',
+      params: { id: 40487 },
+      description: 'Поиск партий',
+    },
     { url: '/modal-form/cnc', description: 'Данные ЧПУ' },
     { url: '/modal-form/operators/fio', description: 'ФИО операторов' },
   ]
@@ -98,7 +92,9 @@ it('Получение данных для модального окна выд�
 
 it('Отмена операции выдачи', async () => {
   console.log('--- Отмена операции выдачи ---')
-  const response = await axios.get(`${baseUrl}/issue/cancel-operation/${createdIssueId}`)
+  const response = await axios.get(
+    `${baseUrl}/issue/cancel-operation/${createdIssueId}`
+  )
   console.log('Получен ответ:', response.data)
 
   expect(response.status).toBe(200)
@@ -107,7 +103,9 @@ it('Отмена операции выдачи', async () => {
 
 it('Отмена операции выдачи администратором', async () => {
   console.log('--- Отмена операции выдачи администратором ---')
-  const response = await axios.get(`${baseUrl}/issue/cancel-operation-admin/${createdIssueId}`)
+  const response = await axios.get(
+    `${baseUrl}/issue/cancel-operation-admin/${createdIssueId}`
+  )
   console.log('Получен ответ:', response.data)
 
   expect(response.status).toBe(200)

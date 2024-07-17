@@ -11,20 +11,12 @@ const dbConfig = getDbConfig()
 const pool = new Pool(dbConfig)
 
 async function getReportData() {
-  const sql = fs.readFileSync(__dirname + '/OrderToolsController/5_general.sql', 'utf-8')
+  const sql = fs.readFileSync(
+    __dirname + '/OrderToolsController/5_general.sql',
+    'utf-8'
+  )
   const { rows } = await pool.query(sql)
   return rows
-}
-
-function getCurrentMonthDates() {
-  const currentDate = new Date()
-  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
-  const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
-
-  const firstDate = firstDayOfMonth.toISOString().split('T')[0]
-  const lastDate = lastDayOfMonth.toISOString().split('T')[0]
-
-  return { firstDate, lastDate }
 }
 
 async function createExcelFileStream(data) {
@@ -34,7 +26,12 @@ async function createExcelFileStream(data) {
   worksheet.columns = [
     { header: '# Excel', key: 'index', width: 5 },
     { header: 'ID', key: 'id_tool', width: 5 },
-    { header: 'Название', key: 'name', width: 28, style: { font: { bold: true } } },
+    {
+      header: 'Название',
+      key: 'name',
+      width: 28,
+      style: { font: { bold: true } },
+    },
     { header: 'Склад группы', key: 'group_sum', width: 20 },
     { header: 'На складе', key: 'sklad', width: 10 },
     { header: 'Норма', key: 'norma', width: 10 },
@@ -146,7 +143,8 @@ async function sendEmailWithExcelStream(emails, text, excelStream, data) {
       {
         filename: `Заказ инструмента ${currentDateTime}.xlsx`,
         content: excelStream,
-        contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        contentType:
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       },
     ],
   }
@@ -179,14 +177,18 @@ async function genRedAlert(req, res) {
 
     if (editorEmails.length > 0) {
       await sendEmailWithExcelStream(editorEmails, emailText, excelStream, data)
-      res.status(200).send('The report has been successfully sent to the specified emails.')
+      res
+        .status(200)
+        .send('The report has been successfully sent to the specified emails.')
     } else {
       console.log('No editors found in the database.')
       res.status(400).send('No editors found in the database.')
     }
   } catch (error) {
     console.error('Error in generating and sending the report:', error)
-    res.status(500).send(`Error in generating and sending the report: ${error.message}`)
+    res
+      .status(500)
+      .send(`Error in generating and sending the report: ${error.message}`)
   }
 }
 
