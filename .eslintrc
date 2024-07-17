@@ -1,36 +1,52 @@
 {
   "env": {
     "browser": true,
-    "es2021": true,
+    "es2021": true
   },
   "globals": {
-    "process": "readonly" // Добавление process как глобальной переменной
+    "process": "readonly"
   },
   "extends": [
     "eslint:recommended",
     "plugin:vue/vue3-recommended",
-    "plugin:prettier/recommended" // Добавление поддержки Prettier
+    "plugin:prettier/recommended",
+    "plugin:jest/recommended"
   ],
   "overrides": [
     {
-      "env": { "node": true },
-      "files": [".eslintrc.{js,cjs}"],
-      "parserOptions": { "sourceType": "script" }
+      "env": {
+        "node": true,
+        "jest/globals": true
+      },
+      "files": [
+        ".eslintrc.{js,cjs}",
+        "**/*.test.js"
+      ],
+      "parserOptions": {
+        "sourceType": "script"
+      }
     }
   ],
   "parserOptions": {
     "ecmaVersion": 2023,
     "sourceType": "module"
   },
-  "plugins": ["vue", "prettier"],
+  "plugins": [
+    "vue",
+    "prettier",
+    "jest"
+  ],
   "rules": {
-    "max-len": "off", // Отключаем правило max-len
+    "max-len": "off",
     "vue/multi-word-component-names": "off",
     "vue/valid-v-slot": "off",
     "quotes": [
       "error",
       "single",
-      { "avoidEscape": true, "allowTemplateLiterals": true }
+      {
+        "avoidEscape": true,
+        "allowTemplateLiterals": true
+      }
     ],
     "prettier/prettier": [
       "error",
@@ -40,7 +56,7 @@
         "singleQuote": true,
         "semi": false,
         "endOfLine": "auto",
-        "printWidth": 100
+        "printWidth": 85
       }
     ]
   }
