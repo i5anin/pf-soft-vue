@@ -6,6 +6,93 @@ const dbConfig = getDbConfig()
 // Создание пула соединений с базой данных
 const pool = new Pool(dbConfig)
 
+async function folderToolsTreeId(req, res) {
+  try {
+    const { id } = req.params
+
+    // Получаем все дочерние папки
+    const { rows } = await pool.query(
+      `
+      SELECT
+        t.id,
+        t.name,
+        (SELECT COUNT(*) FROM dbo.tool_nom n WHERE n.parent_id = t.id) as element_count,
+        (SELECT COUNT(*) FROM dbo.tool_nom n WHERE n.parent_id = t.id AND n.sklad > 0) as available_count
+      FROM dbo.tool_tree t
+      WHERE t.parent_id = $1
+      `,
+      [id]
+    )
+
+    // Формируем ответ с данными дочерних папок
+    const folders = rows.map((row) => ({
+      id: row.id,
+      label: row.name,
+      elements: parseInt(row.element_count, 10),
+      available: parseInt(row.available_count, 10),
+    }))
+
+    res.json(folders)
+  } catch (error) {
+    console.error(error)
+    res.status(500).send(error.message)
+  }
+}
+
+async function pathToolsTreeId(req, res) {
+  try {
+    const { id } = req.params
+
+    // Функция для получения пути к папке по ID в виде массива объектов
+    const getFolderPath = async (id) => {
+      const path = []
+      let currentId = id
+
+      while (currentId !== 0) {
+        const { rows } = await pool.query(
+          `
+          SELECT
+            t.id,
+            t.name,
+            t.parent_id,
+            (SELECT COUNT(*) FROM dbo.tool_nom n WHERE n.parent_id = t.id) as element_count,
+            (SELECT COUNT(*) FROM dbo.tool_nom n WHERE n.parent_id = t.id AND n.sklad > 0) as available_count
+          FROM dbo.tool_tree t
+          WHERE t.id = $1
+          `,
+          [currentId]
+        )
+
+        if (rows.length === 0) {
+          return null // Папка не найдена
+        }
+
+        const { id, name, parent_id, element_count, available_count } = rows[0]
+        path.unshift({
+          id: id,
+          label: name,
+          elements: parseInt(element_count, 10),
+          available: parseInt(available_count, 10),
+        }) // Добавляем объект в начало
+        currentId = parent_id
+      }
+
+      return path // Возвращаем массив объектов
+    }
+
+    const path = await getFolderPath(id) // Вызываем функцию для получения пути
+
+    if (path) {
+      res.json(path) // Возвращаем массив объектов
+    } else {
+      res.status(404).send('Папка не найдена')
+    }
+  } catch (error) {
+    console.error(error)
+    res.status(500).send(error.message)
+  }
+}
+
 // Экспорт функции для получения дерева инструментов
 async function getToolsTree(req, res) {
   try {
@@ -20,12 +107,14 @@ async function getToolsTree(req, res) {
 // Функция для построения дерева данных
 async function buildTreeData(parentId = 0) {
   const { rows } = await pool.query(
-    `SELECT t.id, t.parent_id, t.name,
-      (SELECT COUNT(*) FROM dbo.tool_nom n WHERE n.parent_id = t.id) as element_count,
-      (SELECT COUNT(*) FROM dbo.tool_nom n WHERE n.parent_id = t.id AND n.sklad > 0) as available_count
-    FROM dbo.tool_tree t
-    WHERE t.parent_id = $1
-    ORDER BY t.name ASC`, // Добавлено сортировка по имени
+    `SELECT t.id,
+            t.parent_id,
+            t.name,
+            (SELECT COUNT(*) FROM dbo.tool_nom n WHERE n.parent_id = t.id)                 as element_count,
+            (SELECT COUNT(*) FROM dbo.tool_nom n WHERE n.parent_id = t.id AND n.sklad > 0) as available_count
+     FROM dbo.tool_tree t
+     WHERE t.parent_id = $1
+     ORDER BY t.name ASC`, // Добавлено сортировка по имени
     [parentId]
   )
 
@@ -182,7 +271,9 @@ const addBranch = async (req, res) => {
 
     // First, check if the parentId exists in the database
     const parentCheckResult = await pool.query(
-      `SELECT id FROM dbo.tool_tree WHERE id = $1`,
+      `SELECT id
+       FROM dbo.tool_tree
+       WHERE id = $1`,
       [parentId]
     )
 
@@ -217,4 +308,6 @@ module.exports = {
   dellFolderTree,
   getToolsTree,
   addBranch,
+  pathToolsTreeId,
+  folderToolsTreeId,
 }

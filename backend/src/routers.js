@@ -53,6 +53,8 @@ router.delete('/tools-params/:id', paramController.deleteToolParam)
 router.patch('/tools-params/:id/move', paramController.moveToolParam)
 
 // "Дерево"
+router.get('/tools-tree/path/:id', treeController.pathToolsTreeId)
+router.get('/tools-tree/folder/:id', treeController.folderToolsTreeId)
 router.get('/tools-tree', treeController.getToolsTree)
 router.post('/tools-tree', treeController.addBranch)
 router.put('/tools-tree', treeController.updateFolderTree)
