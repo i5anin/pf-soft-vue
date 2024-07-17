@@ -1,11 +1,14 @@
 const axios = require('axios')
-const config = require('../../../config/config-test')
+const config = require('./config-test')
 
 const baseUrl = config.api.baseUrl
 
 console.log(baseUrl)
 
 let createdRecordId
+let createdParamId
+let createdTreeFolderId
+let createdIssueId
 
 describe('Работа с создание номенклатур', () => {
   // Группа тестов для инструмента
@@ -93,6 +96,7 @@ describe('Работа с создание номенклатур', () => {
   it('Проверка удаления инструмента', async () => {
     console.log('--- Проверка удаления ---')
     try {
+      console.log('createdRecordId:', createdRecordId)
       const response = await axios.get(`${baseUrl}/tool/${createdRecordId}`)
       console.log('Получен ответ:', response.data)
     } catch (error) {

@@ -1,9 +1,10 @@
 const axios = require('axios')
-const config = require('../../config/config-test')
+const config = require('./config-test')
 
 const baseUrl = config.api.baseUrl
 
 let token
+let createdIssueId
 
 beforeAll(async () => {
   try {
