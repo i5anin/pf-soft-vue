@@ -91,7 +91,7 @@ export default {
     },
 
     formatDate(date) {
-      return format(parseISO(date), 'dd.MM.yyyy hh:mm')
+      return format(parseISO(date), 'dd.MM.yy hh:mm')
     },
 
     async fetchAndFormatToolHistory() {

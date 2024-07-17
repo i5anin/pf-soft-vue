@@ -40,9 +40,7 @@
                   v-for="item in operations"
                   :key="item + 'progress'"
                   :color="completedOperations.includes(item) ? 'green' : 'grey'"
-                  :variant="
-                    completedOperations.includes(item) ? 'elevated' : 'text'
-                  "
+                  :variant="completedOperations.includes(item) ? 'elevated' : 'text'"
                   class="ma-2"
                   outlined
                 >
@@ -67,11 +65,7 @@
         <thead>
           <tr>
             <th>#</th>
-            <th
-              v-for="header in currentHeaders"
-              :key="header.value"
-              class="text-left"
-            >
+            <th v-for="header in currentHeaders" :key="header.value" class="text-left">
               {{ header.title }}
             </th>
           </tr>
@@ -114,9 +108,7 @@
                     size="x-small"
                     icon
                     small
-                    :disabled="
-                      new Date() - new Date(item.timestamp) > 432000000
-                    "
+                    :disabled="new Date() - new Date(item.timestamp) > 432000000"
                     color="error"
                     @click.stop="promptCancelQuantity(item.id)"
                   >
@@ -149,7 +141,7 @@
       <v-card>
         <v-card-title class="headline">Подтверждение отмены</v-card-title>
         <v-card-text>
-          Введите количество для отмены:
+          Введите для отмены:
           <v-text-field
             v-model="cancelQuantity"
             type="number"
@@ -159,20 +151,10 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn
-            color="green darken-1"
-            text="true"
-            @click="confirmCancelOperation"
-          >
+          <v-btn color="green darken-1" text="true" @click="confirmCancelOperation">
             Подтвердить
           </v-btn>
-          <v-btn
-            color="red darken-1"
-            text="true"
-            @click="showCancelDialog = false"
-          >
-            Отмена
-          </v-btn>
+          <v-btn color="red darken-1" text="true" @click="showCancelDialog = false"> Отмена </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -212,7 +194,7 @@ export default {
       headers: [
         { title: 'Инструмент', value: 'name_tool' },
         { title: 'Кол-во выдано', value: 'quantity', width: '90px' },
-        { title: 'На складе', value: 'current_stock' },
+        { title: 'Сейчас склад', value: 'current_stock' },
         { title: 'Выдано', value: 'user_fio' },
         { title: 'Тип выдачи', value: 'type_issue' },
         { title: 'Дата время', value: 'timestamp' },
@@ -283,11 +265,7 @@ export default {
         alert('Internal error: The operation ID is invalid.')
         return
       }
-      if (
-        !confirm(
-          `Вы уверены, что хотите отменить ${this.cancelQuantity} из этой операции?`
-        )
-      ) {
+      if (!confirm(`Вы уверены, что хотите отменить ${this.cancelQuantity} из этой операции?`)) {
         return
       }
       const token = localStorage.getItem('token')
@@ -328,7 +306,7 @@ export default {
     },
     formatDate(date) {
       try {
-        return format(parseISO(date), 'dd.MM.yyyy HH:mm:ss')
+        return format(parseISO(date), 'dd.MM.yy HH:mm:ss')
       } catch (error) {
         console.error('Error formatting date:', error)
         return 'Invalid Date'
@@ -339,21 +317,14 @@ export default {
     },
     async fetchHistoryData() {
       try {
-        const response = await issueHistoryApi.fetchHistoryByPartId(
-          this.idPart,
-          this.selectedDate
-        )
-        const partInfoResponse = await issueHistoryApi.fetchHistoryByPartIdInfo(
-          this.idPart
-        )
+        const response = await issueHistoryApi.fetchHistoryByPartId(this.idPart, this.selectedDate)
+        const partInfoResponse = await issueHistoryApi.fetchHistoryByPartIdInfo(this.idPart)
         this.operations = partInfoResponse.info.operations
         this.completedOperations = partInfoResponse.info.completed_operations
         if (response && typeof response === 'object') {
           this.info = partInfoResponse.info
           this.originalData = response
-          this.availableOperations = Object.keys(this.originalData).filter(
-            (key) => key !== 'info'
-          )
+          this.availableOperations = Object.keys(this.originalData).filter((key) => key !== 'info')
           this.filterData()
         } else {
           this.filteredData = []

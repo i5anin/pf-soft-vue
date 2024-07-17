@@ -7,9 +7,7 @@
         </template>
         {{ group.path }}
       </v-chip>
-      <v-chip color="primary" variant="elevated">{{
-        group.tools.length
-      }}</v-chip>
+      <v-chip color="primary" variant="elevated">{{ group.tools.length }}</v-chip>
       <div v-if="visibleGroups.includes(index)">
         <v-table dense>
           <thead>
@@ -58,7 +56,7 @@ export default {
   methods: {
     formatDate(date) {
       if (!date) return ''
-      return format(parseISO(date), 'dd.MM.yyyy HH:mm') // Формат dd.MM.yyyy, например, 06.05.2024
+      return format(parseISO(date), 'dd.MM.yy HH:mm') // Формат dd.MM.yyyy, например, 06.05.2024
     },
     async fetchZakazData() {
       try {

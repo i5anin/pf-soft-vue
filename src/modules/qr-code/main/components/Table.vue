@@ -105,7 +105,7 @@ export default {
     },
 
     formatDate(date) {
-      return format(parseISO(date), 'dd.MM.yyyy HH:mm') // Используйте HH для часов в 24-часовом формате
+      return format(parseISO(date), 'dd.MM.yy HH:mm') // Используйте HH для часов в 24-часовом формате
     },
 
     async fetchAndFormatToolHistory() {
