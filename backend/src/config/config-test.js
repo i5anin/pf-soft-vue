@@ -1,7 +1,7 @@
 // config.js
 const apiConfig = {
   ip: '192.168.0.200',
-  port: '8002',
+  port: '4001',
 }
 
 module.exports = {
