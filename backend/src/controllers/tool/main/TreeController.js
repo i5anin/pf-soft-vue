@@ -6,10 +6,10 @@ const dbConfig = getDbConfig()
 // Создание пула соединений с базой данных
 const pool = new Pool(dbConfig)
 
-// Экспорт функции для получения дерева инструментов
 async function getToolsTree(req, res) {
   try {
-    const tree = await buildTreeData()
+    const folderNotNull = req.query.folderNotNull === 'true' || false // Параметр для фильтрации, по умолчанию false
+    const tree = await buildTreeData(0, folderNotNull)
     res.json(tree)
   } catch (error) {
     console.error(error)
@@ -18,41 +18,42 @@ async function getToolsTree(req, res) {
 }
 
 // Функция для построения дерева данных
-async function buildTreeData(parentId = 0) {
+async function buildTreeData(parentId = 0, folderNotNull = false) {
   const { rows } = await pool.query(
     `SELECT t.id, t.parent_id, t.name,
       (SELECT COUNT(*) FROM dbo.tool_nom n WHERE n.parent_id = t.id) as element_count,
       (SELECT COUNT(*) FROM dbo.tool_nom n WHERE n.parent_id = t.id AND n.sklad > 0) as available_count
     FROM dbo.tool_tree t
     WHERE t.parent_id = $1
-    ORDER BY t.name ASC`, // Добавлено сортировка по имени
+    ORDER BY t.name ASC`,
     [parentId]
   )
 
   const treeData = []
   for (const row of rows) {
-    const children = await buildTreeData(row.id)
+    const children = await buildTreeData(row.id, folderNotNull)
 
-    // Сортировка дочерних элементов не требуется, если они уже получены в отсортированном виде из базы данных
-    // Однако, если вы хотите дополнительно убедиться в сортировке на уровне JavaScript, можете раскомментировать следующую строку
-    // children.sort((a, b) => a.label.localeCompare(b.label));
-
-    const totalElements =
-      children.reduce((acc, child) => acc + child.totalElements, 0) +
+    const totalElements = children.reduce(
+      (acc, child) => acc + child.totalElements,
       parseInt(row.element_count, 10)
-    const totalAvailable =
-      children.reduce((acc, child) => acc + child.totalAvailable, 0) +
+    )
+    const totalAvailable = children.reduce(
+      (acc, child) => acc + child.totalAvailable,
       parseInt(row.available_count, 10)
+    )
 
-    treeData.push({
-      id: row.id,
-      label: row.name,
-      elements: parseInt(row.element_count, 10),
-      available: parseInt(row.available_count, 10),
-      totalElements: totalElements,
-      totalAvailable: totalAvailable, // Общее количество доступных элементов в поддереве
-      nodes: children,
-    })
+    // Фильтр по наличию доступных элементов в поддереве
+    if (!folderNotNull || totalAvailable > 0) {
+      treeData.push({
+        id: row.id,
+        label: row.name,
+        elements: parseInt(row.element_count, 10),
+        available: parseInt(row.available_count, 10),
+        totalElements: totalElements,
+        totalAvailable: totalAvailable,
+        nodes: children,
+      })
+    }
   }
   return treeData
 }
