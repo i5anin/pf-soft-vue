@@ -28,3 +28,4 @@ pnpm-debug.log*
 *.zip
 *.meta
 *.ini
+backend/src/controllers/tool/my-sql-file/ost_form_field.js
