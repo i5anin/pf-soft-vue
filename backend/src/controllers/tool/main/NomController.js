@@ -506,6 +506,11 @@ async function filterParamsParentId(req, res) {
                    WHERE parent_id = $1`
     const { rows } = await pool.query(query, [parent_id])
 
+    // Проверяем, найден ли инструмент
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Инструмент не найден' })
+    }
+
     const paramsAggregation = {}
 
     rows.forEach((row) => {
