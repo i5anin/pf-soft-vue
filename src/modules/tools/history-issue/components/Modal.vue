@@ -304,7 +304,7 @@ export default {
         }
       } catch (error) {
         console.error('Ошибка при отмене операции:', error)
-        alert('Ошибка при отмене операции: ' + error.message)
+        alert('Ошибка при отмене операции: ' + data.message)
       }
     },
     filterData() {
