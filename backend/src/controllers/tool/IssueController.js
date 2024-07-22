@@ -372,18 +372,20 @@ async function cancelOperation(req, res) {
       .json({ message: 'Укажите корректное количество для отмены.' })
   }
 
-  const userResult = await pool.query(
-    'SELECT id FROM dbo.vue_users WHERE token = $1',
-    [issueToken]
-  )
-
-  if (userResult.rows.length === 0) {
-    return res.status(403).json({ message: 'Invalid token.' })
-  }
-
-  const issuerId = userResult.rows[0].id
-
   try {
+    // Получаем ID и роль пользователя по токену
+    const userResult = await pool.query(
+      'SELECT id, role FROM dbo.vue_users WHERE token = $1',
+      [issueToken]
+    )
+
+    if (userResult.rows.length === 0) {
+      return res.status(403).json({ message: 'Invalid token.' })
+    }
+
+    const issuerId = userResult.rows[0].id
+    const userRole = userResult.rows[0].role
+
     await pool.query('BEGIN')
 
     const operation = await pool.query(
@@ -408,34 +410,37 @@ async function cancelOperation(req, res) {
         .json({ message: 'Количество для отмены превышает доступное.' })
     }
 
+    // Проверка на 3 дня, если пользователь не Admin и не Editor
+    if (userRole !== 'Admin' && userRole !== 'Editor') {
+      const currentDate = new Date()
+      const operationDate = new Date(operation.rows[0].timestamp)
+      const differenceInDays = Math.floor(
+        (currentDate - operationDate) / (1000 * 60 * 60 * 24)
+      )
+
+      if (differenceInDays > 3) {
+        await pool.query('ROLLBACK')
+        return res.status(403).json({
+          message:
+            'Отмена операции возможна только в течение 3 дней с момента выполнения. ' +
+            'Если вам нужно удалить операцию, обратитесь к Хохолову А.О. или Синицыну А.Ю.',
+        })
+      }
+    }
+
     const stockResult = await pool.query(
       `SELECT sklad FROM dbo.tool_nom WHERE id = $1`,
       [operation.rows[0].id_tool]
     )
 
     const oldQuantity = parseInt(stockResult.rows[0].sklad, 10)
-
-    const currentDate = new Date()
-    const operationDate = new Date(operation.rows[0].timestamp)
-    const differenceInDays = Math.floor(
-      (currentDate - operationDate) / (1000 * 60 * 60 * 24)
-    )
-
-    if (differenceInDays > 3) {
-      await pool.query('ROLLBACK')
-      return res.status(403).json({
-        message:
-          'Отмена операции возможна только в течение 3 дней с момента выполнения. ' +
-          'Если вам нужно удалить операцию, обратитесь к Хохолову А.О. или Синицыну А.Ю.',
-      })
-    }
+    const newQuantity = oldQuantity + parseInt(cancelQuantity, 10)
 
     await pool.query(
       `UPDATE dbo.tool_history_nom SET quantity = quantity - $2, cancelled = true, cancelled_id = $3 WHERE id = $1`,
       [id, cancelQuantity, issuerId]
     )
 
-    const newQuantity = oldQuantity + parseInt(cancelQuantity, 10)
     await pool.query(`UPDATE dbo.tool_nom SET sklad = $1 WHERE id = $2`, [
       newQuantity,
       operation.rows[0].id_tool,
