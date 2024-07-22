@@ -357,22 +357,26 @@ async function cancelOperation(req, res) {
   const { issueToken, cancelQuantity } = req.body // Token and cancellation quantity passed in the request body
 
   if (!id) {
-    return res.status(400).send('Отсутствует обязательный параметр: id операции')
+    return res
+      .status(400)
+      .json({ message: 'Отсутствует обязательный параметр: id операции' })
   }
 
   if (!issueToken) {
-    return res.status(401).send('Authentication token is required.')
+    return res.status(401).json({ message: 'Authentication token is required.' })
   }
 
   if (!cancelQuantity || cancelQuantity <= 0) {
-    return res.status(400).send('Укажите корректное количество для отмены.')
+    return res
+      .status(400)
+      .json({ message: 'Укажите корректное количество для отмены.' })
   }
 
   const userValidationQuery = 'SELECT id FROM dbo.vue_users WHERE token = $1'
   const userResult = await pool.query(userValidationQuery, [issueToken])
 
   if (userResult.rows.length === 0) {
-    return res.status(403).send('Invalid token.')
+    return res.status(403).json({ message: 'Invalid token.' })
   }
 
   const issuerId = userResult.rows[0].id // ID of the user who initiated the cancellation
@@ -386,17 +390,19 @@ async function cancelOperation(req, res) {
 
     if (operation.rows.length === 0) {
       await pool.query('ROLLBACK')
-      return res.status(404).send('Операция не найдена')
+      return res.status(404).json({ message: 'Операция не найдена' })
     }
 
     if (operation.rows[0].cancelled) {
       await pool.query('ROLLBACK')
-      return res.status(400).send('Операция уже была отменена')
+      return res.status(400).json({ message: 'Операция уже была отменена' })
     }
 
     if (cancelQuantity > operation.rows[0].quantity) {
       await pool.query('ROLLBACK')
-      return res.status(400).send('Количество для отмены превышает доступное.')
+      return res
+        .status(400)
+        .json({ message: 'Количество для отмены превышает доступное.' })
     }
 
     const stockQuery = `SELECT sklad
@@ -413,12 +419,11 @@ async function cancelOperation(req, res) {
 
     if (differenceInDays > 3) {
       await pool.query('ROLLBACK')
-      return res
-        .status(403)
-        .send(
+      return res.status(403).json({
+        message:
           'Отмена операции возможна только в течение 3 дней с момента выполнения. ' +
-            'Если вам нужно удалить операцию, обратитесь к Хохолову А.О. или Синицыну А.Ю.'
-        )
+          'Если вам нужно удалить операцию, обратитесь к Хохолову А.О. или Синицыну А.Ю.',
+      })
     }
 
     const updateOperationQuery = `UPDATE dbo.tool_history_nom
@@ -451,7 +456,7 @@ async function cancelOperation(req, res) {
 
     res.status(200).json({
       success: true,
-      message: 'Операция успешно отменена',
+      message: 'Операция успешно отменена', // Измененное сообщение
       operationId: id,
       details: {
         toolId: operation.rows[0].id_tool,
