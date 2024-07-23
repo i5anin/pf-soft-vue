@@ -33,7 +33,6 @@ async function getToolHistoryByPartIdInfo(req, res) {
     if (selectedDate) {
       queryParams.push(selectedDate)
     } else {
-      // If not provided, default to current date
       queryParams.push(new Date())
     }
 
