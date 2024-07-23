@@ -235,123 +235,6 @@ async function getCncData(req, res) {
   }
 }
 
-async function cancelOperationAdmin(req, res) {
-  const { id } = req.params // The operation ID
-  const { issueToken, cancelQuantity } = req.body // Token and cancellation quantity passed in the request body
-
-  if (!id) {
-    return res.status(400).send('Отсутствует обязательный параметр: id операции')
-  }
-
-  if (!issueToken) {
-    return res.status(401).send('Authentication token is required.')
-  }
-
-  if (!cancelQuantity || cancelQuantity <= 0) {
-    return res.status(400).send('Укажите корректное количество для отмены.')
-  }
-
-  const userValidationQuery = 'SELECT id FROM dbo.vue_users WHERE token = $1'
-  const userResult = await pool.query(userValidationQuery, [issueToken])
-
-  if (userResult.rows.length === 0) {
-    return res.status(403).send('Invalid token.')
-  }
-
-  const issuerId = userResult.rows[0].id // ID of the user who initiated the cancellation
-
-  try {
-    await pool.query('BEGIN')
-
-    const operationQuery =
-      'SELECT id, id_tool, quantity, cancelled, timestamp FROM dbo.tool_history_nom WHERE id = $1'
-    const operation = await pool.query(operationQuery, [id])
-
-    if (operation.rows.length === 0) {
-      await pool.query('ROLLBACK')
-      return res.status(404).send('Операция не найдена')
-    }
-
-    if (operation.rows[0].cancelled) {
-      await pool.query('ROLLBACK')
-      return res.status(400).send('Операция уже была отменена')
-    }
-
-    if (cancelQuantity > operation.rows[0].quantity) {
-      await pool.query('ROLLBACK')
-      return res.status(400).send('Количество для отмены превышает доступное.')
-    }
-
-    const stockQuery = `SELECT sklad
-                        FROM dbo.tool_nom
-                        WHERE id = $1`
-    const stockResult = await pool.query(stockQuery, [operation.rows[0].id_tool])
-    const oldQuantity = parseInt(stockResult.rows[0].sklad, 10)
-
-    const currentDate = new Date()
-    const operationDate = new Date(operation.rows[0].timestamp)
-    const differenceInDays = Math.floor(
-      (currentDate - operationDate) / (1000 * 60 * 60 * 24)
-    )
-
-    if (differenceInDays > 50) {
-      await pool.query('ROLLBACK')
-      return res
-        .status(403)
-        .send(
-          'Отмена операции возможна только в течение 3 дней с момента выполнения.'
-        )
-    }
-
-    const updateOperationQuery = `UPDATE dbo.tool_history_nom
-                                  SET quantity     = quantity - $2,
-                                      cancelled    = true,
-                                      cancelled_id = $3
-                                  WHERE id = $1`
-    await pool.query(updateOperationQuery, [id, cancelQuantity, issuerId])
-
-    const newQuantity = oldQuantity + parseInt(cancelQuantity, 10)
-
-    const updateStockQuery = `UPDATE dbo.tool_nom
-                              SET sklad = $1
-                              WHERE id = $2`
-    await pool.query(updateStockQuery, [newQuantity, operation.rows[0].id_tool])
-
-    // Логирование операции возврата
-    const logMessage = `Отмена операции ${id}: ${cancelQuantity} ед. возвращено на склад. Было: ${oldQuantity}, стало: ${newQuantity}.`
-    const logQuery = `INSERT INTO dbo.vue_log (message, tool_id, user_id, datetime_log, old_amount, new_amount)
-                      VALUES ($1, $2, $3, NOW(), $4, $5)`
-    await pool.query(logQuery, [
-      logMessage,
-      operation.rows[0].id_tool,
-      issuerId,
-      oldQuantity,
-      newQuantity,
-    ])
-
-    await pool.query('COMMIT')
-
-    res.status(200).json({
-      success: true,
-      message: 'Операция успешно отменена',
-      operationId: id,
-      details: {
-        toolId: operation.rows[0].id_tool,
-        quantityReturned: cancelQuantity,
-        stockUpdated: `Было ${oldQuantity}, стало ${newQuantity} на складе.`,
-      },
-    })
-  } catch (error) {
-    await pool.query('ROLLBACK')
-    console.error('Ошибка при отмене операции:', error)
-    res.status(500).json({
-      success: false,
-      message: 'Внутренняя ошибка сервера',
-      errorDetails: error.message,
-    })
-  }
-}
-
 async function cancelOperation(req, res) {
   const { id } = req.params // ID операции
   const { issueToken, cancelQuantity } = req.body // Токен и количество для отмены
@@ -512,7 +395,6 @@ async function findParties(req, res) {
 module.exports = {
   findParties,
   cancelOperation,
-  cancelOperationAdmin,
   issueTools,
   getFioOperators,
   getCncData,
