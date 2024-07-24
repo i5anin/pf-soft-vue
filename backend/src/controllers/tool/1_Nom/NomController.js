@@ -328,7 +328,6 @@ async function addTool(req, res) {
 async function editTool(req, res) {
   const { id } = req.params
   let {
-    // Используем let вместо const
     name,
     parent_id,
     property,
@@ -338,11 +337,23 @@ async function editTool(req, res) {
     group_standard,
     norma_red,
     norma_green,
+    editToken,
   } = req.body
 
   replaceCommaWithDotInNumbers(property)
 
   try {
+    if (!editToken) return res.status(401).send('Authentication token is required.')
+
+    const tokenQuery = 'SELECT id FROM dbo.vue_users WHERE token = $1'
+    const tokenResult = await pool.query(tokenQuery, [editToken])
+
+    if (tokenResult.rows.length === 0) {
+      return res.status(403).send('Invalid token.')
+    }
+
+    const userId = tokenResult.rows[0].id
+
     if (parent_id <= 1) {
       return res.status(400).json({ error: 'parent_id must be greater than 1.' })
     }
@@ -369,7 +380,6 @@ async function editTool(req, res) {
       return res.status(400).json({ error: 'Specified parent_id does not exist.' })
     }
 
-    // Проверка на корректность значений норм для светофора
     if (
       (norma_green !== null && norma !== null && norma_green < norma) ||
       (norma !== null && norma_red !== null && norma < norma_red)
@@ -399,7 +409,6 @@ async function editTool(req, res) {
       )
     }
 
-    // Преобразование пустых строк и нулей в null
     norma = norma === '' || norma === 0 ? null : norma
     norma_red = norma_red === '' || norma_red === 0 ? null : norma_red
     norma_green = norma_green === '' || norma_green === 0 ? null : norma_green
@@ -423,8 +432,8 @@ async function editTool(req, res) {
 
     if (result.rowCount > 0) {
       await pool.query(
-        'INSERT INTO dbo.vue_log (message, tool_id, datetime_log, old_amount, new_amount) VALUES ($1, $2, NOW(), $3, $4)',
-        [`Обновлен ID инструмента ${id}`, id, oldSklad, newSklad]
+        'INSERT INTO dbo.vue_log (message, tool_id, user_id, datetime_log, old_amount, new_amount) VALUES ($1, $2, $3, NOW(), $4, $5)',
+        [`Обновлен ID инструмента ${id}`, id, userId, oldSklad, newSklad]
       )
 
       res.status(200).json({ success: 'OK', data: result.rows[0] })
