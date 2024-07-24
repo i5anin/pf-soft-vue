@@ -4,28 +4,28 @@ const express = require('express')
 const router = express.Router()
 
 const loginController = require('./controllers/login/LoginController')
-const nomController = require('./controllers/tool/main/NomController')
-const paramController = require('./controllers/tool/main/ParamController')
-const treeController = require('./controllers/tool/main/TreeController')
+const nomController = require('./controllers/tool/1_Nom/NomController')
+const paramController = require('./controllers/tool/2_ParamController/ParamController')
+const treeController = require('./controllers/tool/8_TreeController/TreeController')
 
-const historyController = require('./controllers/tool/HistoryIssueController')
-const historyControllerModal = require('./controllers/tool/HistoryIssueModalController')
+const historyController = require('./controllers/tool/5_HistoryIssue/HistoryIssueController')
+const historyControllerModal = require('./controllers/tool/5_HistoryIssue/HistoryIssueModalController')
 
-const damagedController = require('./controllers/tool/HistoryDamagedController')
-const issueController = require('./controllers/tool/IssueController')
+const damagedController = require('./controllers/tool/6_HistoryDamaged/HistoryDamagedController')
+const issueController = require('./controllers/tool/4_Issue/IssueController')
 
-const reportBuchEndPartController = require('./controllers/tool/reports/email/cron/BuchEndPartController')
-const reportRedAlertController = require('./controllers/tool/reports/email/cron/RedAlertToolsController')
+const reportBuchEndPartController = require('./controllers/tool/cron/BuchEndPart/BuchEndPartController')
+const reportRedAlertController = require('./controllers/tool/cron/RedAlert/RedAlertToolsController')
 
-const reportZakazController = require('./controllers/tool/reports/email/order/OrderToolsController')
-const reportSetupController = require('./controllers/tool/reports/email/NaladReportController')
+const reportZakazController = require('./controllers/tool/ReportsEmail/OrderTools/OrderToolsController')
+const reportSetupController = require('./controllers/tool/ReportsEmail/NaladReport/NaladReportController')
 
-const reportRevisionController = require('./controllers/tool/reports/email/RevisionToolsController')
+const reportRevisionController = require('./controllers/tool/ReportsEmail/RevisionTools/RevisionToolsController')
 
-const reportVueZakazController = require('./controllers/tool/reports/vue/OrderToolsController')
-const reportVueBuhController = require('./controllers/tool/reports/vue/BuchWeekController')
+const reportVueZakazController = require('./controllers/tool/9_ReportsVue/OrderTools/OrderToolsController')
+const reportVueBuhController = require('./controllers/tool/9_ReportsVue/BuchWeekController')
 
-const groupsController = require('./controllers/tool/main/GroupController')
+const groupsController = require('./controllers/tool/3_Group/GroupController')
 
 // 'Аутентификация'
 router.post('/login', loginController.login)

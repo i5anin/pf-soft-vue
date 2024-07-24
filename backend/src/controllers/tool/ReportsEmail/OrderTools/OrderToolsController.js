@@ -2,8 +2,8 @@ const { Pool } = require('pg')
 const fs = require('fs')
 const ExcelJS = require('exceljs')
 const nodemailer = require('nodemailer')
-const { emailConfig } = require('../../../../../config/config')
-const getDbConfig = require('../../../../../config/databaseConfig')
+const { emailConfig } = require('../../../../config/config')
+const getDbConfig = require('../../../../config/databaseConfig')
 const { format } = require('date-fns')
 
 // Настройка подключения к базе данных
@@ -11,7 +11,7 @@ const dbConfig = getDbConfig()
 const pool = new Pool(dbConfig)
 
 async function getReportData() {
-  await pool.query(fs.readFileSync(__dirname + '/isPlate.sql', 'utf-8'))
+  await pool.query(fs.readFileSync(__dirname + '/MarkPlates.sql', 'utf-8'))
   const sql = fs.readFileSync(__dirname + '/OrderToolsEmail.sql', 'utf-8')
   const { rows } = await pool.query(sql)
   return rows
