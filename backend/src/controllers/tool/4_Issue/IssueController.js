@@ -316,9 +316,9 @@ async function findParties(req, res) {
 }
 
 module.exports = {
-  findParties,
-  cancelOperation,
   issueTools,
+  findParties,
   getFioOperators,
   getCncData,
+  cancelOperation,
 }
