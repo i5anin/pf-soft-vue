@@ -40,7 +40,9 @@
                   v-for="item in operations"
                   :key="item + 'progress'"
                   :color="completedOperations.includes(item) ? 'green' : 'grey'"
-                  :variant="completedOperations.includes(item) ? 'elevated' : 'text'"
+                  :variant="
+                    completedOperations.includes(item) ? 'elevated' : 'text'
+                  "
                   class="ma-2"
                   outlined
                 >
@@ -155,10 +157,18 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn color="green darken-1" text="true" @click="confirmCancelOperation">
+          <v-btn
+            color="green darken-1"
+            text="true"
+            @click="confirmCancelOperation"
+          >
             Подтвердить
           </v-btn>
-          <v-btn color="red darken-1" text="true" @click="showCancelDialog = false">
+          <v-btn
+            color="red darken-1"
+            text="true"
+            @click="showCancelDialog = false"
+          >
             Отмена
           </v-btn>
         </v-card-actions>
@@ -329,7 +339,8 @@ export default {
         } else {
           // Другие ошибки
           this.errorMessage =
-            'Ошибка при отмене операции: ' + (error.message || 'Неизвестная ошибка')
+            'Ошибка при отмене операции: ' +
+            (error.message || 'Неизвестная ошибка')
         }
         this.showErrorSnackbar = true
       }

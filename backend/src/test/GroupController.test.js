@@ -4,7 +4,9 @@ const config = require('./config-test')
 const baseUrl = config.api.baseUrl
 
 it('Получение списка инструментов, сгруппированных по ID группы', async () => {
-  console.log('--- Получение списка инструментов, сгруппированных по ID группы ---')
+  console.log(
+    '--- Получение списка инструментов, сгруппированных по ID группы ---'
+  )
   const response = await axios.get(`${baseUrl}/tools-groups`)
 
   console.log('Получен ответ:', response.data)

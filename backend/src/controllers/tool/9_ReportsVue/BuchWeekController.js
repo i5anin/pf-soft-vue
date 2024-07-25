@@ -10,7 +10,9 @@ async function getTableReportData(req, res) {
   try {
     const today = new Date()
     const thisThursday = new Date(today)
-    thisThursday.setDate(thisThursday.getDate() - ((thisThursday.getDay() + 3) % 7))
+    thisThursday.setDate(
+      thisThursday.getDate() - ((thisThursday.getDay() + 3) % 7)
+    )
     const nextThursday = new Date(thisThursday)
     nextThursday.setDate(nextThursday.getDate() + 7)
 

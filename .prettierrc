@@ -4,5 +4,5 @@
   "singleQuote": true,
   "semi": false,
   "endOfLine": "auto",
-  "printWidth": 85
+  "printWidth": 80
 }

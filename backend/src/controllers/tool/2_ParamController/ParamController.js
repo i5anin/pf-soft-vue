@@ -31,7 +31,8 @@ async function moveToolParam(req, res) {
 
   try {
     // Получаем текущий порядок параметра
-    const currentOrderQuery = 'SELECT param_order FROM dbo.tool_params WHERE id = $1'
+    const currentOrderQuery =
+      'SELECT param_order FROM dbo.tool_params WHERE id = $1'
     const currentOrderResult = await pool.query(currentOrderQuery, [id])
     if (currentOrderResult.rows.length === 0) {
       res.status(404).send('Parameter not found')

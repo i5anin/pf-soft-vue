@@ -17,7 +17,8 @@ async function getReportData() {
     currentDate.getMonth(),
     1
   )
-  const firstDayOfMonthStr = firstDayOfMonth.toISOString().slice(0, 10) + ' 00:00:00' // Форматируем дату для SQL запроса
+  const firstDayOfMonthStr =
+    firstDayOfMonth.toISOString().slice(0, 10) + ' 00:00:00' // Форматируем дату для SQL запроса
 
   const query = `
     WITH RankedRecords AS (

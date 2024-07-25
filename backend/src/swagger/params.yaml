@@ -1,137 +1,137 @@
-swagger: "3.0"
+swagger: '3.0'
 info:
-  description: "API для управления параметрами инструментов"
-  version: "1.0.0"
-  title: "API Tool Parameters"
-url: "/v1/api"
+  description: 'API для управления параметрами инструментов'
+  version: '1.0.0'
+  title: 'API Tool Parameters'
+url: '/v1/api'
 tags:
-  - name: "ToolParams"
-    description: "API эндпойнты для параметров инструментов"
+  - name: 'ToolParams'
+    description: 'API эндпойнты для параметров инструментов'
 
 paths:
   /api/tools-params:
     get:
       tags:
-        - "ToolParams"
-      summary: "Получить параметры инструментов"
-      operationId: "getToolsParams"
+        - 'ToolParams'
+      summary: 'Получить параметры инструментов'
+      operationId: 'getToolsParams'
       produces:
-        - "application/json"
+        - 'application/json'
       responses:
-        "200":
-          description: "Успешное получение списка параметров инструментов"
+        '200':
+          description: 'Успешное получение списка параметров инструментов'
           schema:
-            type: "array"
+            type: 'array'
             items:
-              $ref: "#/definitions/ToolParam"
+              $ref: '#/definitions/ToolParam'
           examples:
             application/json:
               - id: 96
-                label: "1. Диаметр, мм"
+                label: '1. Диаметр, мм'
                 param_order: 1
               - id: 94
-                label: "2. Шаг резьбы"
+                label: '2. Шаг резьбы'
                 param_order: 2
               - id: 95
-                label: "3. Квалитет"
+                label: '3. Квалитет'
                 param_order: 3
-        "500":
-          description: "Ошибка сервера"
+        '500':
+          description: 'Ошибка сервера'
     post:
       tags:
-        - "ToolParams"
-      summary: "Добавить параметр инструмента"
-      operationId: "addToolParam"
+        - 'ToolParams'
+      summary: 'Добавить параметр инструмента'
+      operationId: 'addToolParam'
       consumes:
-        - "application/json"
+        - 'application/json'
       produces:
-        - "application/json"
+        - 'application/json'
       parameters:
-        - in: "body"
-          name: "body"
-          description: "Объект параметра инструмента для добавления"
+        - in: 'body'
+          name: 'body'
+          description: 'Объект параметра инструмента для добавления'
           required: true
           schema:
-            $ref: "#/definitions/NewToolParam"
+            $ref: '#/definitions/NewToolParam'
       responses:
-        "201":
-          description: "Успешное добавление параметра инструмента"
-        "400":
-          description: "Неверный запрос"
-        "500":
-          description: "Ошибка сервера"
+        '201':
+          description: 'Успешное добавление параметра инструмента'
+        '400':
+          description: 'Неверный запрос'
+        '500':
+          description: 'Ошибка сервера'
 
   /api/tools-params/{id}:
     parameters:
-      - name: "id"
-        in: "path"
+      - name: 'id'
+        in: 'path'
         required: true
-        type: "integer"
-        format: "int64"
-        description: "ID параметра инструмента"
+        type: 'integer'
+        format: 'int64'
+        description: 'ID параметра инструмента'
     put:
       tags:
-        - "ToolParams"
-      summary: "Обновить параметр инструмента"
-      operationId: "updateToolParam"
+        - 'ToolParams'
+      summary: 'Обновить параметр инструмента'
+      operationId: 'updateToolParam'
       consumes:
-        - "application/json"
+        - 'application/json'
       produces:
-        - "application/json"
+        - 'application/json'
       parameters:
-        - in: "body"
-          name: "body"
-          description: "Объект параметра инструмента с обновленным названием"
+        - in: 'body'
+          name: 'body'
+          description: 'Объект параметра инструмента с обновленным названием'
           required: true
           schema:
-            $ref: "#/definitions/ToolParam"
+            $ref: '#/definitions/ToolParam'
       responses:
-        "200":
-          description: "Успешное обновление параметра инструмента"
-        "400":
-          description: "Неверный запрос"
-        "404":
-          description: "Параметр инструмента не найден"
-        "500":
-          description: "Ошибка сервера"
+        '200':
+          description: 'Успешное обновление параметра инструмента'
+        '400':
+          description: 'Неверный запрос'
+        '404':
+          description: 'Параметр инструмента не найден'
+        '500':
+          description: 'Ошибка сервера'
     delete:
       tags:
-        - "ToolParams"
-      summary: "Удалить параметр инструмента"
-      operationId: "deleteToolParam"
+        - 'ToolParams'
+      summary: 'Удалить параметр инструмента'
+      operationId: 'deleteToolParam'
       responses:
-        "200":
-          description: "Успешное удаление параметра инструмента"
-        "404":
-          description: "Параметр инструмента не найден"
-        "500":
-          description: "Ошибка сервера"
+        '200':
+          description: 'Успешное удаление параметра инструмента'
+        '404':
+          description: 'Параметр инструмента не найден'
+        '500':
+          description: 'Ошибка сервера'
 
 definitions:
   ToolParam:
-    type: "object"
+    type: 'object'
     required:
       - id
       - label
       - param_order
     properties:
       id:
-        type: "integer"
-        format: "int64"
-        description: "Уникальный идентификатор параметра инструмента"
+        type: 'integer'
+        format: 'int64'
+        description: 'Уникальный идентификатор параметра инструмента'
       label:
-        type: "string"
-        description: "Название параметра инструмента"
+        type: 'string'
+        description: 'Название параметра инструмента'
       param_order:
-        type: "integer"
-        format: "int32"
-        description: "Порядковый номер параметра инструмента"
+        type: 'integer'
+        format: 'int32'
+        description: 'Порядковый номер параметра инструмента'
 
   NewToolParam:
-    type: "object"
+    type: 'object'
     required:
-      - "label"
+      - 'label'
     properties:
       label:
-        type: "string"
-        description: "Название нового параметра инструмента"
+        type: 'string'
+        description: 'Название нового параметра инструмента'

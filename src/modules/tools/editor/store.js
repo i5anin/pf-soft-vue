@@ -19,7 +19,6 @@ export default {
       search: '',
       includeNull: false,
       selectedDynamicFilters: {},
-
     },
   }),
   mutations: {

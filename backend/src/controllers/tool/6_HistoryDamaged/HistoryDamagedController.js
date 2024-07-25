@@ -114,7 +114,13 @@ async function addToolHistoryDamaged(req, res) {
       VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
       RETURNING id;
     `
-    await pool.query(insertQuery, [id_tool, id_user, cnc_code, comment, quantity])
+    await pool.query(insertQuery, [
+      id_tool,
+      id_user,
+      cnc_code,
+      comment,
+      quantity,
+    ])
 
     // Обновление количества инструмента на складе
     const updateSkladQuery = `
@@ -140,7 +146,10 @@ async function addToolHistoryDamaged(req, res) {
       updatedQuantity,
     })
   } catch (error) {
-    console.error('Ошибка при добавлении записи о поврежденном инструменте:', error)
+    console.error(
+      'Ошибка при добавлении записи о поврежденном инструменте:',
+      error
+    )
     res.status(500).json({
       success: false,
       message: 'Внутренняя ошибка сервера',

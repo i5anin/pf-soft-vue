@@ -162,8 +162,8 @@ export default {
       this.currentItem = updatedCurrentItem // Если текущий элемент не найден, обновляем его на первый элемент из дерева или на null, если дерево пустое
         ? updatedCurrentItem
         : updatedTree.length > 0
-        ? updatedTree[0]
-        : null
+          ? updatedTree[0]
+          : null
     },
 
     async selectItem(item) {

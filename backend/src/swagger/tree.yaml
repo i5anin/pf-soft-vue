@@ -1,20 +1,20 @@
 openapi: 3.0.0
 info:
-  title: "API Tool Tree"
-  version: "1.0.0"
-  description: "API для работы с деревом инструментов"
+  title: 'API Tool Tree'
+  version: '1.0.0'
+  description: 'API для работы с деревом инструментов'
 servers:
-  - url: "http://192.168.0.200:4001"
+  - url: 'http://192.168.0.200:4001'
 
 paths:
   /tools-tree:
     get:
       tags:
-        - "Tool Tree"
-      summary: "Получить дерево инструментов"
+        - 'Tool Tree'
+      summary: 'Получить дерево инструментов'
       responses:
         '200':
-          description: "Успешно получен список инструментов в виде дерева"
+          description: 'Успешно получен список инструментов в виде дерева'
           content:
             application/json:
               schema:
@@ -22,22 +22,22 @@ paths:
                 items:
                   $ref: '#/components/schemas/ToolTreeNode'
         '500':
-          description: "Внутренняя ошибка сервера"
+          description: 'Внутренняя ошибка сервера'
 
   /tools-tree/{id}:
     put:
       tags:
-        - "Tool Tree"
-      summary: "Обновить название папки"
+        - 'Tool Tree'
+      summary: 'Обновить название папки'
       parameters:
-        - name: "id"
-          in: "path"
-          description: "ID папки для обновления"
+        - name: 'id'
+          in: 'path'
+          description: 'ID папки для обновления'
           required: true
           schema:
             type: integer
       requestBody:
-        description: "Данные для обновления папки"
+        description: 'Данные для обновления папки'
         required: true
         content:
           application/json:
@@ -46,25 +46,25 @@ paths:
               properties:
                 newName:
                   type: string
-                  description: "Новое название папки"
+                  description: 'Новое название папки'
       responses:
         '200':
-          description: "Папка успешно обновлена"
+          description: 'Папка успешно обновлена'
         '400':
-          description: "Ошибка в запросе"
+          description: 'Ошибка в запросе'
           content:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Error'
         '500':
-          description: "Внутренняя ошибка сервера"
+          description: 'Внутренняя ошибка сервера'
 
     post:
       tags:
-        - "Tool Tree"
-      summary: "Добавить подпапку"
+        - 'Tool Tree'
+      summary: 'Добавить подпапку'
       requestBody:
-        description: "Данные для добавления новой папки"
+        description: 'Данные для добавления новой папки'
         required: true
         content:
           application/json:
@@ -72,38 +72,38 @@ paths:
               $ref: '#/components/schemas/NewBranch'
       responses:
         '200':
-          description: "Новая подпапка успешно добавлена"
+          description: 'Новая подпапка успешно добавлена'
         '400':
-          description: "Ошибка в запросе"
+          description: 'Ошибка в запросе'
           content:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Error'
         '500':
-          description: "Внутренняя ошибка сервера"
+          description: 'Внутренняя ошибка сервера'
 
     delete:
       tags:
-        - "Tool Tree"
-      summary: "Удалить папку с инструментами"
+        - 'Tool Tree'
+      summary: 'Удалить папку с инструментами'
       parameters:
-        - name: "id"
-          in: "path"
-          description: "ID папки для удаления"
+        - name: 'id'
+          in: 'path'
+          description: 'ID папки для удаления'
           required: true
           schema:
             type: integer
       responses:
         '200':
-          description: "Папка успешно удалена"
+          description: 'Папка успешно удалена'
         '400':
-          description: "Ошибка в запросе"
+          description: 'Ошибка в запросе'
           content:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Error'
         '500':
-          description: "Внутренняя ошибка сервера"
+          description: 'Внутренняя ошибка сервера'
 
 components:
   schemas:
@@ -119,22 +119,22 @@ components:
       properties:
         id:
           type: integer
-          description: "ID инструмента"
+          description: 'ID инструмента'
         label:
           type: string
-          description: "Название инструмента"
+          description: 'Название инструмента'
         elements:
           type: integer
-          description: "Количество элементов в данной папке"
+          description: 'Количество элементов в данной папке'
         available:
           type: integer
-          description: "Количество доступных элементов в данной папке"
+          description: 'Количество доступных элементов в данной папке'
         totalElements:
           type: integer
-          description: "Общее количество элементов в данной папке и ее подпапках"
+          description: 'Общее количество элементов в данной папке и ее подпапках'
         totalAvailable:
           type: integer
-          description: "Общее количество доступных элементов в данной папке и ее подпапках"
+          description: 'Общее количество доступных элементов в данной папке и ее подпапках'
         nodes:
           type: array
           items:
@@ -145,10 +145,10 @@ components:
       properties:
         name:
           type: string
-          description: "Название новой подпапки"
+          description: 'Название новой подпапки'
         parentId:
           type: integer
-          description: "ID родительской папки"
+          description: 'ID родительской папки'
 
     # Дополнительные схемы для примера
     Error:
@@ -156,4 +156,4 @@ components:
       properties:
         message:
           type: string
-          description: "Сообщение об ошибке"
+          description: 'Сообщение об ошибке'

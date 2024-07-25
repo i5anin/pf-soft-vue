@@ -280,7 +280,9 @@ async function genZayavInstr(req, res) {
 // Функция для округления заказа
 function getRoundedCount(count) {
   if (count < 10) return 10
-  return count % 10 < 5 ? Math.floor(count / 10) * 10 : Math.ceil(count / 10) * 10
+  return count % 10 < 5
+    ? Math.floor(count / 10) * 10
+    : Math.ceil(count / 10) * 10
 }
 
 module.exports = {

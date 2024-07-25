@@ -117,10 +117,14 @@ export default {
     ...mapGetters('EditorToolStore', ['nameOptions', 'tool', 'parentCatalog']),
     availableToolParamOptions() {
       // Фильтрация toolParamOptions, чтобы показывать только те, которые еще не выбраны
-      return this.toolParamOptions.filter((option) => !this.selectedParams.includes(option))
+      return this.toolParamOptions.filter(
+        (option) => !this.selectedParams.includes(option)
+      )
     },
     isAddButtonVisible() {
-      const uniqueSelectedParamsCount = new Set(Object.keys(this.toolModel.property)).size
+      const uniqueSelectedParamsCount = new Set(
+        Object.keys(this.toolModel.property)
+      ).size
       const totalAvailableParams = this.toolParams.length
       return uniqueSelectedParamsCount < totalAvailableParams
     },
@@ -128,7 +132,9 @@ export default {
       // Возвращаем информацию о выбранных параметрах на основе текущего состояния toolModel.property
       return Object.entries(this.toolModel.property)
         .map(([key, value]) => {
-          const param = this.toolParams.find((param) => param.id.toString() === key)
+          const param = this.toolParams.find(
+            (param) => param.id.toString() === key
+          )
           return param ? { ...param, value } : null
         })
         .filter((param) => param !== null)
@@ -163,7 +169,10 @@ export default {
       this.toolParamOptions = rawToolParams.map((param) => param.info) // Предполагается, что каждый параметр содержит поле info
 
       // Если модель инструмента уже содержит выбранные параметры, обновите selectedParams
-      if (this.toolModel.property && Object.keys(this.toolModel.property).length > 0) {
+      if (
+        this.toolModel.property &&
+        Object.keys(this.toolModel.property).length > 0
+      ) {
         const propertyIds = Object.keys(this.toolModel.property)
         this.selectedParams = this.toolParams
           .filter((param) => propertyIds.includes(String(param.id)))
@@ -210,7 +219,10 @@ export default {
             user: item.user_login || 'Неопределен', // Предоставим значение по умолчанию, если user_login равен null
           }))
         } catch (error) {
-          console.error('Ошибка при получении данных о движении инструмента:', error)
+          console.error(
+            'Ошибка при получении данных о движении инструмента:',
+            error
+          )
           this.showErrorSnackbar('Ошибка загрузки данных.')
         }
       }
@@ -222,7 +234,8 @@ export default {
     },
     async fetchToolNamesByParentId(parentId) {
       try {
-        this.toolNameOptions = await editorToolApi.getToolNamesByParentId(parentId)
+        this.toolNameOptions =
+          await editorToolApi.getToolNamesByParentId(parentId)
       } catch (error) {
         console.error('Ошибка при получении названий инструментов:', error)
       }
@@ -308,7 +321,8 @@ export default {
       }
     },
     prependOptionIfNeeded(value, optionsList) {
-      if (value && !optionsList.some((option) => option.value === value)) optionsList.unshift(value)
+      if (value && !optionsList.some((option) => option.value === value))
+        optionsList.unshift(value)
     },
     prepareFioOptions(fioData) {
       return fioData.map((item) => ({
@@ -317,7 +331,8 @@ export default {
       }))
     },
     confirmDelete() {
-      if (window.confirm('Вы уверены, что хотите удалить этот инструмент?')) this.onDelete()
+      if (window.confirm('Вы уверены, что хотите удалить этот инструмент?'))
+        this.onDelete()
     },
     async onDelete() {
       // Предполагается, что метод onDelete вызывается, когда пользователь подтверждает удаление
@@ -351,7 +366,10 @@ export default {
         }
         if (response.success === 'OK') this.$emit('changes-saved')
       } catch (error) {
-        console.error('Ошибка при сохранении:', error.response ? error.response.data : error)
+        console.error(
+          'Ошибка при сохранении:',
+          error.response ? error.response.data : error
+        )
       }
     },
   },

@@ -1,25 +1,25 @@
 openapi: 3.0.0
 info:
-  title: "API Tools"
-  version: "1.0.0"
-  description: "Описание вашего API инструмента"
+  title: 'API Tools'
+  version: '1.0.0'
+  description: 'Описание вашего API инструмента'
 paths:
   /api/tools:
     get:
       tags:
         - Tools
-      summary: "Получить список инструментов"
+      summary: 'Получить список инструментов'
       parameters:
         - in: query
           name: search
           schema:
             type: string
-          description: "Поиск по имени инструмента"
+          description: 'Поиск по имени инструмента'
         - in: query
           name: parent_id
           schema:
             type: integer
-          description: "Фильтр по ID родительской категории"
+          description: 'Фильтр по ID родительской категории'
         - in: query
           name: onlyInStock
           schema:
@@ -27,27 +27,27 @@ paths:
             enum:
               - true
               - false
-          description: "Фильтр по наличию на складе"
+          description: 'Фильтр по наличию на складе'
         - in: query
           name: page
           schema:
             type: integer
             default: 1
-          description: "Номер страницы для пагинации"
+          description: 'Номер страницы для пагинации'
         - in: query
           name: limit
           schema:
             type: integer
             default: 50
-          description: "Количество элементов на странице"
+          description: 'Количество элементов на странице'
         - in: query
           name: param_{paramId}
           schema:
             type: string
-          description: "Динамические параметры для фильтрации"
+          description: 'Динамические параметры для фильтрации'
       responses:
         '200':
-          description: "Список инструментов"
+          description: 'Список инструментов'
           content:
             application/json:
               schema:
@@ -86,11 +86,11 @@ paths:
                         group_standard:
                           type: string
         '500':
-          description: "Внутренняя ошибка сервера"
+          description: 'Внутренняя ошибка сервера'
     post:
       tags:
         - Tools
-      summary: "Добавить новый инструмент"
+      summary: 'Добавить новый инструмент'
       requestBody:
         content:
           application/json:
@@ -99,22 +99,22 @@ paths:
               type: object
       responses:
         '201':
-          description: "Инструмент успешно добавлен"
+          description: 'Инструмент успешно добавлен'
         '400':
-          description: "Некорректные данные запроса"
+          description: 'Некорректные данные запроса'
         '500':
-          description: "Внутренняя ошибка сервера"
+          description: 'Внутренняя ошибка сервера'
     put:
       tags:
         - Tools
-      summary: "Обновить инструмент"
+      summary: 'Обновить инструмент'
       parameters:
         - in: path
           name: id
           schema:
             type: integer
           required: true
-          description: "ID инструмента для обновления"
+          description: 'ID инструмента для обновления'
       requestBody:
         content:
           application/json:
@@ -123,28 +123,28 @@ paths:
               type: object
       responses:
         '200':
-          description: "Инструмент успешно обновлен"
+          description: 'Инструмент успешно обновлен'
         '400':
-          description: "Некорректные данные запроса"
+          description: 'Некорректные данные запроса'
         '404':
-          description: "Инструмент не найден"
+          description: 'Инструмент не найден'
         '500':
-          description: "Внутренняя ошибка сервера"
+          description: 'Внутренняя ошибка сервера'
     delete:
       tags:
         - Tools
-      summary: "Удалить инструмент"
+      summary: 'Удалить инструмент'
       parameters:
         - in: path
           name: id
           schema:
             type: integer
           required: true
-          description: "ID инструмента для удаления"
+          description: 'ID инструмента для удаления'
       responses:
         '204':
-          description: "Инструмент успешно удален"
+          description: 'Инструмент успешно удален'
         '404':
-          description: "Инструмент не найден"
+          description: 'Инструмент не найден'
         '500':
-          description: "Внутренняя ошибка сервера"
+          description: 'Внутренняя ошибка сервера'

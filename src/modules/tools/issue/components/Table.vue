@@ -1,5 +1,11 @@
 <template>
-  <v-snackbar v-model="snackbarVisible" :timeout="8000" bottom right color="blue-grey">
+  <v-snackbar
+    v-model="snackbarVisible"
+    :timeout="8000"
+    bottom
+    right
+    color="blue-grey"
+  >
     {{ snackbarText }}
   </v-snackbar>
   <v-container>
@@ -63,7 +69,9 @@
       </template>
       <template #item.sklad="{ item }" #item.norma="{ item }">
         <td :class="colorClassRed(item)" style="white-space: nowrap">
-          <v-chip size="large" color="primary" variant="flat"> {{ item.sklad }}</v-chip>
+          <v-chip size="large" color="primary" variant="flat">
+            {{ item.sklad }}</v-chip
+          >
           <span v-if="item.norma" class="grey"> / {{ item.norma }} </span>
         </td>
       </template>
@@ -172,7 +180,10 @@ export default {
   },
 
   methods: {
-    ...mapActions('IssueToolStore', ['fetchToolsDynamicFilters', 'fetchToolsByFilter']),
+    ...mapActions('IssueToolStore', [
+      'fetchToolsDynamicFilters',
+      'fetchToolsByFilter',
+    ]),
     ...mapMutations('IssueToolStore', [
       'setCurrentPage',
       'setItemsPerPage',
@@ -199,7 +210,9 @@ export default {
         return
       }
 
-      const existingCartItem = this.cartItems.find((item) => item.toolId === toolId)
+      const existingCartItem = this.cartItems.find(
+        (item) => item.toolId === toolId
+      )
       const totalQuantityInCart = existingCartItem
         ? existingCartItem.quantity + quantityToAdd
         : quantityToAdd

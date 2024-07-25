@@ -1,29 +1,31 @@
 <template>
   <v-container>
     <v-row>
-      <v-col cols='12'>
+      <v-col cols="12">
         <v-table>
           <thead>
-          <tr>
-            <th class='text-left'>Название</th>
-            <th class='text-left'>Информация</th>
-            <th class='text-left'>На почту</th>
-          </tr>
+            <tr>
+              <th class="text-left">Название</th>
+              <th class="text-left">Информация</th>
+              <th class="text-left">На почту</th>
+            </tr>
           </thead>
           <tbody>
-          <tr v-for='(report, index) in reports' :key='index'>
-            <td>{{ report.name }}</td>
-            <td>{{ report.info }}</td>
-            <td>
-              <v-btn color='primary' @click='report.action(report)'>Email</v-btn>
-            </td>
-          </tr>
+            <tr v-for="(report, index) in reports" :key="index">
+              <td>{{ report.name }}</td>
+              <td>{{ report.info }}</td>
+              <td>
+                <v-btn color="primary" @click="report.action(report)"
+                  >Email</v-btn
+                >
+              </td>
+            </tr>
           </tbody>
         </v-table>
       </v-col>
     </v-row>
   </v-container>
-<!--  <ReportZakaz></ReportZakaz>-->
+  <!--  <ReportZakaz></ReportZakaz>-->
 </template>
 <script>
 import { reportApi } from '../api/report'

@@ -146,7 +146,9 @@ async function getToolHistoryByPartId(req, res) {
 
       if (allTools[row.id_tool]) {
         allTools[row.id_tool].quantity += row.quantity
-        if (new Date(allTools[row.id_tool].timestamp) < new Date(row.timestamp)) {
+        if (
+          new Date(allTools[row.id_tool].timestamp) < new Date(row.timestamp)
+        ) {
           allTools[row.id_tool].timestamp = row.timestamp
           allTools[row.id_tool].type_issue = row.type_issue
         }
@@ -353,7 +355,9 @@ async function addToArchive(req, res) {
 
     await client.query('COMMIT')
     res.send(
-      newArchiveState ? 'Запись добавлена в архив.' : 'Запись удалена из архива.'
+      newArchiveState
+        ? 'Запись добавлена в архив.'
+        : 'Запись удалена из архива.'
     )
   } catch (err) {
     await client.query('ROLLBACK')

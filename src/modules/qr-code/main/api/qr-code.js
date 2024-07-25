@@ -17,6 +17,9 @@ export const QrCodeApi = {
   },
 
   addQrCodeData: async () => {
-    return axiosInstance.post('/qr-code').then(handleResponse).catch(handleApiError)
+    return axiosInstance
+      .post('/qr-code')
+      .then(handleResponse)
+      .catch(handleApiError)
   },
 }

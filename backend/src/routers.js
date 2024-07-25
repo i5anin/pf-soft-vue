@@ -38,11 +38,17 @@ router.post('/tool', nomController.addTool)
 router.put('/tool/:id', nomController.editTool)
 router.delete('/tool/:id', nomController.deleteTool)
 // "Главный фильтр"
-router.get('/tools/params/:parent_id/filter', nomController.filterParamsParentId)
+router.get(
+  '/tools/params/:parent_id/filter',
+  nomController.filterParamsParentId
+)
 // "Инструмент Modal"
 router.get('/tool/modal-form/:id', nomController.getToolById) //1 элемент router.get('/tool/:id', nomController.getToolById)
 router.get('/tools/modal-form/:id/names', nomController.getToolNameId) // router.get('/tools-params-name/:id', paramController.getToolNameId)
-router.get('/tools/modal-form/:id/params', paramController.getToolParamsParentId) // подсказки для заполнения router.get('/tools-params/:id', paramController.getToolParamsParentId)
+router.get(
+  '/tools/modal-form/:id/params',
+  paramController.getToolParamsParentId
+) // подсказки для заполнения router.get('/tools-params/:id', paramController.getToolParamsParentId)
 
 // "Параметры"
 router.get('/tools-params', paramController.getToolParams)
@@ -72,8 +78,14 @@ router.get('/history-all-tool', historyController.getAllIssuedToolIdsWithNames) 
 
 // "История выдачи Modal"
 router.get('/history-part', historyControllerModal.getToolHistoryByPartId) //история основной список
-router.get('/history-operation', historyControllerModal.getToolHistoryByOperationId) //история по операции
-router.get('/history-part/info', historyControllerModal.getToolHistoryByPartIdInfo) //история информация по партии
+router.get(
+  '/history-operation',
+  historyControllerModal.getToolHistoryByOperationId
+) //история по операции
+router.get(
+  '/history-part/info',
+  historyControllerModal.getToolHistoryByPartIdInfo
+) //история информация по партии
 router.post('/history-add-archive', historyControllerModal.addToArchive) //архив истории выдачи
 
 // "Движение инструмента"
@@ -91,7 +103,10 @@ router.get('/report/zayav-instr', reportZakazController.genZayavInstr) // зая
 router.get('/report/setup', reportSetupController.genSetupReport) // заявка на инструмент	раз в неделю каждый ЧТ в 12:00 (за неделю)
 router.get('/report/revision-instr', reportRevisionController.genRevisionInstr) // заявка на инструмент	раз в неделю каждый ЧТ в 12:00 (за неделю)
 // "Email report Buch *CRON"
-router.get('/report/buch-end-op', reportBuchEndPartController.checkStatusChanges) //в режиме CRON
+router.get(
+  '/report/buch-end-op',
+  reportBuchEndPartController.checkStatusChanges
+) //в режиме CRON
 router.get('/report/red-alert', reportRedAlertController.genRedAlert) //в режиме CRON
 
 // "Vue"

@@ -6,5 +6,5 @@ module.exports = {
   // runInBand: true,
 
   // Установить количество worker-процессов в 1
-  maxWorkers: 1
-};
+  maxWorkers: 1,
+}

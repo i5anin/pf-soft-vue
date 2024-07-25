@@ -36,7 +36,10 @@ describe('Работа с создание номенклатур', () => {
     expect(response.status).toBe(200)
     expect(response.data.data).toHaveProperty('id')
     expect(response.data.data).toHaveProperty('name', newRecordData.name)
-    expect(response.data.data).toHaveProperty('parent_id', newRecordData.parent_id)
+    expect(response.data.data).toHaveProperty(
+      'parent_id',
+      newRecordData.parent_id
+    )
 
     createdRecordId = response.data.data.id
     console.log('Созданный ID:', createdRecordId)
@@ -44,7 +47,9 @@ describe('Работа с создание номенклатур', () => {
 
   it('Получение созданного инструмента', async () => {
     console.log('--- Получение созданного инструмента ---')
-    const response = await axios.get(`${baseUrl}/tool/modal-form/${createdRecordId}`)
+    const response = await axios.get(
+      `${baseUrl}/tool/modal-form/${createdRecordId}`
+    )
     console.log('Получен ответ:', response.data)
 
     expect(response.status).toBe(200)
@@ -83,7 +88,10 @@ describe('Работа с создание номенклатур', () => {
       'parent_id',
       updatedRecordData.parent_id
     )
-    expect(response.data.data).toHaveProperty('property', updatedRecordData.property)
+    expect(response.data.data).toHaveProperty(
+      'property',
+      updatedRecordData.property
+    )
   })
 
   it('Удаление инструмента', async () => {
@@ -100,7 +108,10 @@ describe('Работа с создание номенклатур', () => {
       const response = await axios.get(`${baseUrl}/tool/${createdRecordId}`)
       console.log('Получен ответ:', response.data)
     } catch (error) {
-      console.log('Ошибка:', error.response ? error.response.data : error.message)
+      console.log(
+        'Ошибка:',
+        error.response ? error.response.data : error.message
+      )
       expect(error.response.status).toBe(404)
     }
   })
@@ -110,7 +121,9 @@ it('Проверка фильтрации папки', async () => {
   console.log('--- Проверка фильтров папки ---')
   const folderId = 200
   try {
-    const response = await axios.get(`${baseUrl}/tools/params/${folderId}/filter`)
+    const response = await axios.get(
+      `${baseUrl}/tools/params/${folderId}/filter`
+    )
     console.log('Получен ответ:', response.data)
 
     // Функция проверки структуры каждого элемента в массиве

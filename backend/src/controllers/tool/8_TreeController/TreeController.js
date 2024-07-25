@@ -137,7 +137,9 @@ async function updateFolderTree(req, res) {
     const { id, newName } = req.body // Получение ID и нового названия из тела запроса
 
     if (!id || !newName) {
-      return res.status(400).json({ message: 'Необходимы ID и новое имя папки' })
+      return res
+        .status(400)
+        .json({ message: 'Необходимы ID и новое имя папки' })
     }
 
     // Получение текущего parent_id для данной записи

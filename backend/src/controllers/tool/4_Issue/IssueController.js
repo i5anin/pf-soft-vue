@@ -39,7 +39,8 @@ async function getFioOperators(req, res) {
 async function issueTools(req, res) {
   const { operationId, userId, tools, typeIssue, issueToken } = req.body
 
-  if (!issueToken) return res.status(401).send('Authentication token is required.')
+  if (!issueToken)
+    return res.status(401).send('Authentication token is required.')
 
   try {
     await pool.query('BEGIN')
@@ -60,7 +61,10 @@ async function issueTools(req, res) {
       const selectQuery = 'SELECT sklad FROM dbo.tool_nom WHERE id = $1'
       const stockResult = await pool.query(selectQuery, [toolId])
 
-      if (stockResult.rows.length === 0 || stockResult.rows[0].sklad < quantity) {
+      if (
+        stockResult.rows.length === 0 ||
+        stockResult.rows[0].sklad < quantity
+      ) {
         insufficientTools.push({
           toolId,
           available: stockResult.rows[0]?.sklad || 0,
@@ -120,7 +124,13 @@ async function issueTools(req, res) {
       const logMessage = `Выдача инструмента ${toolId}: ${quantity} ед. Пользователь: ${userId}, Осталось на складе: ${newStock}.`
       const logQuery =
         'INSERT INTO dbo.vue_log (message, tool_id, user_id, datetime_log, old_amount, new_amount) VALUES ($1, $2, $3, NOW(), $4, $5)'
-      await pool.query(logQuery, [logMessage, toolId, issuerId, oldStock, newStock])
+      await pool.query(logQuery, [
+        logMessage,
+        toolId,
+        issuerId,
+        oldStock,
+        newStock,
+      ])
     }
 
     await pool.query('COMMIT')
@@ -169,7 +179,9 @@ async function cancelOperation(req, res) {
   }
 
   if (!issueToken) {
-    return res.status(401).json({ message: 'Authentication token is required.' })
+    return res
+      .status(401)
+      .json({ message: 'Authentication token is required.' })
   }
 
   if (!cancelQuantity || cancelQuantity <= 0) {

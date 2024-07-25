@@ -267,8 +267,9 @@ export default {
       )
     },
     isAddButtonVisible() {
-      const uniqueSelectedParamsCount = new Set(Object.keys(this.toolModel.property))
-        .size
+      const uniqueSelectedParamsCount = new Set(
+        Object.keys(this.toolModel.property)
+      ).size
       const totalAvailableParams = this.toolParams.length
       return uniqueSelectedParamsCount < totalAvailableParams
     },
@@ -276,7 +277,9 @@ export default {
       // Возвращаем информацию о выбранных параметрах на основе текущего состояния toolModel.property
       return Object.entries(this.toolModel.property)
         .map(([key, value]) => {
-          const param = this.toolParams.find((param) => param.id.toString() === key)
+          const param = this.toolParams.find(
+            (param) => param.id.toString() === key
+          )
           return param ? { ...param, value } : null
         })
         .filter((param) => param !== null)
@@ -363,7 +366,8 @@ export default {
     },
     async fetchToolNamesByParentId(parentId) {
       try {
-        this.toolNameOptions = await editorToolApi.getToolNamesByParentId(parentId)
+        this.toolNameOptions =
+          await editorToolApi.getToolNamesByParentId(parentId)
       } catch (error) {
         console.error('Ошибка при получении названий инструментов:', error)
       }

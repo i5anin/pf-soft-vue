@@ -10,7 +10,10 @@ const dbConfig = getDbConfig()
 const pool = new Pool(dbConfig)
 
 async function getReportData() {
-  const sql = fs.readFileSync(__dirname + '/RevisionToolsController.sql', 'utf-8')
+  const sql = fs.readFileSync(
+    __dirname + '/RevisionToolsController.sql',
+    'utf-8'
+  )
   const { rows } = await pool.query(sql)
   return rows
 }

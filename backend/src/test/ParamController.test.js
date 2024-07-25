@@ -65,5 +65,7 @@ it('Удаление созданного параметра инструмен�
 
   // Проверяем, что удалённый параметр отсутствует в списке
   const params = getResponse.data // Предполагаем, что бэкенд возвращает массив параметров
-  expect(params).not.toContainEqual(expect.objectContaining({ id: createdParamId }))
+  expect(params).not.toContainEqual(
+    expect.objectContaining({ id: createdParamId })
+  )
 })

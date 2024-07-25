@@ -103,7 +103,9 @@
           title="В архиве"
         />
         <span
-          v-else-if="item.status_otgruzka && item.ready_count < item.operation_count"
+          v-else-if="
+            item.status_otgruzka && item.ready_count < item.operation_count
+          "
           class="mdi mdi-help check-icon--large--red"
           title="Отгружено, не все операции завершены, не в производстве"
         />
@@ -113,7 +115,9 @@
           title="Отгружено"
         />
         <span
-          v-else-if="item.quantity_prod >= item.quantity_prod_all && item.status_ready"
+          v-else-if="
+            item.quantity_prod >= item.quantity_prod_all && item.status_ready
+          "
           class="mdi mdi-check check-icon--large--green"
           title="Произведено"
         />
@@ -199,7 +203,10 @@ export default {
   },
   created() {
     this.dateOptions = this.generateDateOptions()
-    this.debouncedFetchAndFormatToolHistory = this.debounce(this.fetchAndFormatToolHistory, 500)
+    this.debouncedFetchAndFormatToolHistory = this.debounce(
+      this.fetchAndFormatToolHistory,
+      500
+    )
   },
   methods: {
     generateDateOptions() {

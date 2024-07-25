@@ -33,7 +33,10 @@ it('Добавление новой ветки в дерево', async () => {
   expect(response.data).toHaveProperty('newBranchId') // Проверяем newBranchId
   createdTreeFolderId = response.data.newBranchId // Сохраняем newBranchId
 
-  expect(response.data).toHaveProperty('message', 'New branch added successfully.')
+  expect(response.data).toHaveProperty(
+    'message',
+    'New branch added successfully.'
+  )
   // expect(response.data).toHaveProperty('newBranchId', newBranchData.newBranchId)
 })
 
@@ -56,7 +59,9 @@ it('Изменение ветки в дереве', async () => {
 
 it('Удаление ветки из дерева', async () => {
   console.log('--- Удаление ветки из дерева ---')
-  const response = await axios.delete(`${baseUrl}/tools-tree/${createdTreeFolderId}`)
+  const response = await axios.delete(
+    `${baseUrl}/tools-tree/${createdTreeFolderId}`
+  )
   console.log('Получен ответ:', response.data)
 
   expect(response.status).toBe(200)

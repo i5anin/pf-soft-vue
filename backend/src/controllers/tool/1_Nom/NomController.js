@@ -65,7 +65,9 @@ async function getTools(req, res) {
       })
 
     conditions = [...conditions, ...dynamicParams]
-    const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
+    const whereClause = conditions.length
+      ? `WHERE ${conditions.join(' AND ')}`
+      : ''
 
     const countQuery = `
       SELECT COUNT(*)
@@ -252,7 +254,9 @@ async function addTool(req, res) {
     // --- Конец проверки токена ---
 
     if (parent_id <= 1) {
-      return res.status(400).json({ error: 'parent_id must be greater than 1.' })
+      return res
+        .status(400)
+        .json({ error: 'parent_id must be greater than 1.' })
     }
 
     if (property && property.id) {
@@ -274,7 +278,9 @@ async function addTool(req, res) {
     )
 
     if (parentCheckResult.rowCount === 0) {
-      return res.status(400).json({ error: 'Specified parent_id does not exist.' })
+      return res
+        .status(400)
+        .json({ error: 'Specified parent_id does not exist.' })
     }
 
     const propertyWithoutNull = removeNullProperties(property)
@@ -347,7 +353,8 @@ async function editTool(req, res) {
   replaceCommaWithDotInNumbers(property)
 
   try {
-    if (!editToken) return res.status(401).send('Authentication token is required.')
+    if (!editToken)
+      return res.status(401).send('Authentication token is required.')
 
     const tokenQuery = 'SELECT id FROM dbo.vue_users WHERE token = $1'
     const tokenResult = await pool.query(tokenQuery, [editToken])
@@ -359,7 +366,9 @@ async function editTool(req, res) {
     const userId = tokenResult.rows[0].id
 
     if (parent_id <= 1) {
-      return res.status(400).json({ error: 'parent_id must be greater than 1.' })
+      return res
+        .status(400)
+        .json({ error: 'parent_id must be greater than 1.' })
     }
 
     if (property && property.id) {
@@ -381,7 +390,9 @@ async function editTool(req, res) {
     )
 
     if (parentCheckResult.rowCount === 0) {
-      return res.status(400).json({ error: 'Specified parent_id does not exist.' })
+      return res
+        .status(400)
+        .json({ error: 'Specified parent_id does not exist.' })
     }
 
     if (
@@ -389,7 +400,8 @@ async function editTool(req, res) {
       (norma !== null && norma_red !== null && norma < norma_red)
     ) {
       return res.status(400).json({
-        error: 'Некорректные значения норм для светофора: green >= norma >= red.',
+        error:
+          'Некорректные значения норм для светофора: green >= norma >= red.',
       })
     }
 
@@ -399,7 +411,9 @@ async function editTool(req, res) {
     )
 
     if (currentSkladResult.rowCount === 0) {
-      return res.status(404).json({ error: 'Tool with the specified ID not found.' })
+      return res
+        .status(404)
+        .json({ error: 'Tool with the specified ID not found.' })
     }
 
     const oldSklad = currentSkladResult.rows[0].sklad
@@ -571,7 +585,10 @@ async function getToolNameId(req, res) {
     // Возвращаем результат в ответе
     res.json(namesArray)
   } catch (error) {
-    console.error('Ошибка при получении названий инструментов по parent_id:', error)
+    console.error(
+      'Ошибка при получении названий инструментов по parent_id:',
+      error
+    )
     res.status(500).send('Server error')
   }
 }
