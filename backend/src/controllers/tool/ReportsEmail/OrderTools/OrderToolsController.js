@@ -96,10 +96,10 @@ async function createExcelFileStream(data) {
       group_standard: item.group_standard ? 'Да' : 'Нет',
       // tool_path: item.tool_path ? item.tool_path : 'Не указан',
       group_sum: Number(item.group_sum) || '',
-      norma_green: item.norma_green, // <-- добавлено поле "Норма Зеленая"
-      norma_red: item.norma_red, // <-- добавлено поле "Норма Красная"
-      is_plate: item.is_plate, // <-- добавлено поле "Норма Красная"
-      path_file: item.path_file, // <-- добавлено поле "Норма Красная"
+      norma_green: item.norma_green,
+      norma_red: item.norma_red,
+      is_plate: item.is_plate,
+      path_file: item.path_file,
     })
   })
 
