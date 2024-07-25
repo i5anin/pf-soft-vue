@@ -80,7 +80,7 @@
                     <v-combobox
                       v-model="toolModel.property[param.id]"
                       density="compact"
-                      :items="toolParamsOptions[param.id]"
+                      :items="toolParamValues[param.id]"
                       label="Значение"
                       variant="outlined"
                       clearable="true"
@@ -244,14 +244,9 @@ export default {
         norma_red: null,
       },
       toolNameOptions: [],
-      parameterValuePairs: [{ parameter: null, value: null }],
-      toolParamOptions: [],
-      toolParamsOptions: {},
+      toolParamValues: {},
       selectedParams: [],
       toolParams: [],
-      confirmDeleteDialog: false,
-      typeSelected: false,
-      selectedType: '',
       parentIdRules: [
         (v) => !!v || 'ID папки обязательно',
         (v) => v > 1 || 'ID папки должен быть больше 1',
@@ -267,7 +262,7 @@ export default {
     ...mapGetters('EditorToolStore', ['nameOptions', 'tool', 'parentCatalog']),
     availableToolParamOptions() {
       // Фильтрация toolParamOptions, чтобы показывать только те, которые еще не выбраны
-      return this.toolParamOptions.filter(
+      return this.allToolParamLabels.filter(
         (option) => !this.selectedParams.includes(option)
       )
     },
@@ -312,7 +307,7 @@ export default {
       // Получение списка параметров инструмента
       const rawToolParams = await getToolParams()
       this.toolParams = [...rawToolParams]
-      this.toolParamOptions = rawToolParams.map((param) => param.label) // Предполагается, что каждый параметр содержит поле info
+      this.allToolParamLabels = rawToolParams.map((param) => param.label) // Предполагается, что каждый параметр содержит поле info
 
       // Если модель инструмента уже содержит выбранные параметры, обновите selectedParams
       if (
@@ -368,7 +363,7 @@ export default {
           newToolParamsOptions[item.id] = item.values
         })
         // Прямое обновление toolParamsOptions
-        this.toolParamsOptions = newToolParamsOptions
+        this.toolParamValues = newToolParamsOptions
       } catch (error) {
         console.error('Ошибка при получении данных о параметрах:', error)
       }
