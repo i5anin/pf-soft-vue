@@ -301,45 +301,60 @@ export default {
     },
   },
   async created() {
-    await this.fetchToolParamsByParentId(this.parentCatalog.id)
-    await this.fetchToolNamesByParentId(this.parentCatalog.id)
-    try {
-      // Получение списка параметров инструмента
-      const rawToolParams = await getToolParams()
-      this.toolParams = [...rawToolParams]
-      this.allToolParamLabels = rawToolParams.map((param) => param.label) // Предполагается, что каждый параметр содержит поле info
+    await this.fetchToolData()
+    await this.initializeToolModel()
 
-      // Если модель инструмента уже содержит выбранные параметры, обновите selectedParams
-      if (
-        this.toolModel.property &&
-        Object.keys(this.toolModel.property).length > 0
-      ) {
-        const propertyIds = Object.keys(this.toolModel.property)
-        this.selectedParams = this.toolParams
-          .filter((param) => propertyIds.includes(String(param.id)))
-          .map((param) => param.label)
-      }
-    } catch (error) {
-      console.error('Ошибка при загрузке параметров инструмента:', error)
-    }
-
-    // this.initializeLocalState()
-    if (this.toolId == null) {
-      this.setTool({
-        id: null,
-        name: null,
-        property: {},
-      })
-    } else {
-      await this.fetchToolById(this.toolId)
-      if (this.tool && this.tool.property === null) {
-        this.tool.property = {}
-      }
+    if (this.toolId) {
+      await this.loadExistingTool()
     }
   },
   methods: {
     ...mapActions('EditorToolStore', ['fetchToolsByFilter', 'fetchToolById']),
     ...mapMutations('EditorToolStore', ['setTool']),
+
+    async fetchToolData() {
+      await this.fetchToolParamsByParentId(this.parentCatalog.id)
+      await this.fetchToolNamesByParentId(this.parentCatalog.id)
+      try {
+        const rawToolParams = await getToolParams()
+        this.toolParams = [...rawToolParams]
+        this.allToolParamLabels = rawToolParams.map((param) => param.label)
+      } catch (error) {
+        console.error('Ошибка при загрузке параметров инструмента:', error)
+      }
+    },
+
+    async initializeToolModel() {
+      if (this.toolId == null) {
+        this.setTool({
+          id: null,
+          name: null,
+          property: {},
+        })
+      } else {
+        await this.fetchToolById(this.toolId)
+        if (this.tool) {
+          // Клонируем объект this.tool, чтобы не изменять его напрямую
+          this.toolModel = JSON.parse(JSON.stringify(this.tool))
+          // Инициализируем property пустым объектом, если он null
+          if (this.toolModel.property === null) {
+            this.toolModel.property = {}
+          }
+          // Загружаем выбранные параметры в selectedParams
+          this.updateSelectedParams()
+        } else {
+          // Обрабатываем случай, когда инструмент не найден
+          this.showErrorSnackbar('Инструмент не найден.')
+        }
+      }
+    },
+
+    async loadExistingTool() {
+      await this.fetchToolById(this.toolId)
+      if (this.tool && this.tool.property === null) {
+        this.tool.property = {}
+      }
+    },
 
     showErrorSnackbar(message) {
       this.snackbar.text = message
