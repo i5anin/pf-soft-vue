@@ -16,7 +16,7 @@
           <v-text-field
             v-model="searchQuery"
             variant="outlined"
-            clearable="true"
+            clearable
             label="Поиск по партии, названию, обозначению"
             class="flex-grow-1 mr-2"
             prepend-inner-icon="mdi-magnify"
@@ -38,7 +38,7 @@
         <v-col cols="12" md="4">
           <v-select
             v-model="selectedDate"
-            clearable="true"
+            clearable
             :items="dateOptions"
             item-value="value"
             item-title="title"

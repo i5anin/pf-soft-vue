@@ -63,7 +63,7 @@
           </v-col>
         </v-row>
       </div>
-      <v-table hover="true" class="elevation-1">
+      <v-table hover class="elevation-1">
         <thead>
           <tr>
             <th>#</th>
@@ -143,7 +143,7 @@
         Закрыть
       </v-btn>
     </template>
-    <v-dialog v-model="showCancelDialog" persistent="true" max-width="350">
+    <v-dialog v-model="showCancelDialog" persistent max-width="350">
       <v-card>
         <v-card-title class="headline">Подтверждение отмены</v-card-title>
         <v-card-text>
