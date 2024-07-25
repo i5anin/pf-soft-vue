@@ -121,7 +121,8 @@ async function issueTools(req, res) {
       const updateQuery = 'UPDATE dbo.tool_nom SET sklad = $1 WHERE id = $2'
       await pool.query(updateQuery, [newStock, toolId])
 
-      const logMessage = `Выдача инструмента ${toolId}: ${quantity} ед. Пользователь: ${userId}, Осталось на складе: ${newStock}.`
+      // const logMessage = `Выдача инструмента ${toolId}: ${quantity} ед. Пользователь: ${userId}, Осталось на складе: ${newStock}.`
+      const logMessage = `Выдача инструмента`
       const logQuery =
         'INSERT INTO dbo.vue_log (message, tool_id, user_id, datetime_log, old_amount, new_amount) VALUES ($1, $2, $3, NOW(), $4, $5)'
       await pool.query(logQuery, [
@@ -267,7 +268,7 @@ async function cancelOperation(req, res) {
     await pool.query(
       `INSERT INTO dbo.vue_log (message, tool_id, user_id, datetime_log, old_amount, new_amount) VALUES ($1, $2, $3, NOW(), $4, $5)`,
       [
-        `Отмена операции ${id}: ${cancelQuantity} ед. возвращено на склад. Было: ${oldQuantity}, стало: ${newQuantity}.`,
+        `Отмена операции`,
         operation.rows[0].id_tool,
         issuerId,
         oldQuantity,

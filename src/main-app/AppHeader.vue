@@ -15,7 +15,10 @@
       :rail="isRail"
     >
       <v-list>
-        <v-list-item prepend-avatar="@/assets/logoWhite.svg" title="СОФТ 2.0" />
+        <v-list-item
+          prepend-avatar="@/assets/logoWhite.svg"
+          title="Софт инструмента"
+        />
       </v-list>
       <v-divider />
       <v-list>

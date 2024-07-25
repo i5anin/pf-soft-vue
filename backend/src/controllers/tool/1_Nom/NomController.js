@@ -312,7 +312,7 @@ async function addTool(req, res) {
     const toolId = toolInsertResult.rows[0].id
 
     // --- Логирование добавления ---
-    const logMessage = `Добавлен новый инструмент ID ${toolId}, группа ${group_id}.`
+    const logMessage = `Добавлен новый инструмент ID.`
     await pool.query(
       'INSERT INTO dbo.vue_log (message, tool_id, user_id, datetime_log, new_amount) VALUES ($1, $2, $3, NOW(), $4)',
       [logMessage, toolId, userId, sklad] // Используем userId из токена
@@ -451,7 +451,7 @@ async function editTool(req, res) {
     if (result.rowCount > 0) {
       await pool.query(
         'INSERT INTO dbo.vue_log (message, tool_id, user_id, datetime_log, old_amount, new_amount) VALUES ($1, $2, $3, NOW(), $4, $5)',
-        [`Обновлен ID инструмента ${id}`, id, userId, oldSklad, newSklad]
+        [`Обновлен ID инструмента`, id, userId, oldSklad, newSklad]
       )
 
       res.status(200).json({ success: 'OK', data: result.rows[0] })
