@@ -12,6 +12,7 @@ const pool = new Pool(dbConfig)
 
 async function getReportData() {
   await pool.query(fs.readFileSync(__dirname + '/MarkPlates.sql', 'utf-8'))
+  await pool.query(fs.readFileSync(__dirname + '/DefinePath.sql', 'utf-8'))
   const sql = fs.readFileSync(__dirname + '/OrderToolsEmail.sql', 'utf-8')
   const { rows } = await pool.query(sql)
   return rows
@@ -70,6 +71,7 @@ async function createExcelFileStream(data) {
     { header: 'Норма Зеленая', key: 'norma_green', width: 30 },
     { header: 'Норма Красная', key: 'norma_red', width: 30 },
     { header: 'Пластина', key: 'is_plate', width: 30 },
+    { header: 'Путь', key: 'path_file', width: 30 },
     // { header: 'Группа ID', key: 'group_display', width: 15 },
     // { header: 'Стандарт', key: 'group_standard', width: 15 },
   ]
@@ -97,6 +99,7 @@ async function createExcelFileStream(data) {
       norma_green: item.norma_green, // <-- добавлено поле "Норма Зеленая"
       norma_red: item.norma_red, // <-- добавлено поле "Норма Красная"
       is_plate: item.is_plate, // <-- добавлено поле "Норма Красная"
+      path_file: item.path_file, // <-- добавлено поле "Норма Красная"
     })
   })
 
@@ -136,6 +139,7 @@ function generateHtmlTable(data) {
     { header: 'Норма Зеленая', key: 'norma_green' },
     { header: 'Норма Красная', key: 'norma_red' },
     { header: 'Пластина', key: 'is_plate' },
+    { header: 'Путь', key: 'path_file' },
   ]
   const currentDateTime = format(new Date(), 'yyyy-MM-dd_HH-mm-ss')
   let htmlContent = `<h2>Заказ: Журнал инструмента ${currentDateTime}</h2>`
