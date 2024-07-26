@@ -36,7 +36,9 @@ function replaceCommaWithDotInNumbers(obj) {
 
 async function getTools(req, res) {
   try {
+    // Объединение параметров из тела POST-запроса и параметров строки запроса GET-запроса
     const params = { ...req.query, ...req.body }
+
     const { search, parent_id, onlyInStock, page = 1, limit = 50 } = params
 
     const pageNumber = parseInt(page, 10)
@@ -45,30 +47,29 @@ async function getTools(req, res) {
 
     let conditions = []
 
-    if (search) {
+    // Обработка стандартных параметров для фильтрации
+    if (search)
       conditions.push(`tool_nom.name ILIKE '%${search.replace(/'/g, "''")}%'`)
-    }
 
-    if (parent_id) {
-      conditions.push(`tool_nom.parent_id = ${parent_id}`)
-    }
+    if (parent_id) conditions.push(`tool_nom.parent_id = ${parent_id}`)
 
-    if (onlyInStock === 'true') {
-      conditions.push(`tool_nom.sklad > 0`)
-    }
+    if (onlyInStock === 'true') conditions.push(`tool_nom.sklad > 0`)
 
+    // Обработка динамических параметров для фильтрации
     let dynamicParams = Object.entries(params)
       .filter(([key, value]) => key.startsWith('param_') && value)
       .map(([key, value]) => {
-        const paramId = key.split('_')[1]
+        const paramId = key.split('_')[1] // Извлечение ID параметра
         return `tool_nom.property ->> '${paramId}' = '${value.replace(/'/g, "''")}'`
       })
 
     conditions = [...conditions, ...dynamicParams]
+
     const whereClause = conditions.length
       ? `WHERE ${conditions.join(' AND ')}`
       : ''
 
+    // SQL запросы для получения инструментов и их количества
     const countQuery = `
       SELECT COUNT(*)
       FROM dbo.tool_nom as tool_nom
@@ -86,19 +87,22 @@ async function getTools(req, res) {
       FROM dbo.tool_nom as tool_nom
         ${whereClause}
       ORDER BY
-        CASE WHEN tool_nom.sklad > 0 THEN 1 ELSE 2 END,
+        CASE WHEN tool_nom.sklad > 0 THEN 1 ELSE 2
+      END,
         tool_nom.name
       LIMIT ${limitNumber} OFFSET ${offset}
     `
 
+    // Выполнение запросов и получение данных параметров одновременно
     const [countResult, toolsResult, paramsMapping] = await Promise.all([
       pool.query(countQuery),
       pool.query(toolQuery),
-      getParamsMapping(), // Замените на вашу реальную функцию
+      getParamsMapping(),
     ])
 
     const totalCount = parseInt(countResult.rows[0].count, 10)
 
+    // Обработка инструментов и параметров для ответа
     const uniqueParams = new Set()
     const propertyValues = {}
 
@@ -142,8 +146,7 @@ async function getTools(req, res) {
     Object.keys(propertyValues).forEach((key) => {
       propertyValues[key] = Array.from(propertyValues[key])
     })
-
-    const paramsList = Array.from(uniqueParams)
+    Array.from(uniqueParams)
       .map((key) => {
         const values = propertyValues[key]
         if (values && values.length > 1) {
@@ -156,13 +159,13 @@ async function getTools(req, res) {
         return null
       })
       .filter((item) => item != null)
-
+    // Отправка ответа
     res.json({
       currentPage: pageNumber,
       itemsPerPage: limitNumber,
       totalCount,
       tools: formattedTools,
-      paramsList,
+      // paramsList, TODO:DEL
     })
   } catch (err) {
     console.error(err)
