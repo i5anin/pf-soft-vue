@@ -1,6 +1,6 @@
 <template>
   <v-dialog
-    persistent="true"
+    persistent
     :model-value="true"
     v-bind="modalProps"
     :width="widthDefault"

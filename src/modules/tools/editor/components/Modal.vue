@@ -1,167 +1,172 @@
 <template>
-  <Modal :title='popupTitle' width-default='650px'>
+  <Modal :title="popupTitle" width-default="650px">
     <template #content>
       <v-container>
         <v-row>
           <v-col>
             <v-row>
-              <v-col cols='6'>
+              <v-col cols="6">
                 <v-text-field
-                  v-model='parentCatalog.label'
-                  label='Папка'
-                  variant='solo'
-                  density='compact'
+                  v-model="parentCatalog.label"
+                  label="Папка"
+                  variant="solo"
+                  density="compact"
                   required
-                  type='Text'
-                  :disabled='true'
+                  type="Text"
+                  :disabled="true"
                 />
               </v-col>
-              <v-col cols='6'>
+              <v-col cols="6">
                 <v-text-field
-                  variant='solo'
-                  density='compact'
-                  v-model='parentCatalog.id'
-                  label='ID папки'
+                  variant="solo"
+                  density="compact"
+                  v-model="parentCatalog.id"
+                  label="ID папки"
                   required
-                  type='Number'
-                  :rules='parentIdRules'
+                  type="Number"
+                  :rules="parentIdRules"
                 />
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols='6' class='pl-10'>
+              <v-col cols="6" class="pl-10">
                 <v-checkbox
-                  v-model='toolModel.group_standard'
-                  label='Эталон группы'
-                  color='yellow'
+                  v-model="toolModel.group_standard"
+                  label="Эталон группы"
+                  color="yellow"
                 />
               </v-col>
-              <v-col cols='6'>
+              <v-col cols="6">
                 <v-text-field
-                  v-model='toolModel.group_id'
-                  label='ID группы'
-                  variant='solo'
-                  density='compact'
+                  v-model="toolModel.group_id"
+                  label="ID группы"
+                  variant="solo"
+                  density="compact"
                   required
-                  type='Number'
+                  type="Number"
                 />
               </v-col>
             </v-row>
             <!--левый столбец -->
             <div>
               <v-combobox
-                v-model='toolModel.name'
-                variant='outlined'
-                label='Маркировка'
-                :items='toolNameOptions'
-                item-text='text'
-                item-value='value'
+                v-model="toolModel.name"
+                variant="outlined"
+                label="Маркировка"
+                :items="toolNameOptions"
+                item-text="text"
+                item-value="value"
                 required
-                :rules='typeRules'
+                :rules="typeRules"
               />
             </div>
-            <h2 class='text-h6'>Характеристики:</h2>
-            <div v-for='(param, index) in selectedParamsInfo' :key='param.id'>
+            <h2 class="text-h6">Характеристики:</h2>
+            <div v-for="(param, index) in selectedParamsInfo" :key="param.id">
               <v-container>
                 <v-row>
-                  <v-col cols='6' class='pa-1'>
+                  <v-col cols="6" class="pa-1">
                     <v-select
-                      v-model='param.label'
-                      variant='solo-filled'
-                      density='compact'
-                      :items='availableToolParamOptions'
-                      label='Параметр'
-                      single-line='true'
+                      v-model="param.label"
+                      variant="solo-filled"
+                      density="compact"
+                      :items="availableToolParamOptions"
+                      label="Параметр"
+                      single-line
                       solo
-                      @update:model-value='(value) => selectParam(value, index)'
+                      @update:model-value="(value) => selectParam(value, index)"
                     />
                   </v-col>
-                  <v-col cols='5' class='pa-1'>
+                  <v-col cols="5" class="pa-1">
                     <v-combobox
-                      v-model='toolModel.property[param.id]'
-                      density='compact'
-                      :items='toolParamsOptions[param.id]'
-                      label='Значение'
-                      variant='outlined'
-                      clearable='true'
-                      single-line='true'
+                      v-model="toolModel.property[param.id]"
+                      density="compact"
+                      :items="toolParamValues[param.id]"
+                      label="Значение"
+                      variant="outlined"
+                      clearable
+                      single-line
                       solo
                     />
                   </v-col>
 
-                  <v-col cols='1'>
-                    <v-btn class='delete-icon' size='x-small' icon @click='removeParameter(param.id)'>
-                        <span>
-                          <v-icon>mdi-delete</v-icon>
-                        </span>
+                  <v-col cols="1">
+                    <v-btn
+                      class="delete-icon"
+                      size="x-small"
+                      icon
+                      @click="removeParameter(param.id)"
+                    >
+                      <span>
+                        <v-icon>mdi-delete</v-icon>
+                      </span>
                     </v-btn>
                   </v-col>
-
                 </v-row>
               </v-container>
             </div>
-            <v-row justify='center'>
-              <v-col cols='12' class='text-center mb-4'>
+            <v-row justify="center">
+              <v-col cols="12" class="text-center mb-4">
                 <v-btn
-                  v-show='isAddButtonVisible'
-                  color='primary'
-                  @click='addParameterValuePair'
+                  v-show="isAddButtonVisible"
+                  color="primary"
+                  @click="addParameterValuePair"
                 >
                   Добавить
                 </v-btn>
               </v-col>
             </v-row>
 
-            <v-divider class='my-1' />
+            <v-divider class="my-1" />
             <v-row>
-              <v-col cols='3'>
+              <v-col cols="3">
                 <v-text-field
-                  :disabled='toolModel.group_id && !toolModel.group_standard'
-                  v-model='toolModel.norma_green'
-                  type='number'
-                  color='green'
-                  label='Норма макс'
-                  required>
-                  <template v-slot:append-inner>
-                    <v-icon color='green'>mdi-alert-box</v-icon>
-                  </template>
-                </v-text-field>
-              </v-col>
-              <v-col cols='3'>
-                <v-text-field
-                  :disabled='toolModel.group_id && !toolModel.group_standard'
-                  v-model='toolModel.norma'
-                  type='number'
-                  color='yellow'
-                  label='Норма'
+                  :disabled="toolModel.group_id && !toolModel.group_standard"
+                  v-model="toolModel.norma_green"
+                  type="number"
+                  color="green"
+                  label="Норма макс"
                   required
                 >
                   <template v-slot:append-inner>
-                    <v-icon color='yellow'>mdi-alert-box</v-icon>
+                    <v-icon color="green">mdi-alert-box</v-icon>
                   </template>
                 </v-text-field>
               </v-col>
-              <v-col cols='3'>
+              <v-col cols="3">
                 <v-text-field
-                  :disabled='toolModel.group_id && !toolModel.group_standard'
-                  v-model='toolModel.norma_red'
-                  type='number'
-                  color='red'
-                  color-icon='red'
-                  label='Норма мин'
-                  required>
+                  :disabled="toolModel.group_id && !toolModel.group_standard"
+                  v-model="toolModel.norma"
+                  type="number"
+                  color="yellow"
+                  label="Норма"
+                  required
+                >
                   <template v-slot:append-inner>
-                    <v-icon color='red'>mdi-alert-box</v-icon>
+                    <v-icon color="yellow">mdi-alert-box</v-icon>
                   </template>
                 </v-text-field>
-
               </v-col>
-              <v-col cols='3'>
+              <v-col cols="3">
                 <v-text-field
-                  append-inner-icon='mdi-package'
-                  v-model='toolModel.sklad'
-                  type='number'
-                  label='Склад'
+                  :disabled="toolModel.group_id && !toolModel.group_standard"
+                  v-model="toolModel.norma_red"
+                  type="number"
+                  color="red"
+                  color-icon="red"
+                  label="Норма мин"
+                  required
+                >
+                  <template v-slot:append-inner>
+                    <v-icon color="red">mdi-alert-box</v-icon>
+                  </template>
+                </v-text-field>
+              </v-col>
+              <v-col cols="3">
+                <v-text-field
+                  append-inner-icon="mdi-package"
+                  v-model="toolModel.sklad"
+                  type="number"
+                  label="Склад"
                   required
                 />
               </v-col>
@@ -172,38 +177,38 @@
     </template>
     <template #action>
       <v-btn
-        color='red darken-1'
-        variant='text'
-        class='text-none text-subtitle-1 ml-3'
-        @click='confirmDelete'
+        color="red darken-1"
+        variant="text"
+        class="text-none text-subtitle-1 ml-3"
+        @click="confirmDelete"
       >
         Удалить
       </v-btn>
       <v-spacer />
       <v-btn
-        color='red darken-1'
-        variant='text'
-        class='text-none text-subtitle-1 ml-3'
-        @click='onCancel'
+        color="red darken-1"
+        variant="text"
+        class="text-none text-subtitle-1 ml-3"
+        @click="onCancel"
       >
         Закрыть
       </v-btn>
       <v-btn
-        prepend-icon='mdi-check'
-        class='text-none text-subtitle-1 pl-3'
-        color='green'
-        size='large'
-        variant='flat'
-        @click='onSave'
+        prepend-icon="mdi-check"
+        class="text-none text-subtitle-1 pl-3"
+        color="green"
+        size="large"
+        variant="flat"
+        @click="onSave"
       >
         Сохранить
       </v-btn>
     </template>
   </Modal>
   <!-- v-snackbar для отображения сообщений об ошибке -->
-  <v-snackbar v-model='snackbar.show' :color='snackbar.color' bottom right>
+  <v-snackbar v-model="snackbar.show" :color="snackbar.color" bottom right>
     {{ snackbar.text }}
-    <v-btn color='white' text @click='snackbar.show = false'>Закрыть</v-btn>
+    <v-btn color="white" text @click="snackbar.show = false">Закрыть</v-btn>
   </v-snackbar>
 </template>
 
@@ -239,14 +244,9 @@ export default {
         norma_red: null,
       },
       toolNameOptions: [],
-      parameterValuePairs: [{ parameter: null, value: null }],
-      toolParamOptions: [],
-      toolParamsOptions: {},
+      toolParamValues: {},
       selectedParams: [],
       toolParams: [],
-      confirmDeleteDialog: false,
-      typeSelected: false,
-      selectedType: '',
       parentIdRules: [
         (v) => !!v || 'ID папки обязательно',
         (v) => v > 1 || 'ID папки должен быть больше 1',
@@ -262,13 +262,13 @@ export default {
     ...mapGetters('EditorToolStore', ['nameOptions', 'tool', 'parentCatalog']),
     availableToolParamOptions() {
       // Фильтрация toolParamOptions, чтобы показывать только те, которые еще не выбраны
-      return this.toolParamOptions.filter(
-        (option) => !this.selectedParams.includes(option),
+      return this.allToolParamLabels.filter(
+        (option) => !this.selectedParams.includes(option)
       )
     },
     isAddButtonVisible() {
       const uniqueSelectedParamsCount = new Set(
-        Object.keys(this.toolModel.property),
+        Object.keys(this.toolModel.property)
       ).size
       const totalAvailableParams = this.toolParams.length
       return uniqueSelectedParamsCount < totalAvailableParams
@@ -278,7 +278,7 @@ export default {
       return Object.entries(this.toolModel.property)
         .map(([key, value]) => {
           const param = this.toolParams.find(
-            (param) => param.id.toString() === key,
+            (param) => param.id.toString() === key
           )
           return param ? { ...param, value } : null
         })
@@ -304,45 +304,60 @@ export default {
     },
   },
   async created() {
-    await this.fetchToolParamsByParentId(this.parentCatalog.id)
-    await this.fetchToolNamesByParentId(this.parentCatalog.id)
-    try {
-      // Получение списка параметров инструмента
-      const rawToolParams = await getToolParams()
-      this.toolParams = [...rawToolParams]
-      this.toolParamOptions = rawToolParams.map((param) => param.label) // Предполагается, что каждый параметр содержит поле info
+    await this.fetchToolData()
+    await this.initializeToolModel()
 
-      // Если модель инструмента уже содержит выбранные параметры, обновите selectedParams
-      if (
-        this.toolModel.property &&
-        Object.keys(this.toolModel.property).length > 0
-      ) {
-        const propertyIds = Object.keys(this.toolModel.property)
-        this.selectedParams = this.toolParams
-          .filter((param) => propertyIds.includes(String(param.id)))
-          .map((param) => param.label)
-      }
-    } catch (error) {
-      console.error('Ошибка при загрузке параметров инструмента:', error)
-    }
-
-    // this.initializeLocalState()
-    if (this.toolId == null) {
-      this.setTool({
-        id: null,
-        name: null,
-        property: {},
-      })
-    } else {
-      await this.fetchToolById(this.toolId)
-      if (this.tool && this.tool.property === null) {
-        this.tool.property = {}
-      }
+    if (this.toolId) {
+      await this.loadExistingTool()
     }
   },
   methods: {
     ...mapActions('EditorToolStore', ['fetchToolsByFilter', 'fetchToolById']),
     ...mapMutations('EditorToolStore', ['setTool']),
+
+    async fetchToolData() {
+      await this.fetchToolParamsByParentId(this.parentCatalog.id)
+      await this.fetchToolNamesByParentId(this.parentCatalog.id)
+      try {
+        const rawToolParams = await getToolParams()
+        this.toolParams = [...rawToolParams]
+        this.allToolParamLabels = rawToolParams.map((param) => param.label)
+      } catch (error) {
+        console.error('Ошибка при загрузке параметров инструмента:', error)
+      }
+    },
+
+    async initializeToolModel() {
+      if (this.toolId == null) {
+        this.setTool({
+          id: null,
+          name: null,
+          property: {},
+        })
+      } else {
+        await this.fetchToolById(this.toolId)
+        if (this.tool) {
+          // Клонируем объект this.tool, чтобы не изменять его напрямую
+          this.toolModel = JSON.parse(JSON.stringify(this.tool))
+          // Инициализируем property пустым объектом, если он null
+          if (this.toolModel.property === null) {
+            this.toolModel.property = {}
+          }
+          // Загружаем выбранные параметры в selectedParams
+          this.updateSelectedParams()
+        } else {
+          // Обрабатываем случай, когда инструмент не найден
+          this.showErrorSnackbar('Инструмент не найден.')
+        }
+      }
+    },
+
+    async loadExistingTool() {
+      await this.fetchToolById(this.toolId)
+      if (this.tool && this.tool.property === null) {
+        this.tool.property = {}
+      }
+    },
 
     showErrorSnackbar(message) {
       this.snackbar.text = message
@@ -367,7 +382,7 @@ export default {
           newToolParamsOptions[item.id] = item.values
         })
         // Прямое обновление toolParamsOptions
-        this.toolParamsOptions = newToolParamsOptions
+        this.toolParamValues = newToolParamsOptions
       } catch (error) {
         console.error('Ошибка при получении данных о параметрах:', error)
       }
@@ -462,10 +477,13 @@ export default {
       this.$emit('canceled')
     },
     async onSave() {
+      const token = localStorage.getItem('token')
       const toolDataToSend = {
         ...this.toolModel,
         parent_id: this.parentCatalog.id,
+        editToken: token, // Добавляем токен в данные запроса
       }
+
       try {
         let response
         if (this.toolId) {
@@ -477,7 +495,7 @@ export default {
       } catch (error) {
         console.error(
           'Ошибка при сохранении:',
-          error.response ? error.response.data : error,
+          error.response ? error.response.data : error
         )
       }
     },

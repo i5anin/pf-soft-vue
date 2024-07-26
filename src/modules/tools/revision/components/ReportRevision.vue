@@ -1,5 +1,10 @@
 <template>
-  <date-picker v-model="startDate" locale="ru" label="Start Date" color="primary"></date-picker>
+  <date-picker
+    v-model="startDate"
+    locale="ru"
+    label="Start Date"
+    color="primary"
+  ></date-picker>
   <div>
     <div v-for="(group, index) in toolGroups" :key="index" class="tool-group">
       <v-chip variant="text" size="large" @click="toggleVisibility(index)">
@@ -8,7 +13,9 @@
         </template>
         {{ group.path }}
       </v-chip>
-      <v-chip color="primary" variant="elevated">{{ group.tools.length }}</v-chip>
+      <v-chip color="primary" variant="elevated">{{
+        group.tools.length
+      }}</v-chip>
       <div v-if="visibleGroups.includes(index)">
         <v-table dense>
           <thead>

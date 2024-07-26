@@ -14,7 +14,11 @@
       </tr>
     </thead>
     <tbody>
-      <tr v-for="(item, index) in items" :key="index" @click="$emit('row-click', item)">
+      <tr
+        v-for="(item, index) in items"
+        :key="index"
+        @click="$emit('row-click', item)"
+      >
         <td class="grey">{{ index + 1 }}</td>
         <td>
           {{ item.name }}
@@ -24,7 +28,8 @@
             :color="getColorForGroup(item.group_id)"
             :title="'Группа ' + item.group_id"
           >
-            <span v-if="item.group_standard" style="color: yellow"> ★ </span> G{{ item.group_id }}
+            <span v-if="item.group_standard" style="color: yellow"> ★ </span>
+            G{{ item.group_id }}
           </v-chip>
         </td>
         <td>
@@ -103,7 +108,9 @@ export default {
     },
     getRoundedCount(count) {
       if (count < 10) return 10
-      return count % 10 < 5 ? Math.floor(count / 10) * 10 : Math.ceil(count / 10) * 10
+      return count % 10 < 5
+        ? Math.floor(count / 10) * 10
+        : Math.ceil(count / 10) * 10
     },
     calcPercent(sklad, norma) {
       return ((1 - sklad / norma) * 100).toFixed(0)

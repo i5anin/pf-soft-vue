@@ -16,7 +16,12 @@
     <div v-for="(group, index) in toolGroups" :key="index" class="tool-group">
       <v-chip variant="text" size="large" @click="toggleVisibility(index)">
         <template #prepend>
-          <v-icon v-if="!group.hasLowStock" color="green" icon="mdi-folder" start />
+          <v-icon
+            v-if="!group.hasLowStock"
+            color="green"
+            icon="mdi-folder"
+            start
+          />
           <v-icon
             v-else
             icon="mdi-folder-alert"
@@ -60,7 +65,10 @@ export default {
   },
   computed: {
     totalToolCount() {
-      return this.toolGroups.reduce((total, group) => total + group.tools.length, 0)
+      return this.toolGroups.reduce(
+        (total, group) => total + group.tools.length,
+        0
+      )
     },
   },
   methods: {
@@ -139,7 +147,9 @@ export default {
     },
     toggleAllVisibility() {
       this.isAllVisible = !this.isAllVisible
-      this.visibleGroups = this.isAllVisible ? [...Array(this.toolGroups.length).keys()] : []
+      this.visibleGroups = this.isAllVisible
+        ? [...Array(this.toolGroups.length).keys()]
+        : []
     },
   },
 }
