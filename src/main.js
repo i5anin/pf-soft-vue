@@ -1,6 +1,7 @@
 // main.js
 import { createApp } from 'vue'
 import { createPinia } from 'pinia' // импортируем createPinia
+import store from './store/store'
 import App from './App.vue'
 import router from './router'
 import { registerPlugins } from './plugins'
@@ -14,4 +15,5 @@ app.use(pinia) // используем Pinia
 
 registerPlugins(app)
 app.use(router)
+app.use(store)
 app.mount('#app')

@@ -1,6 +1,5 @@
 <template>
   <v-container>
-    <tool-filter :filters="filters" @filter-update="onParamsFilterUpdate" />
     <div class="text-right">
       <v-btn color="blue" @click="onAddTool">
         <template #prepend>
@@ -42,8 +41,8 @@
       </template>
       <!--name-->
       <template #item.name="{ item }">
-        <td :class="colorClassGrey(item)" style="white-space: nowrap">
-          {{ item.name }}
+        <td style="white-space: nowrap">
+          <span :class="colorClassGrey(item)">{{ item.name }}</span>
           <v-chip
             v-if="item.group_id"
             size="x-small"
@@ -51,8 +50,8 @@
             :title="'Группа ' + item.group_id"
           >
             <span v-if="item.group_standard" style="color: yellow">★</span>
-            G{{ item.group_id }}</v-chip
-          >
+            G{{ item.group_id }}
+          </v-chip>
         </td>
       </template>
       <template #item.sklad="{ item }">
@@ -73,7 +72,7 @@
 <script>
 import EditorToolModal from './modal/Modal.vue'
 import ToolFilter from './Filter.vue'
-import { mapActions, mapMutations, mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default {
   components: {
@@ -128,8 +127,6 @@ export default {
             : []),
           { title: 'Норма', key: 'norma', sortable: false },
           { title: 'Склад', key: 'sklad', sortable: false },
-          // { title: 'Заказ', key: 'zakaz', sortable: false },
-          // { title: 'Лимит', key: 'limit', sortable: false },
         ]
       },
     },
@@ -203,20 +200,6 @@ export default {
 </script>
 
 <style scoped>
-.index {
-  max-width: 40px !important;
-  font-size: 0.9em;
-  color: grey;
-}
-
-.grey {
-  color: grey;
-}
-
-.red {
-  color: red;
-}
-
 .scrollable-table {
   height: 74vh; /* Замените это значение на желаемую высоту */
   overflow-y: auto;

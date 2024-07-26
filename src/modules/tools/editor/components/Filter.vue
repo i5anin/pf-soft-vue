@@ -45,11 +45,6 @@ export default {
   data() {
     return {
       searchQuery: '',
-      openDialog: false,
-      isDataLoaded: false,
-      editingToolId: null, //редактирование идентификатора инструмента
-      toolTableHeaders: [], //заголовки таблиц инструментов
-      filterParamsList: [],
       debouncedSearch: null,
     }
   },
@@ -64,14 +59,13 @@ export default {
     ]),
     groupedFilters() {
       const result = []
-      const itemsPerRow = 4 // Меняйте это значение в зависимости от желаемого количества элементов в строке
+      const itemsPerRow = 4
       for (let i = 0; i < this.dynamicFilters.length; i += itemsPerRow) {
         result.push(this.dynamicFilters.slice(i, i + itemsPerRow))
       }
       return result
     },
   },
-
   async mounted() {
     await this.fetchToolsDynamicFilters()
     this.debouncedSearch = this.debounce(this.onActualSearch, 500)
@@ -83,9 +77,9 @@ export default {
       'fetchToolsByFilter',
     ]),
     ...mapMutations('EditorToolStore', [
+      'setSelectedDynamicFilters',
       'setCurrentPage',
       'setItemsPerPage',
-      'setSelectedDynamicFilters',
     ]),
     onActualSearch() {
       store.commit('EditorToolStore/setSearch', this.searchQuery)
@@ -105,7 +99,6 @@ export default {
     onSearch() {
       this.debouncedSearch()
     },
-    // Метод для обработки обновления параметров фильтра
     onParamsFilterUpdate({ key, value }) {
       this.setSelectedDynamicFilters({
         ...this.filters.selectedDynamicFilters,
