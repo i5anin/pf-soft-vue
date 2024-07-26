@@ -65,11 +65,7 @@
         <thead>
           <tr>
             <th>#</th>
-            <th
-              v-for="header in currentHeaders"
-              :key="header.value"
-              class="text-left"
-            >
+            <th v-for="header in currentHeaders" :key="header.value" class="text-left">
               {{ header.title }}
             </th>
           </tr>
@@ -112,10 +108,10 @@
                     size="x-small"
                     icon
                     small
+                    :disabled="new Date() - new Date(item.timestamp) > 432000000"
                     color="error"
                     @click.stop="promptCancelQuantity(item.id)"
                   >
-                    <!-- :disabled="new Date() - new Date(item.timestamp) > 432000000"-->
                     <v-icon>mdi-close</v-icon>
                   </v-btn>
                 </template>
@@ -158,9 +154,7 @@
           <v-btn color="green darken-1" text="true" @click="confirmCancelOperation">
             Подтвердить
           </v-btn>
-          <v-btn color="red darken-1" text="true" @click="showCancelDialog = false">
-            Отмена
-          </v-btn>
+          <v-btn color="red darken-1" text="true" @click="showCancelDialog = false"> Отмена </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -271,11 +265,7 @@ export default {
         alert('Internal error: The operation ID is invalid.')
         return
       }
-      if (
-        !confirm(
-          `Вы уверены, что хотите отменить ${this.cancelQuantity} из этой операции?`
-        )
-      ) {
+      if (!confirm(`Вы уверены, что хотите отменить ${this.cancelQuantity} из этой операции?`)) {
         return
       }
       const token = localStorage.getItem('token')
@@ -305,7 +295,6 @@ export default {
       } catch (error) {
         console.error('Ошибка при отмене операции:', error)
         alert('Ошибка при отмене операции: ' + error.message)
-        alert('Ошибка при отмене операции: ' + error)
       }
     },
     filterData() {
@@ -328,21 +317,14 @@ export default {
     },
     async fetchHistoryData() {
       try {
-        const response = await issueHistoryApi.fetchHistoryByPartId(
-          this.idPart,
-          this.selectedDate
-        )
-        const partInfoResponse = await issueHistoryApi.fetchHistoryByPartIdInfo(
-          this.idPart
-        )
+        const response = await issueHistoryApi.fetchHistoryByPartId(this.idPart, this.selectedDate)
+        const partInfoResponse = await issueHistoryApi.fetchHistoryByPartIdInfo(this.idPart)
         this.operations = partInfoResponse.info.operations
         this.completedOperations = partInfoResponse.info.completed_operations
         if (response && typeof response === 'object') {
           this.info = partInfoResponse.info
           this.originalData = response
-          this.availableOperations = Object.keys(this.originalData).filter(
-            (key) => key !== 'info'
-          )
+          this.availableOperations = Object.keys(this.originalData).filter((key) => key !== 'info')
           this.filterData()
         } else {
           this.filteredData = []
