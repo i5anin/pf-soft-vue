@@ -15,14 +15,6 @@ module.exports = {
     port: process.env.DB_PORT,
     dialect: process.env.DB_DIALECT,
   },
-  dbConfigSuperTest: {
-    user: process.env.DB_USER_T,
-    host: process.env.DB_HOST_T,
-    database: process.env.DB_NAME_T,
-    password: process.env.DB_PASSWORD_T,
-    port: process.env.DB_PORT_T,
-    dialect: process.env.DB_DIALECT_T,
-  },
   server: {
     host: process.env.HOST,
     port: process.env.PORT,
