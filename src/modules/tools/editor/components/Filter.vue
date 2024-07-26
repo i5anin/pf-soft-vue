@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-row v-if="dynamicFilters && dynamicFilters.length > 0">
+    <v-row v-if="hasDynamicFilters">
       <v-col cols="12">
         <v-text-field
           v-model="searchQuery"
@@ -9,43 +9,32 @@
           append-icon="mdi-magnify"
           label="Поиск по инструменту"
           hide-details
-          @input="onSearch"
-          @update:model-value="onSearch"
+          @input="debounceSearch"
         />
       </v-col>
     </v-row>
-    <v-row
-      v-for="(group, index) in groupedFilters"
-      :key="`group-${index}`"
-      cols="12"
-      sm="6"
-    >
-      <v-col v-for="filter in group" :key="filter.key" cols="12" sm="3">
-        <v-combobox
-          density="compact"
-          variant="solo"
-          clearable
-          :label="filter.label"
-          :items="filter.values"
-          :value="filters.selectedDynamicFilters[filter.key]"
-          @update:model-value="
-            (value) => onParamsFilterUpdate({ key: filter.key, value })
-          "
-        />
-      </v-col>
-    </v-row>
+
+    <DynamicFilters
+      v-if="hasDynamicFilters"
+      :filters="groupedFilters"
+      @filter-update="onParamsFilterUpdate"
+    />
   </div>
 </template>
 
 <script>
+import { debounce } from 'lodash'
 import { mapActions, mapMutations, mapGetters } from 'vuex'
 import store from '@/store/store'
+import DynamicFilters from './DynamicFilters.vue'
 
 export default {
+  components: {
+    DynamicFilters,
+  },
   data() {
     return {
       searchQuery: '',
-      debouncedSearch: null,
     }
   },
   computed: {
@@ -58,18 +47,17 @@ export default {
       'isLoading',
     ]),
     groupedFilters() {
+      const filtersPerRow = 4
       const result = []
-      const itemsPerRow = 4
-      for (let i = 0; i < this.dynamicFilters.length; i += itemsPerRow) {
-        result.push(this.dynamicFilters.slice(i, i + itemsPerRow))
+
+      for (let i = 0; i < this.dynamicFilters.length; i += filtersPerRow) {
+        result.push(this.dynamicFilters.slice(i, i + filtersPerRow))
       }
       return result
     },
-  },
-  async mounted() {
-    await this.fetchToolsDynamicFilters()
-    this.debouncedSearch = this.debounce(this.onActualSearch, 500)
-    this.isDataLoaded = true
+    hasDynamicFilters() {
+      return this.dynamicFilters.length > 0
+    },
   },
   methods: {
     ...mapActions('EditorToolStore', [
@@ -80,32 +68,24 @@ export default {
       'setSelectedDynamicFilters',
       'setCurrentPage',
       'setItemsPerPage',
+      'setSearch',
     ]),
-    onActualSearch() {
-      store.commit('EditorToolStore/setSearch', this.searchQuery)
-      store.dispatch('EditorToolStore/fetchToolsByFilter')
-    },
-    debounce(func, wait) {
-      let timeout
-      return function (...args) {
-        const later = () => {
-          timeout = null
-          func.apply(this, args)
-        }
-        clearTimeout(timeout)
-        timeout = setTimeout(later, wait)
-      }
-    },
-    onSearch() {
-      this.debouncedSearch()
-    },
-    onParamsFilterUpdate({ key, value }) {
+    // Декорированный метод поиска с задержкой.
+    debounceSearch: debounce(function () {
+      // Используем импортированную debounce
+      this.setSearch(this.searchQuery)
+      this.fetchToolsByFilter()
+    }, 500),
+    onParamsFilterUpdate(updatedFilters) {
       this.setSelectedDynamicFilters({
         ...this.filters.selectedDynamicFilters,
-        [key]: value,
+        ...updatedFilters,
       })
       this.fetchToolsByFilter()
     },
+  },
+  async mounted() {
+    await this.fetchToolsDynamicFilters()
   },
 }
 </script>
