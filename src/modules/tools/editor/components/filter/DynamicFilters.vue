@@ -22,8 +22,6 @@
 </template>
 
 <script>
-import store from '@/store/store'
-
 export default {
   emits: ['filter-update'],
   props: {
