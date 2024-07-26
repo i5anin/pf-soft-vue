@@ -71,7 +71,7 @@
 
 <script>
 import EditorToolModal from './modal/Modal.vue'
-import ToolFilter from './Filter.vue'
+import ToolFilter from './filter/Filter.vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default {

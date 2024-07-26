@@ -10,7 +10,7 @@
 
 <script>
 import Catalog from './Catalog.vue'
-import ToolFilter from './Filter.vue'
+import ToolFilter from './filter/Filter.vue'
 import Table from './Table.vue'
 
 export default {

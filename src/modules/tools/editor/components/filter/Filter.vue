@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="pt-4">
     <v-row v-if="hasDynamicFilters">
       <v-col cols="12">
         <v-text-field
@@ -25,7 +25,6 @@
 <script>
 import { debounce } from 'lodash'
 import { mapActions, mapMutations, mapGetters } from 'vuex'
-import store from '@/store/store'
 import DynamicFilters from './DynamicFilters.vue'
 
 export default {
