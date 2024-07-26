@@ -1,5 +1,8 @@
 <template>
   <v-container>
+    {{ filterParamsList }}
+    -
+    {{ filters }}
     <tool-filter
       :filter-params-list="filterParamsList"
       :filters="filters"
