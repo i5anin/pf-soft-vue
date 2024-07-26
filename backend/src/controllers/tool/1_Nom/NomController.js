@@ -36,7 +36,9 @@ function replaceCommaWithDotInNumbers(obj) {
 
 async function getTools(req, res) {
   try {
+    // Объединение параметров из тела POST-запроса и параметров строки запроса GET-запроса
     const params = { ...req.query, ...req.body }
+
     const { search, parent_id, onlyInStock, page = 1, limit = 50 } = params
 
     const pageNumber = parseInt(page, 10)
@@ -45,30 +47,27 @@ async function getTools(req, res) {
 
     let conditions = []
 
-    if (search) {
+    // Обработка стандартных параметров для фильтрации
+    if (search)
       conditions.push(`tool_nom.name ILIKE '%${search.replace(/'/g, "''")}%'`)
-    }
 
-    if (parent_id) {
-      conditions.push(`tool_nom.parent_id = ${parent_id}`)
-    }
+    if (parent_id) conditions.push(`tool_nom.parent_id = ${parent_id}`)
 
-    if (onlyInStock === 'true') {
-      conditions.push(`tool_nom.sklad > 0`)
-    }
+    if (onlyInStock === 'true') conditions.push(`tool_nom.sklad > 0`)
 
+    // Обработка динамических параметров для фильтрации
     let dynamicParams = Object.entries(params)
       .filter(([key, value]) => key.startsWith('param_') && value)
       .map(([key, value]) => {
-        const paramId = key.split('_')[1]
+        const paramId = key.split('_')[1] // Извлечение ID параметра
         return `tool_nom.property ->> '${paramId}' = '${value.replace(/'/g, "''")}'`
       })
 
     conditions = [...conditions, ...dynamicParams]
-    const whereClause = conditions.length
-      ? `WHERE ${conditions.join(' AND ')}`
-      : ''
 
+    const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
+
+    // SQL запросы для получения инструментов и их количества
     const countQuery = `
       SELECT COUNT(*)
       FROM dbo.tool_nom as tool_nom
@@ -86,19 +85,22 @@ async function getTools(req, res) {
       FROM dbo.tool_nom as tool_nom
         ${whereClause}
       ORDER BY
-        CASE WHEN tool_nom.sklad > 0 THEN 1 ELSE 2 END,
+        CASE WHEN tool_nom.sklad > 0 THEN 1 ELSE 2
+      END,
         tool_nom.name
       LIMIT ${limitNumber} OFFSET ${offset}
     `
 
+    // Выполнение запросов и получение данных параметров одновременно
     const [countResult, toolsResult, paramsMapping] = await Promise.all([
       pool.query(countQuery),
       pool.query(toolQuery),
-      getParamsMapping(), // Замените на вашу реальную функцию
+      getParamsMapping(),
     ])
 
     const totalCount = parseInt(countResult.rows[0].count, 10)
 
+    // Обработка инструментов и параметров для ответа
     const uniqueParams = new Set()
     const propertyValues = {}
 
@@ -142,8 +144,7 @@ async function getTools(req, res) {
     Object.keys(propertyValues).forEach((key) => {
       propertyValues[key] = Array.from(propertyValues[key])
     })
-
-    const paramsList = Array.from(uniqueParams)
+    Array.from(uniqueParams)
       .map((key) => {
         const values = propertyValues[key]
         if (values && values.length > 1) {
@@ -156,13 +157,13 @@ async function getTools(req, res) {
         return null
       })
       .filter((item) => item != null)
-
+    // Отправка ответа
     res.json({
       currentPage: pageNumber,
       itemsPerPage: limitNumber,
       totalCount,
       tools: formattedTools,
-      paramsList,
+      // paramsList, TODO:DEL
     })
   } catch (err) {
     console.error(err)
@@ -233,31 +234,22 @@ async function addTool(req, res) {
     group_standard,
     norma_red,
     norma_green,
-    editToken, // Добавляем токен в данные запроса
   } = req.body
-
+  // Преобразование запятых в точки в числах в property
   replaceCommaWithDotInNumbers(property)
 
   try {
-    // --- Проверка токена ---
-    if (!editToken) {
-      return res.status(401).send('Authentication token is required.')
-    }
-
-    const tokenQuery = 'SELECT id FROM dbo.vue_users WHERE token = $1'
-    const tokenResult = await pool.query(tokenQuery, [editToken])
-
-    if (tokenResult.rows.length === 0) {
-      return res.status(403).send('Invalid token.')
-    }
-    const userId = tokenResult.rows[0].id
-    // --- Конец проверки токена ---
-
     if (parent_id <= 1) {
-      return res
-        .status(400)
-        .json({ error: 'parent_id must be greater than 1.' })
+      return res.status(400).json({ error: 'parent_id must be greater than 1.' })
     }
+
+    // if (sklad < 0)
+    //   return res.status(400).json({ error: 'Склад не может быть отрицательным.' })
+
+    // Проверка на корректность значений норм для светофора (изменено условие)
+    // if (norma_green < norma || norma < norma_red)
+    //   return res.status(400).json({ error: 'Некорректные значения норм для светофора: green > norma > red.' })
+    //
 
     if (property && property.id) {
       const propertyIdCheckResult = await pool.query(
@@ -278,14 +270,13 @@ async function addTool(req, res) {
     )
 
     if (parentCheckResult.rowCount === 0) {
-      return res
-        .status(400)
-        .json({ error: 'Specified parent_id does not exist.' })
+      return res.status(400).json({ error: 'Specified parent_id does not exist.' })
     }
 
     const propertyWithoutNull = removeNullProperties(property)
     const propertyString = JSON.stringify(propertyWithoutNull)
 
+    // Если group_standard == true, то необходимо сбросить флаг эталонного инструмента для предыдущего эталона в той же группе
     if (group_standard && group_id) {
       await pool.query(
         'UPDATE dbo.tool_nom SET group_standard = false WHERE group_id = $1',
@@ -311,13 +302,12 @@ async function addTool(req, res) {
 
     const toolId = toolInsertResult.rows[0].id
 
-    // --- Логирование добавления ---
-    const logMessage = `Добавлен новый инструмент ID.`
+    // Логирование добавления инструмента
+    const logMessage = `Инструмент успешно добавлен ID ${toolId}, группа ${group_id}.`
     await pool.query(
-      'INSERT INTO dbo.vue_log (message, tool_id, user_id, datetime_log, new_amount) VALUES ($1, $2, $3, NOW(), $4)',
-      [logMessage, toolId, userId, sklad] // Используем userId из токена
+      'INSERT INTO dbo.vue_log (message, tool_id, datetime_log, new_amount) VALUES ($1, $2, NOW(), $3)',
+      [logMessage, toolId, sklad]
     )
-    // --- Конец логирования ---
 
     const newToolResult = await pool.query(
       'SELECT * FROM dbo.tool_nom WHERE id = $1',
@@ -338,6 +328,7 @@ async function addTool(req, res) {
 async function editTool(req, res) {
   const { id } = req.params
   let {
+    // Используем let вместо const
     name,
     parent_id,
     property,
@@ -347,28 +338,13 @@ async function editTool(req, res) {
     group_standard,
     norma_red,
     norma_green,
-    editToken,
   } = req.body
 
   replaceCommaWithDotInNumbers(property)
 
   try {
-    if (!editToken)
-      return res.status(401).send('Authentication token is required.')
-
-    const tokenQuery = 'SELECT id FROM dbo.vue_users WHERE token = $1'
-    const tokenResult = await pool.query(tokenQuery, [editToken])
-
-    if (tokenResult.rows.length === 0) {
-      return res.status(403).send('Invalid token.')
-    }
-
-    const userId = tokenResult.rows[0].id
-
     if (parent_id <= 1) {
-      return res
-        .status(400)
-        .json({ error: 'parent_id must be greater than 1.' })
+      return res.status(400).json({ error: 'parent_id must be greater than 1.' })
     }
 
     if (property && property.id) {
@@ -390,18 +366,16 @@ async function editTool(req, res) {
     )
 
     if (parentCheckResult.rowCount === 0) {
-      return res
-        .status(400)
-        .json({ error: 'Specified parent_id does not exist.' })
+      return res.status(400).json({ error: 'Specified parent_id does not exist.' })
     }
 
+    // Проверка на корректность значений норм для светофора
     if (
       (norma_green !== null && norma !== null && norma_green < norma) ||
       (norma !== null && norma_red !== null && norma < norma_red)
     ) {
       return res.status(400).json({
-        error:
-          'Некорректные значения норм для светофора: green >= norma >= red.',
+        error: 'Некорректные значения норм для светофора: green >= norma >= red.',
       })
     }
 
@@ -411,9 +385,7 @@ async function editTool(req, res) {
     )
 
     if (currentSkladResult.rowCount === 0) {
-      return res
-        .status(404)
-        .json({ error: 'Tool with the specified ID not found.' })
+      return res.status(404).json({ error: 'Tool with the specified ID not found.' })
     }
 
     const oldSklad = currentSkladResult.rows[0].sklad
@@ -427,6 +399,7 @@ async function editTool(req, res) {
       )
     }
 
+    // Преобразование пустых строк и нулей в null
     norma = norma === '' || norma === 0 ? null : norma
     norma_red = norma_red === '' || norma_red === 0 ? null : norma_red
     norma_green = norma_green === '' || norma_green === 0 ? null : norma_green
@@ -450,8 +423,8 @@ async function editTool(req, res) {
 
     if (result.rowCount > 0) {
       await pool.query(
-        'INSERT INTO dbo.vue_log (message, tool_id, user_id, datetime_log, old_amount, new_amount) VALUES ($1, $2, $3, NOW(), $4, $5)',
-        [`Обновлен ID инструмента`, id, userId, oldSklad, newSklad]
+        'INSERT INTO dbo.vue_log (message, tool_id, datetime_log, old_amount, new_amount) VALUES ($1, $2, NOW(), $3, $4)',
+        [`Обновлен ID инструмента ${id}`, id, oldSklad, newSklad]
       )
 
       res.status(200).json({ success: 'OK', data: result.rows[0] })
@@ -585,10 +558,7 @@ async function getToolNameId(req, res) {
     // Возвращаем результат в ответе
     res.json(namesArray)
   } catch (error) {
-    console.error(
-      'Ошибка при получении названий инструментов по parent_id:',
-      error
-    )
+    console.error('Ошибка при получении названий инструментов по parent_id:', error)
     res.status(500).send('Server error')
   }
 }
