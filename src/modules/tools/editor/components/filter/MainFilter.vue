@@ -6,7 +6,7 @@
           v-model="searchQuery"
           variant="outlined"
           clearable
-          append-icon="mdi-magnify"
+          prepend-inner-icon="mdi-magnify"
           label="Поиск по инструменту"
           hide-details
           @input="debounceSearch"

@@ -37,7 +37,9 @@
       @click:row="onEditRow"
     >
       <template #item.index="{ index }">
-        <td class="index">{{ index + 1 }}</td>
+        <td class="index">
+          {{ index + 1 + (filters.currentPage - 1) * filters.itemsPerPage }}
+        </td>
       </template>
       <!--name-->
       <template #item.name="{ item }">
