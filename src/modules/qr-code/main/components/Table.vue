@@ -120,9 +120,7 @@ export default {
         if (response) {
           this.toolsHistory = response.data.map((tool) => ({
             ...tool,
-            created_at: tool.created_at
-              ? this.formatDate(tool.created_at)
-              : null,
+            created_at: tool.created_at ? this.formatDate(tool.created_at) : null,
           }))
           this.totalCount = response.totalCount
         } else {
