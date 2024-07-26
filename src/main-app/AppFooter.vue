@@ -1,12 +1,12 @@
 <template>
   <v-footer v-if="databaseInfo" class="container">
-    <v-chip variant="plain" density="x-small">
+    <v-chip variant="plain" density="compact">
       Все права защищены © 2024
     </v-chip>
     <v-spacer />
     <v-chip
       :color="databaseInfo.dbName === 'BusinessForum' ? 'red' : 'green'"
-      density="small"
+      density="compact"
     >
       <template v-if="databaseInfo.dbName === 'BusinessForum'">
         <!--        <v-icon left icon="mdi-information" />-->

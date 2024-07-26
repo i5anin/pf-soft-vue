@@ -46,7 +46,7 @@ import ViewToolStore from '@/modules/tools/view/store'
 // import { normSpaces } from '@/modules/shared/normSpaces'
 
 export default {
-  name: 'EditorCatalog',
+  name: 'ViewCatalog',
   components: { TabMainTable, CatalogBreadcrumbs },
 
   data() {
