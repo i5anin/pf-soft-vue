@@ -215,7 +215,7 @@
 <script>
 import Modal from '@/modules/tools/shared/components/Modal.vue'
 import { getToolParams } from '@/api'
-import { editorToolApi } from '../api/editor'
+import { editorToolApi } from '../../api/editor'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default {

@@ -1,13 +1,6 @@
 <template>
   <v-container>
-    {{ filterParamsList }}
-    -
-    {{ filters }}
-    <tool-filter
-      :filter-params-list="filterParamsList"
-      :filters="filters"
-      @filter-update="onParamsFilterUpdate"
-    />
+    <tool-filter :filters="filters" @filter-update="onParamsFilterUpdate" />
     <div class="text-right">
       <v-btn color="blue" @click="onAddTool">
         <template #prepend>
@@ -78,8 +71,8 @@
 </template>
 
 <script>
-import EditorToolModal from './Modal.vue'
-import ToolFilter from './ToolFilter.vue'
+import EditorToolModal from './modal/Modal.vue'
+import ToolFilter from './Filter.vue'
 import { mapActions, mapMutations, mapGetters } from 'vuex'
 
 export default {

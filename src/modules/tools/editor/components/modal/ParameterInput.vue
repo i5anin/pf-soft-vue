@@ -72,7 +72,7 @@
 
 <script>
 import { getToolParams } from '@/api'
-import { editorToolApi } from '../api/editor'
+import { editorToolApi } from '../../api/editor'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import { issueToolApi } from '@/modules/tools/issue/api/issue'
 

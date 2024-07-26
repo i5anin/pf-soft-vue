@@ -58,12 +58,12 @@
       </v-container>
     </v-main>
   </v-app>
-  <TabMainTable
-    v-if="isTableShown"
-    v-bind="{
-      namespace: 'EditorToolStore',
-    }"
-  />
+  <!--  <TabMainTable-->
+  <!--    v-if="isTableShown"-->
+  <!--    v-bind="{-->
+  <!--      namespace: 'EditorToolStore',-->
+  <!--    }"-->
+  <!--  />-->
 </template>
 
 <script>
