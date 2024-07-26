@@ -7,7 +7,6 @@
     "frontend": "vite --host",
     "pm": "pm2 start ecosystem.config.js",
     "build": "vite build",
-    "build_debug": "vite build --debug",
     "preview": "vite preview",
     "lint": "eslint src --ext --fix .js,.vue",
     "b_lint": "eslint backend/src --ext .js --fix",
