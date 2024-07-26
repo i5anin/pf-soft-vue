@@ -129,9 +129,7 @@ export default {
     },
 
     popupTitle() {
-      return this.toolId != null
-        ? `Инструмент поврежден ID: ${this.toolId}`
-        : 'Ошибка нет ID'
+      return this.toolId != null ? `Инструмент поврежден ID: ${this.toolId}` : 'Ошибка нет ID'
     },
   },
   watch: {
@@ -205,21 +203,14 @@ export default {
         }
 
         // Отправка данных о поврежденном инструменте
-        const response =
-          await issueToolApi.addToolHistoryDamaged(damagedToolData)
+        const response = await issueToolApi.addToolHistoryDamaged(damagedToolData)
         if (response.success === 'OK') {
           this.$emit('changes-saved')
         } else {
-          console.error(
-            'Ошибка при сохранении данных о поврежденном инструменте: ',
-            response
-          )
+          console.error('Ошибка при сохранении данных о поврежденном инструменте: ', response)
         }
       } catch (error) {
-        console.error(
-          'Ошибка при отправке данных о поврежденном инструменте: ',
-          error
-        )
+        console.error('Ошибка при отправке данных о поврежденном инструменте: ', error)
       }
     },
   },

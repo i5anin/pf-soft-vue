@@ -3,9 +3,7 @@
     <template #content>
       <div style="padding-left: 16px">
         <v-row>
-          <h2 v-if="info" style="padding-left: 25px">
-            {{ info.name }} {{ info.description }}
-          </h2>
+          <h2 v-if="info" style="padding-left: 25px">{{ info.name }} {{ info.description }}</h2>
           <v-spacer />
           <v-col cols="12" md="3">
             <v-select
@@ -21,11 +19,7 @@
       <v-table class="elevation-1">
         <thead>
           <tr>
-            <th
-              v-for="header in currentHeaders"
-              :key="header.value"
-              class="text-left"
-            >
+            <th v-for="header in currentHeaders" :key="header.value" class="text-left">
               {{ header.title }}
             </th>
           </tr>
@@ -132,9 +126,7 @@ export default {
     },
     async fetchHistoryData() {
       try {
-        const response = await issueHistoryApi.fetchHistoryByPartId(
-          this.id_part
-        )
+        const response = await issueHistoryApi.fetchHistoryByPartId(this.id_part)
         this.info = response.info
         if (response && typeof response === 'object') {
           // Removing the 'info' key from the response object

@@ -14,8 +14,8 @@
                 item-value="value"
                 required
                 :rules="typeRules"
-                readonly
-                disabled
+                readonly="true"
+                disabled="true"
               />
             </div>
             <h2 class="text-h6">Деталь:</h2>

@@ -129,8 +129,7 @@ export default {
         if (response.status === 'ok') {
           this.userRole = response.role
           // Проверяем роль и устанавливаем hasAccess в true, если это необходимо
-          this.hasAccess =
-            this.userRole === 'Editor' || this.userRole === 'Admin'
+          this.hasAccess = this.userRole === 'Editor' || this.userRole === 'Admin'
         } else {
           // Если checkLogin вернул ошибку или не 'ok', доступ запрещен
           this.hasAccess = false

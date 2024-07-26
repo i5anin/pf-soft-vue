@@ -40,9 +40,7 @@
                   v-for="item in operations"
                   :key="item + 'progress'"
                   :color="completedOperations.includes(item) ? 'green' : 'grey'"
-                  :variant="
-                    completedOperations.includes(item) ? 'elevated' : 'text'
-                  "
+                  :variant="completedOperations.includes(item) ? 'elevated' : 'text'"
                   class="ma-2"
                   outlined
                 >
@@ -63,7 +61,7 @@
           </v-col>
         </v-row>
       </div>
-      <v-table hover class="elevation-1">
+      <v-table hover="true" class="elevation-1">
         <thead>
           <tr>
             <th>#</th>
@@ -143,7 +141,7 @@
         Закрыть
       </v-btn>
     </template>
-    <v-dialog v-model="showCancelDialog" persistent max-width="350">
+    <v-dialog v-model="showCancelDialog" persistent="true" max-width="350">
       <v-card>
         <v-card-title class="headline">Подтверждение отмены</v-card-title>
         <v-card-text>
@@ -157,26 +155,15 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn
-            color="green darken-1"
-            text="true"
-            @click="confirmCancelOperation"
-          >
+          <v-btn color="green darken-1" text="true" @click="confirmCancelOperation">
             Подтвердить
           </v-btn>
-          <v-btn
-            color="red darken-1"
-            text="true"
-            @click="showCancelDialog = false"
-          >
+          <v-btn color="red darken-1" text="true" @click="showCancelDialog = false">
             Отмена
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-snackbar v-model="showErrorSnackbar" color="error" :timeout="15000">
-      {{ errorMessage }}
-    </v-snackbar>
   </Modal>
 </template>
 
@@ -200,8 +187,6 @@ export default {
   emits: ['canceled', 'operation-cancelled'],
   data() {
     return {
-      showErrorSnackbar: false,
-      errorMessage: '',
       info: { is_archive: false },
       userRole: null,
       showCancelDialog: false,
@@ -283,11 +268,9 @@ export default {
     async cancelOperation(operationId) {
       if (!operationId) {
         console.error('Invalid operation ID:', operationId)
-        this.errorMessage = 'Internal error: The operation ID is invalid.'
-        this.showErrorSnackbar = true
+        alert('Internal error: The operation ID is invalid.')
         return
       }
-
       if (
         !confirm(
           `Вы уверены, что хотите отменить ${this.cancelQuantity} из этой операции?`
@@ -295,54 +278,34 @@ export default {
       ) {
         return
       }
-
       const token = localStorage.getItem('token')
       if (!token) {
         console.error('Token not found in local storage.')
-        this.errorMessage = 'Ошибка авторизации: Токен не найден.'
-        this.showErrorSnackbar = true
+        alert('Ошибка авторизации: Токен не найден.')
         return
       }
-
       try {
         const response = await issueHistoryApi.cancelOperation(
           operationId,
           token,
           this.cancelQuantity
         )
-
         if (response.success) {
           const item = this.filteredData.find((x) => x.id === operationId)
           if (item) {
             item.cancelled = true
-            item.canceller_login = response.canceller_login
+            item.canceller_login = response.canceller_login // Assuming response includes the canceller's login
           }
-
-          this.errorMessage = 'Операция успешно отменена'
-          this.showErrorSnackbar = true
+          alert('Операция успешно отменена')
           this.$emit('operation-cancelled', operationId)
           await this.fetchHistoryData()
         } else {
-          // Обработка ответа с success: false (возможно, есть message от сервера)
-          this.errorMessage =
-            'Не удалось отменить операцию: ' +
-            (response.message || 'Неизвестная ошибка')
-          this.showErrorSnackbar = true
+          alert('Не удалось отменить операцию: ' + response.message)
         }
       } catch (error) {
         console.error('Ошибка при отмене операции:', error)
-
-        if (error.response && error.response.status === 403) {
-          // Ошибка 403 (Forbidden) - выводим сообщение от сервера
-          this.errorMessage =
-            error.response.data.message || 'Отмена операции запрещена.'
-        } else {
-          // Другие ошибки
-          this.errorMessage =
-            'Ошибка при отмене операции: ' +
-            (error.message || 'Неизвестная ошибка')
-        }
-        this.showErrorSnackbar = true
+        alert('Ошибка при отмене операции: ' + error.message)
+        alert('Ошибка при отмене операции: ' + error)
       }
     },
     filterData() {

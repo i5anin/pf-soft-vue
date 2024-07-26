@@ -11,15 +11,15 @@
                   v-model="param.info"
                   :items="availableToolParamOptions"
                   label="Параметр"
-                  single-line
+                  single-line="true"
                   solo
                   @update:model-value="(value) => selectParam(value, index)"
                 />
                 <v-combobox
                   v-model="toolModel.property[param.id]"
                   label="Значение"
-                  clearable
-                  single-line
+                  clearable="true"
+                  single-line="true"
                   solo
                 />
                 <v-btn icon @click="removeParameter(param.id)">

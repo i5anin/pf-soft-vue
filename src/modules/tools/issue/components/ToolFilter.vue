@@ -5,7 +5,7 @@
         <v-text-field
           v-model="searchQuery"
           variant="outlined"
-          clearable
+          clearable="true"
           append-icon="mdi-magnify"
           label="Поиск"
           hide-details
@@ -24,7 +24,7 @@
         <v-combobox
           density="compact"
           variant="solo"
-          clearable
+          clearable="true"
           :label="filter.label"
           :items="filter.values"
           :value="filters.selectedDynamicFilters[filter.key]"

@@ -71,7 +71,7 @@
                       density="compact"
                       :items="availableToolParamOptions"
                       label="Параметр"
-                      single-line
+                      single-line="true"
                       solo
                       @update:model-value="(value) => selectParam(value, index)"
                     />
@@ -83,8 +83,8 @@
                       :items="toolParamsOptions[param.id]"
                       label="Значение"
                       variant="outlined"
-                      clearable
-                      single-line
+                      clearable="true"
+                      single-line="true"
                       solo
                     />
                   </v-col>

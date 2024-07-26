@@ -7,9 +7,7 @@
         </template>
         {{ group.path }}
       </v-chip>
-      <v-chip color="primary" variant="elevated">{{
-        group.tools.length
-      }}</v-chip>
+      <v-chip color="primary" variant="elevated">{{ group.tools.length }}</v-chip>
       <div v-if="visibleGroups.includes(index)">
         <v-table dense>
           <thead>

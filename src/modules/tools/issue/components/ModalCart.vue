@@ -2,11 +2,7 @@
   <v-snackbar v-model="snackbar" :timeout="3000" color="error">
     {{ snackbarText }}
   </v-snackbar>
-  <Modal
-    :title="popupTitle"
-    :width="modalWidth"
-    transition="slide-x-reverse-transition"
-  >
+  <Modal :title="popupTitle" :width="modalWidth" transition="slide-x-reverse-transition">
     <template #content>
       <v-container>
         <div class="d-flex">
@@ -120,11 +116,7 @@
               </tbody>
             </v-table>
           </div>
-          <div
-            v-if="toolModel.operationType"
-            class="flex-grow-1 ml-2"
-            style="flex-basis: 60%"
-          >
+          <div v-if="toolModel.operationType" class="flex-grow-1 ml-2" style="flex-basis: 60%">
             <ModalTableOperaton :operation-id="toolModel.operationType" />
           </div>
         </div>
@@ -152,9 +144,7 @@
       >
         Выдать
         <!-- Добавление класса ml-2 (margin left 2) для отступа -->
-        <v-chip color="red" variant="flat" class="ml-2">
-          {{ cartItemsTotalQuantity }} шт</v-chip
-        >
+        <v-chip color="red" variant="flat" class="ml-2"> {{ cartItemsTotalQuantity }} шт</v-chip>
       </v-btn>
     </template>
   </Modal>
@@ -222,12 +212,7 @@ export default {
     },
   }),
   computed: {
-    ...mapGetters('IssueToolStore', [
-      'nameOptions',
-      'tool',
-      'parentCatalog',
-      'cartItems',
-    ]),
+    ...mapGetters('IssueToolStore', ['nameOptions', 'tool', 'parentCatalog', 'cartItems']),
     ...mapState('IssueToolStore', ['isModalOpen', 'parentCatalog']),
     selectedFioModel: {
       get() {
@@ -238,9 +223,7 @@ export default {
       },
     },
     cartItemsTotalQuantity() {
-      return this.cartItems
-        ? this.cartItems.reduce((total, item) => total + item.quantity, 0)
-        : 0
+      return this.cartItems ? this.cartItems.reduce((total, item) => total + item.quantity, 0) : 0
     },
     currentFolderName() {
       return this.toolId === null ? this.idParent.label : this.tool.folder_name
@@ -335,10 +318,7 @@ export default {
         this.toolModel.operationType = null
         this.toolModel.numberType = null // Сбросить выбранный "Номер Тип"
       } else {
-        console.error(
-          'Не удалось найти ID для выбранного значения:',
-          selectedValue
-        )
+        console.error('Не удалось найти ID для выбранного значения:', selectedValue)
         this.options.numberType = []
         this.toolModel.operationType = null
         this.toolModel.numberType = null // Сбросить выбранный "Номер Тип"
@@ -378,8 +358,7 @@ export default {
           return true
         }
       } catch (error) {
-        this.snackbarText =
-          error.message || 'Произошла ошибка при отправке данных'
+        this.snackbarText = error.message || 'Произошла ошибка при отправке данных'
         this.snackbar = true
         this.submitButtonDisabled = true
         setTimeout(() => {

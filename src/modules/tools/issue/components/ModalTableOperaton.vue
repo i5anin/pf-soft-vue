@@ -69,9 +69,7 @@ export default {
   methods: {
     async fetchToolHistory() {
       try {
-        this.historyItems = await issueToolApi.getToolHistoryByOperationId(
-          this.operationId
-        )
+        this.historyItems = await issueToolApi.getToolHistoryByOperationId(this.operationId)
       } catch (error) {
         // Обработка ошибки 404
         if (error.response && error.response.status === 404) {
