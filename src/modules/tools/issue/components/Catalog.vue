@@ -83,7 +83,7 @@ export default {
   },
 
   async created() {
-    const toolsTree = await toolTreeApi.getTree()
+    const toolsTree = await toolTreeApi.getTree({ folderNotNull: true })
     if (toolsTree && toolsTree.length > 0) {
       this.currentItem = toolsTree[0]
       this.tree.push(this.currentItem)
