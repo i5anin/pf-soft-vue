@@ -36,6 +36,19 @@ function replaceCommaWithDotInNumbers(obj) {
 
 async function getTools(req, res) {
   try {
+    const token = req.headers.authorization?.split(' ')[1]
+
+    if (!token) {
+      return res.status(401).json({ error: 'Authentication token is required.' })
+    }
+
+    const tokenQuery = 'SELECT id FROM dbo.vue_users WHERE token = $1'
+    const tokenResult = await pool.query(tokenQuery, [token])
+
+    if (tokenResult.rows.length === 0) {
+      return res.status(403).json({ error: 'Invalid token.' })
+    }
+
     const params = { ...req.query, ...req.body }
     const { search, parent_id, onlyInStock, page = 1, limit = 50 } = params
 
