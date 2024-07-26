@@ -206,4 +206,18 @@ export default {
   height: 74vh; /* Замените это значение на желаемую высоту */
   overflow-y: auto;
 }
+
+.index {
+  max-width: 40px !important;
+  font-size: 0.9em;
+  color: grey;
+}
+
+.grey {
+  color: grey;
+}
+
+.red {
+  color: red;
+}
 </style>
