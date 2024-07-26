@@ -19,8 +19,8 @@
           <component
             :is="item.component"
             :key="`component-${item.name}-${tab}`"
-            :type="item.type"
           />
+          <!--          :type="item.type"-->
         </v-window-item>
       </v-window>
     </v-card-text>
