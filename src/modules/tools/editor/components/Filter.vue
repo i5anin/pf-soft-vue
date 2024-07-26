@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-row v-if="dynamicFilters && dynamicFilters.length > 0">
+    <v-row v-if="dynamicFilters.length">
       <v-col cols="12">
         <v-text-field
           v-model="searchQuery"
@@ -9,11 +9,11 @@
           append-icon="mdi-magnify"
           label="Поиск по инструменту"
           hide-details
-          @input="onSearch"
-          @update:model-value="onSearch"
+          @input="debounceSearch"
         />
       </v-col>
     </v-row>
+
     <v-row
       v-for="(group, index) in groupedFilters"
       :key="`group-${index}`"
@@ -45,7 +45,6 @@ export default {
   data() {
     return {
       searchQuery: '',
-      debouncedSearch: null,
     }
   },
   computed: {
@@ -60,16 +59,12 @@ export default {
     groupedFilters() {
       const result = []
       const itemsPerRow = 4
+
       for (let i = 0; i < this.dynamicFilters.length; i += itemsPerRow) {
         result.push(this.dynamicFilters.slice(i, i + itemsPerRow))
       }
       return result
     },
-  },
-  async mounted() {
-    await this.fetchToolsDynamicFilters()
-    this.debouncedSearch = this.debounce(this.onActualSearch, 500)
-    this.isDataLoaded = true
   },
   methods: {
     ...mapActions('EditorToolStore', [
@@ -80,25 +75,14 @@ export default {
       'setSelectedDynamicFilters',
       'setCurrentPage',
       'setItemsPerPage',
+      'setSearch', // Добавляем мутацию setSearch
     ]),
-    onActualSearch() {
-      store.commit('EditorToolStore/setSearch', this.searchQuery)
-      store.dispatch('EditorToolStore/fetchToolsByFilter')
-    },
-    debounce(func, wait) {
-      let timeout
-      return function (...args) {
-        const later = () => {
-          timeout = null
-          func.apply(this, args)
-        }
-        clearTimeout(timeout)
-        timeout = setTimeout(later, wait)
-      }
-    },
-    onSearch() {
-      this.debouncedSearch()
-    },
+    // Декорированный метод поиска с задержкой.
+    debounceSearch: _.debounce(function () {
+      this.setSearch(this.searchQuery) // Обновляем состояние поиска в хранилище Vuex.
+      this.fetchToolsByFilter() // Загружаем инструменты с учетом нового значения поиска.
+    }, 500), // Задержка в 500 миллисекунд.
+
     onParamsFilterUpdate({ key, value }) {
       this.setSelectedDynamicFilters({
         ...this.filters.selectedDynamicFilters,
@@ -106,6 +90,9 @@ export default {
       })
       this.fetchToolsByFilter()
     },
+  },
+  async mounted() {
+    await this.fetchToolsDynamicFilters()
   },
 }
 </script>
