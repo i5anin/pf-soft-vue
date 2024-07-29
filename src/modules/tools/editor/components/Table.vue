@@ -21,11 +21,11 @@
       items-per-page-text="Пункты на странице:"
       loading-text="Загрузка данных"
       :headers="toolTableHeaders"
-      :items="getFormattedTools"
-      :items-length="getToolsTotalCount"
-      :items-per-page="filters.itemsPerPage"
-      :page="filters.currentPage"
-      :loading="getIsLoading"
+      :items="editorToolStore.getFormattedTools"
+      :items-length="editorToolStore.getToolsTotalCount"
+      :items-per-page="editorToolStore.getFilters.itemsPerPage"
+      :page="editorToolStore.getFilters.currentPage"
+      :loading="editorToolStore.getIsLoading"
       :items-per-page-options="[15, 50, 100, 300]"
       density="compact"
       class="elevation-1 scrollable-table"
@@ -38,7 +38,12 @@
     >
       <template #item.index="{ index }">
         <td class="index">
-          {{ index + 1 + (filters.currentPage - 1) * filters.itemsPerPage }}
+          {{
+            index +
+            1 +
+            (editorToolStore.getFilters.currentPage - 1) *
+              editorToolStore.getFilters.itemsPerPage // Изменено
+          }}
         </td>
       </template>
       <template #item.name="{ item }">
@@ -74,7 +79,6 @@
 import EditorToolModal from './modal/Modal.vue'
 import ToolFilter from './filter/MainFilter.vue'
 import { useEditorToolStore } from '../piniaStore'
-import { storeToRefs } from 'pinia'
 
 export default {
   components: {
@@ -88,25 +92,9 @@ export default {
     },
   },
   emits: [],
-  setup() {
-    const editorToolStore = useEditorToolStore()
-    const {
-      getToolsTotalCount,
-      getFormattedTools,
-      getDynamicFilters,
-      getIsLoading,
-    } = storeToRefs(editorToolStore)
-
-    return {
-      editorToolStore,
-      getToolsTotalCount,
-      getFormattedTools,
-      getDynamicFilters,
-      getIsLoading,
-    }
-  },
   data() {
     return {
+      editorToolStore: useEditorToolStore(), // Инициализируем store
       openDialog: false,
       isDataLoaded: false,
       editingToolId: null,
@@ -125,11 +113,9 @@ export default {
 
   watch: {
     'editorToolStore.parentCatalog.id'(newId) {
-      if (newId != null) {
-        this.fetchToolsDynamicFilters()
-      }
+      if (newId != null) this.fetchToolsDynamicFilters()
     },
-    getDynamicFilters: {
+    'editorToolStore.getDynamicFilters': {
       immediate: true,
       handler(dynamicColumns) {
         this.toolTableHeaders = [
@@ -149,8 +135,8 @@ export default {
     },
   },
 
-  async mounted() {
-    await this.fetchToolsDynamicFilters()
+  mounted() {
+    this.fetchToolsDynamicFilters()
     this.isDataLoaded = true
   },
   methods: {
@@ -174,7 +160,6 @@ export default {
     colorClassRed(item) {
       return { red: !item.sklad || item.sklad === 0 }
     },
-    //рассчитать заказ
     calculateOrder(tool) {
       const order = tool.norma - tool.sklad
       return order < 0 ? '' : order
@@ -201,7 +186,7 @@ export default {
     },
     //получить инструменты по фильтру
     fetchToolsByFilter() {
-      this.editorToolStore.fetchToolsByFilter({ search: this.searchQuery }) // Пример
+      this.editorToolStore.fetchToolsByFilter({ search: this.searchQuery })
     },
     //инструменты извлечения динамических фильтров
     fetchToolsDynamicFilters() {
