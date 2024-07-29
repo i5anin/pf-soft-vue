@@ -42,7 +42,7 @@
             index +
             1 +
             (editorToolStore.getFilters.currentPage - 1) *
-              editorToolStore.getFilters.itemsPerPage // Изменено
+              editorToolStore.getFilters.itemsPerPage
           }}
         </td>
       </template>
@@ -113,7 +113,10 @@ export default {
 
   watch: {
     'editorToolStore.parentCatalog.id'(newId) {
-      if (newId != null) this.fetchToolsDynamicFilters()
+      if (newId != null) {
+        this.fetchToolsDynamicFilters()
+        this.fetchToolsByFilter()
+      }
     },
     'editorToolStore.getDynamicFilters': {
       immediate: true,
@@ -136,7 +139,8 @@ export default {
   },
 
   mounted() {
-    this.fetchToolsDynamicFilters()
+    this.fetchToolsDynamicFilters() //динамический фильтр инструментов выборки
+    this.fetchToolsByFilter() //получить инструменты по фильтру
     this.isDataLoaded = true
   },
   methods: {
@@ -195,3 +199,11 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.index {
+  max-width: 40px !important;
+  font-size: 0.9em;
+  color: grey;
+}
+</style>
