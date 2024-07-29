@@ -56,32 +56,21 @@
         </v-row>
       </v-container>
     </v-main>
-    <TabMainTable v-if="isTableShown" />
   </v-app>
 </template>
 
 <script>
 import { toolTreeApi } from '@/modules/tools/tree/api/tree'
 import { useEditorToolStore } from '../piniaStore'
-import { storeToRefs } from 'pinia'
 import TabMainTable from '@/modules/tools/editor/components/Table.vue'
 import CatalogBreadcrumbs from '@/modules/tools/shared/components/CatalogBreadcrumbs.vue'
 
 export default {
   name: 'EditorCatalog',
   components: { TabMainTable, CatalogBreadcrumbs },
-
-  setup() {
-    const editorToolStore = useEditorToolStore()
-    const { parentCatalog } = storeToRefs(editorToolStore)
-
-    return {
-      editorToolStore,
-      parentCatalog,
-    }
-  },
   data() {
     return {
+      editorToolStore: useEditorToolStore(), // Инициализируем store в data()
       tree: [],
       currentItem: null,
       isEditing: false,
@@ -90,7 +79,7 @@ export default {
   },
   computed: {
     isTableShown() {
-      return this.parentCatalog.id !== 1
+      return this.editorToolStore.getParentCatalog.id !== 1 // Доступ к getter через store
     },
   },
   watch: {
@@ -104,7 +93,6 @@ export default {
       },
     },
   },
-
   async created() {
     const toolsTree = await toolTreeApi.getTree()
     if (toolsTree && toolsTree.length > 0) {

@@ -24,7 +24,7 @@
 
 <script>
 import { debounce } from 'lodash'
-import { mapActions, mapMutations, mapGetters } from 'vuex'
+import { useEditorToolStore } from '../../piniaStore'
 import DynamicFilters from './DynamicFilters.vue'
 
 export default {
@@ -34,53 +34,50 @@ export default {
   data() {
     return {
       searchQuery: '',
+      editorToolStore: useEditorToolStore(),
     }
   },
   computed: {
-    ...mapGetters('EditorToolStore', [
-      'toolsTotalCount',
-      'formattedTools',
-      'dynamicFilters',
-      'filters',
-      'parentCatalog',
-      'isLoading',
-    ]),
     groupedFilters() {
       const filtersPerRow = 4
       const result = []
+      const dynamicFilters = this.editorToolStore.getDynamicFilters // Доступ к getter
 
-      for (let i = 0; i < this.dynamicFilters.length; i += filtersPerRow) {
-        result.push(this.dynamicFilters.slice(i, i + filtersPerRow))
+      for (let i = 0; i < dynamicFilters.length; i += filtersPerRow) {
+        result.push(dynamicFilters.slice(i, i + filtersPerRow))
       }
       return result
     },
     hasDynamicFilters() {
-      return this.dynamicFilters.length > 0
+      return this.editorToolStore.getDynamicFilters.length > 0 // Доступ к getter
+    },
+    getIsLoading() {
+      return this.editorToolStore.getIsLoading
+    },
+    getFilters() {
+      return this.editorToolStore.getFilters
     },
   },
   methods: {
-    ...mapActions('EditorToolStore', [
-      'fetchToolsDynamicFilters',
-      'fetchToolsByFilter',
-    ]),
-    ...mapMutations('EditorToolStore', [
-      'setSelectedDynamicFilters',
-      'setCurrentPage',
-      'setItemsPerPage',
-      'setSearch',
-    ]),
-    // Декорированный метод поиска с задержкой.
     debounceSearch: debounce(function () {
-      // Используем импортированную debounce
-      this.setSearch(this.searchQuery)
+      this.editorToolStore.setSearch(this.searchQuery)
       this.fetchToolsByFilter()
     }, 500),
+
     onParamsFilterUpdate(updatedFilters) {
-      this.setSelectedDynamicFilters({
-        ...this.filters.selectedDynamicFilters,
+      this.editorToolStore.setSelectedDynamicFilters({
+        ...this.getFilters.selectedDynamicFilters,
         ...updatedFilters,
       })
       this.fetchToolsByFilter()
+    },
+
+    fetchToolsByFilter() {
+      this.editorToolStore.fetchToolsByFilter()
+    },
+
+    async fetchToolsDynamicFilters() {
+      await this.editorToolStore.fetchToolsDynamicFilters()
     },
   },
   async mounted() {

@@ -60,18 +60,22 @@ export const useEditorToolStore = defineStore('editorToolStore', {
         } = this.filters
         const { id: parentId } = this.parentCatalog
 
-        const { tools, totalCount } = await toolApi.getTools({
-          search,
-          page: currentPage,
-          limit: itemsPerPage,
+        // Проверка типа данных и преобразование в строку
+        const searchString =
+          typeof search === 'string' ? search : search.toString()
+
+        const { tools, totalCount } = await toolApi.getTools(
+          search, // Передаем search как отдельный параметр
+          currentPage,
+          itemsPerPage,
           includeNull,
           parentId,
           onlyInStock,
-          ...Object.entries(selectedDynamicFilters).reduce(
+          Object.entries(selectedDynamicFilters).reduce(
             (acc, [key, value]) => ({ ...acc, [`param_${key}`]: value }),
             {}
-          ),
-        })
+          )
+        )
 
         this.tools = tools
         this.toolsTotalCount = totalCount

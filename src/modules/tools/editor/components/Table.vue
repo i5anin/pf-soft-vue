@@ -21,11 +21,11 @@
       items-per-page-text="Пункты на странице:"
       loading-text="Загрузка данных"
       :headers="toolTableHeaders"
-      :items="formattedTools"
-      :items-length="toolsTotalCount"
+      :items="getFormattedTools"
+      :items-length="getToolsTotalCount"
       :items-per-page="filters.itemsPerPage"
       :page="filters.currentPage"
-      :loading="isLoading"
+      :loading="getIsLoading"
       :items-per-page-options="[15, 50, 100, 300]"
       density="compact"
       class="elevation-1 scrollable-table"
@@ -41,7 +41,6 @@
           {{ index + 1 + (filters.currentPage - 1) * filters.itemsPerPage }}
         </td>
       </template>
-      <!--name-->
       <template #item.name="{ item }">
         <td style="white-space: nowrap">
           <span :class="colorClassGrey(item)">{{ item.name }}</span>
@@ -74,7 +73,8 @@
 <script>
 import EditorToolModal from './modal/Modal.vue'
 import ToolFilter from './filter/MainFilter.vue'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
+import { useEditorToolStore } from '../piniaStore'
+import { storeToRefs } from 'pinia'
 
 export default {
   components: {
@@ -88,33 +88,48 @@ export default {
     },
   },
   emits: [],
+  setup() {
+    const editorToolStore = useEditorToolStore()
+    const {
+      getToolsTotalCount,
+      getFormattedTools,
+      getDynamicFilters,
+      getIsLoading,
+    } = storeToRefs(editorToolStore)
+
+    return {
+      editorToolStore,
+      getToolsTotalCount,
+      getFormattedTools,
+      getDynamicFilters,
+      getIsLoading,
+    }
+  },
   data() {
     return {
       openDialog: false,
       isDataLoaded: false,
-      editingToolId: null, //редактирование идентификатора инструмента
-      toolTableHeaders: [], //заголовки таблиц инструментов
+      editingToolId: null,
+      toolTableHeaders: [],
       filterParamsList: [],
+      filters: {
+        currentPage: 1,
+        itemsPerPage: 15,
+        search: '',
+        includeNull: false,
+        onlyInStock: null,
+        selectedDynamicFilters: {},
+      },
     }
-  },
-  computed: {
-    ...mapGetters('EditorToolStore', [
-      'toolsTotalCount',
-      'formattedTools',
-      'dynamicFilters',
-      'filters',
-      'parentCatalog',
-      'isLoading',
-    ]),
   },
 
   watch: {
-    'parentCatalog.id'(newId) {
+    'editorToolStore.parentCatalog.id'(newId) {
       if (newId != null) {
         this.fetchToolsDynamicFilters()
       }
     },
-    dynamicFilters: {
+    getDynamicFilters: {
       immediate: true,
       handler(dynamicColumns) {
         this.toolTableHeaders = [
@@ -139,34 +154,23 @@ export default {
     this.isDataLoaded = true
   },
   methods: {
-    ...mapActions('EditorToolStore', [
-      'fetchToolsDynamicFilters',
-      'fetchToolsByFilter',
-    ]),
-    ...mapMutations('EditorToolStore', [
-      'setCurrentPage',
-      'setItemsPerPage',
-      'setSelectedDynamicFilters',
-    ]),
-
     getColorForGroup(index) {
-      const hue = index * 137.508 // используем золотое сечение
+      const hue = index * 137.508
       return `hsl(${hue % 360}, 50%, 50%)`
     },
-    // Метод для обработки обновления параметров фильтра
     onParamsFilterUpdate({ key, value }) {
-      this.setSelectedDynamicFilters({
+      this.editorToolStore.setSelectedDynamicFilters({
         ...this.filters.selectedDynamicFilters,
         [key]: value,
       })
       this.fetchToolsByFilter()
     },
     async onChangePage(page) {
-      this.setCurrentPage(page)
+      this.editorToolStore.setCurrentPage(page)
       await this.fetchToolsByFilter()
     },
     async onUpdateItemsPerPage(itemsPerPage) {
-      this.setItemsPerPage(itemsPerPage)
+      this.editorToolStore.setItemsPerPage(itemsPerPage)
       await this.fetchToolsByFilter()
     },
 
@@ -197,27 +201,12 @@ export default {
       this.editingToolId = tool.id
       this.openDialog = true
     },
+    fetchToolsByFilter() {
+      this.editorToolStore.fetchToolsByFilter()
+    },
+    fetchToolsDynamicFilters() {
+      this.editorToolStore.fetchToolsDynamicFilters()
+    },
   },
 }
 </script>
-
-<style scoped>
-.scrollable-table {
-  height: 74vh; /* Замените это значение на желаемую высоту */
-  overflow-y: auto;
-}
-
-.index {
-  max-width: 40px !important;
-  font-size: 0.9em;
-  color: grey;
-}
-
-.grey {
-  color: grey;
-}
-
-.red {
-  color: red;
-}
-</style>
