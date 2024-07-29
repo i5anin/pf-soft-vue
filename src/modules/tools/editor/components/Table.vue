@@ -158,13 +158,6 @@ export default {
       const hue = index * 137.508
       return `hsl(${hue % 360}, 50%, 50%)`
     },
-    onParamsFilterUpdate({ key, value }) {
-      this.editorToolStore.setSelectedDynamicFilters({
-        ...this.filters.selectedDynamicFilters,
-        [key]: value,
-      })
-      this.fetchToolsByFilter()
-    },
     async onChangePage(page) {
       this.editorToolStore.setCurrentPage(page)
       await this.fetchToolsByFilter()
@@ -173,7 +166,6 @@ export default {
       this.editorToolStore.setItemsPerPage(itemsPerPage)
       await this.fetchToolsByFilter()
     },
-
     colorClassGrey(item) {
       return { grey: !item.sklad || item.sklad === 0 }
     },
