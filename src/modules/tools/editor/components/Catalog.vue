@@ -14,9 +14,8 @@
             @blur="finishEditing"
             @keyup.enter="finishEditing"
           />
-          <!-- Показываем название и иконку, если редактирование не активно -->
           <span v-else @click="startEditing">
-            {{ currentItem ? currentItem.label : 'Редактор' }}
+            {{ currentItem?.label || 'Редактор' }}
             <v-btn
               title="Переименовать папку"
               icon
@@ -32,7 +31,7 @@
               title="Удалить папку"
               icon
               small
-              @click.stop="deleteItem(currentItem.id)"
+              @click.stop="deleteItem(currentItem?.id)"
             >
               <v-icon icon="mdi-delete" />
             </v-btn>
@@ -57,18 +56,14 @@
         </v-row>
       </v-container>
     </v-main>
+    <TabMainTable v-if="isTableShown" />
   </v-app>
-  <!--  <TabMainTable-->
-  <!--    v-if="isTableShown"-->
-  <!--    v-bind="{-->
-  <!--      namespace: 'EditorToolStore',-->
-  <!--    }"-->
-  <!--  />-->
 </template>
 
 <script>
 import { toolTreeApi } from '@/modules/tools/tree/api/tree'
-import { mapActions, mapMutations, mapGetters } from 'vuex'
+import { useEditorToolStore } from '../piniaStore'
+import { storeToRefs } from 'pinia'
 import TabMainTable from '@/modules/tools/editor/components/Table.vue'
 import CatalogBreadcrumbs from '@/modules/tools/shared/components/CatalogBreadcrumbs.vue'
 
@@ -76,17 +71,24 @@ export default {
   name: 'EditorCatalog',
   components: { TabMainTable, CatalogBreadcrumbs },
 
+  setup() {
+    const editorToolStore = useEditorToolStore()
+    const { parentCatalog } = storeToRefs(editorToolStore)
+
+    return {
+      editorToolStore,
+      parentCatalog,
+    }
+  },
   data() {
     return {
       tree: [],
       currentItem: null,
-      selectedItem: null,
       isEditing: false,
       editableLabel: '',
     }
   },
   computed: {
-    ...mapGetters('EditorToolStore', ['parentCatalog']),
     isTableShown() {
       return this.parentCatalog.id !== 1
     },
@@ -94,11 +96,11 @@ export default {
   watch: {
     currentItem: {
       handler(currentItem) {
-        this.setParentCatalog({
-          id: currentItem.id,
-          label: currentItem.label,
+        this.editorToolStore.setParentCatalog({
+          id: currentItem?.id,
+          label: currentItem?.label,
         })
-        this.fetchToolsByFilter()
+        this.editorToolStore.fetchToolsByFilter()
       },
     },
   },
@@ -111,8 +113,6 @@ export default {
     }
   },
   methods: {
-    ...mapMutations('EditorToolStore', ['setParentCatalog']),
-    ...mapActions('EditorToolStore', ['fetchToolsByFilter']),
     async renameCurrentItem() {
       const itemId = this.currentItem.id
       const newName = this.editableLabel
@@ -121,9 +121,11 @@ export default {
         const response = await toolTreeApi.renameFolder(itemId, newName)
         if (response && response.message) {
           alert('Папка успешно переименована.')
-          this.currentItem.label = newName // Обновляем название текущего папки без перестроения всего дерева
-          const historyItem = this.tree.find((item) => item.id === itemId) // Необходимо обновить папка в истории, если он там есть
-          if (historyItem) historyItem.label = newName
+          this.currentItem.label = newName
+          const historyItem = this.tree.find((item) => item.id === itemId)
+          if (historyItem) {
+            historyItem.label = newName
+          }
         } else {
           alert('Произошла ошибка при переименовании.')
         }
@@ -143,7 +145,6 @@ export default {
             this.tree.pop()
             this.currentItem = this.tree[this.tree.length - 1]
           }
-          // Вызываем refreshTree для обновления дерева и currentItem
           await this.refreshTree()
         } catch (error) {
           console.error('Ошибка при удалении:', error)
@@ -168,9 +169,9 @@ export default {
             elements: 0,
             nodes: [],
           }
-          this.currentItem.nodes.push(newFolder) // Добавляем новую папку в список дочерних элементов текущего элемента
-          this.currentItem = newFolder // Обновляем текущий элемент, чтобы отображать новую папку
-          this.tree.push(newFolder) // Добавляем новую папку в историю для навигации
+          this.currentItem.nodes.push(newFolder)
+          this.currentItem = newFolder
+          this.tree.push(newFolder)
         } catch (error) {
           alert('Произошла ошибка при добавлении ветки.')
         }
@@ -179,11 +180,10 @@ export default {
     async refreshTree() {
       const updatedTree = await toolTreeApi.getTree()
       this.tree = updatedTree
-      // TODO: сделать нормальный поиск во вложенных node'ах
       const updatedCurrentItem = updatedTree.find(
-        (item) => item.id === this.currentItem.id // Проверяем, если текущий элемент присутствует в обновленном дереве
+        (item) => item.id === this.currentItem?.id
       )
-      this.currentItem = updatedCurrentItem // Если текущий элемент не найден, обновляем его на первый элемент из дерева или на null, если дерево пустое
+      this.currentItem = updatedCurrentItem
         ? updatedCurrentItem
         : updatedTree.length > 0
           ? updatedTree[0]
@@ -191,7 +191,7 @@ export default {
     },
 
     async selectItem(item) {
-      this.setParentCatalog({ id: item.id, label: item.label })
+      this.editorToolStore.setParentCatalog({ id: item.id, label: item.label })
       this.currentItem = item
       if (!this.tree.includes(item)) this.tree.push(item)
     },
@@ -213,9 +213,9 @@ export default {
 
     goBack() {
       if (this.tree.length > 1) {
-        this.tree.pop() // Удаляем последний элемент истории
-        this.currentItem = this.tree[this.tree.length - 1] // Обновляем currentItem на предыдущий элемент
-        this.setParentCatalog({
+        this.tree.pop()
+        this.currentItem = this.tree[this.tree.length - 1]
+        this.editorToolStore.setParentCatalog({
           id: this.currentItem.id,
           label: this.currentItem.label,
         })
@@ -223,7 +223,7 @@ export default {
     },
     goTo(index) {
       this.currentItem = this.tree[index]
-      this.setParentCatalog({
+      this.editorToolStore.setParentCatalog({
         id: this.currentItem.id,
         label: this.currentItem.label,
       })
@@ -233,14 +233,3 @@ export default {
   },
 }
 </script>
-
-<style>
-/* Стили для хлебных крошек */
-.breadcrumbs {
-  margin-bottom: 8px;
-}
-
-.custom-container > div {
-  min-height: 0 !important;
-}
-</style>
