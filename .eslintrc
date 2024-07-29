@@ -37,6 +37,7 @@
     "jest"
   ],
   "rules": {
+    "no-composition-api": "warn",
     "max-len": "off",
     "vue/multi-word-component-names": "off",
     "vue/valid-v-slot": "off",
