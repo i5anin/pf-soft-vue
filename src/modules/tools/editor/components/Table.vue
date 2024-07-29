@@ -202,7 +202,7 @@ export default {
       this.openDialog = true
     },
     fetchToolsByFilter() {
-      this.editorToolStore.fetchToolsByFilter()
+      this.editorToolStore.fetchToolsByFilter({ search: this.searchQuery }) // Пример
     },
     fetchToolsDynamicFilters() {
       this.editorToolStore.fetchToolsDynamicFilters()
