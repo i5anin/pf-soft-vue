@@ -194,6 +194,11 @@ export default {
       this.setParentCatalog({ id: item.id, label: item.label })
       this.currentItem = item
       if (!this.tree.includes(item)) this.tree.push(item)
+
+      // Reset filters here:
+      this.setSelectedDynamicFilters({}) // Clear dynamic filters
+      this.searchQuery = '' // Clear search query (if applicable)
+      this.setCurrentPage(1) // Reset to the first page
     },
     startEditing() {
       this.isEditing = true
