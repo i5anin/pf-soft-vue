@@ -13,7 +13,6 @@ export const useToolStore = defineStore('tool', {
     toolsTotalCount: 0,
   }),
   getters: {
-    // ... ваши геттеры
     formattedTools(state) {
       return state.tools.map((tool) => ({
         ...tool,
@@ -28,6 +27,11 @@ export const useToolStore = defineStore('tool', {
     },
   },
   actions: {
+    /**
+     * Получает информацию об инструменте по его ID.
+     * @param {number} id - ID инструмента.
+     * @returns {Promise<void>}
+     */
     async fetchToolById(id) {
       try {
         this.tool = await toolApi.getToolById(id)
@@ -36,6 +40,10 @@ export const useToolStore = defineStore('tool', {
       }
     },
 
+    /**
+     * Получает динамические фильтры для инструментов на основе выбранного родительского каталога.
+     * @returns {Promise<void>}
+     */
     async fetchToolsDynamicFilters() {
       const { id = null } = this.parentCatalog
       if (id === null) {
@@ -46,7 +54,6 @@ export const useToolStore = defineStore('tool', {
         const dynamicFilters = await toolApi.filterParamsByParentId(id)
         this.dynamicFilters = dynamicFilters
 
-        // Обновляем selectedDynamicFilters, устанавливая начальные значения для новых ключей
         this.selectedDynamicFilters = {
           ...this.selectedDynamicFilters,
           ...dynamicFilters.reduce(
@@ -59,6 +66,18 @@ export const useToolStore = defineStore('tool', {
       }
     },
 
+    /**
+     * Получает список инструментов с учетом фильтров.
+     * @param {Object} params - Параметры фильтрации.
+     * @param {number} params.currentPage - Текущая страница.
+     * @param {number} params.itemsPerPage - Количество элементов на странице.
+     * @param {string} params.search - Строка поиска.
+     * @param {boolean} params.includeNull - Включать ли элементы с пустыми значениями.
+     * @param {boolean} [params.onlyInStock] - Показывать ли только товары в наличии.
+     * @param {Object} params.selectedDynamicFilters - Выбранные значения динамических фильтров.
+     * @param {number} params.parentId - ID родительского каталога.
+     * @returns {Promise<void>}
+     */
     async fetchToolsByFilter(params) {
       this.isLoading = true
 
