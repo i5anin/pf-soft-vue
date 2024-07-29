@@ -48,7 +48,7 @@ export const useEditorToolStore = defineStore('editorToolStore', {
 
     async fetchToolsByFilter() {
       this.isLoading = true
-
+      this.tools = [] // Очищаем tools перед новым запросом
       try {
         const {
           currentPage,

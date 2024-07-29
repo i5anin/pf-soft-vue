@@ -165,9 +165,6 @@ export default {
     colorClassGrey(item) {
       return { grey: !item.sklad || item.sklad === 0 }
     },
-    colorClassRed(item) {
-      return { red: !item.sklad || item.sklad === 0 }
-    },
     calculateOrder(tool) {
       const order = tool.norma - tool.sklad
       return order < 0 ? '' : order
