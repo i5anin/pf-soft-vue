@@ -15,10 +15,6 @@ import Table from './Table.vue'
 
 export default {
   name: 'Main',
-  components: {
-    Catalog,
-    ToolFilter,
-    Table,
-  },
+  components: { Catalog, ToolFilter, Table },
 }
 </script>

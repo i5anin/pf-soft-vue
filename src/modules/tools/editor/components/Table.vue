@@ -61,12 +61,16 @@
         </td>
       </template>
       <template #item.sklad="{ item }">
-        <td :class="colorClassRed(item)" style="white-space: nowrap">
-          {{ item.sklad }}
+        <td style="white-space: nowrap">
+          <v-chip :color="item.sklad === 0 ? 'red' : ''">
+            {{ item.sklad }}
+          </v-chip>
         </td>
       </template>
       <template #item.norma="{ item }">
-        <td style="white-space: nowrap">{{ item.norma }}</td>
+        <td style="white-space: nowrap">
+          {{ item.norma_green }} {{ item.norma }} {{ item.norma_red }}
+        </td>
       </template>
       <template #item.zakaz="{ item }">
         <td style="white-space: nowrap">{{ calculateOrder(item) }}</td>
@@ -124,6 +128,8 @@ export default {
         this.toolTableHeaders = [
           { title: '№', key: 'index', sortable: false },
           { title: 'Маркировка', key: 'name', sortable: false },
+          { title: 'Склад', key: 'sklad', sortable: false },
+          { title: 'Норма', key: 'norma', sortable: false },
           ...(dynamicColumns && dynamicColumns.length > 0
             ? dynamicColumns.map(({ label: title, key }) => ({
                 title,
@@ -131,8 +137,6 @@ export default {
                 sortable: false,
               }))
             : []),
-          { title: 'Норма', key: 'norma', sortable: false },
-          { title: 'Склад', key: 'sklad', sortable: false },
         ]
       },
     },
