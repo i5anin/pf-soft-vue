@@ -158,13 +158,15 @@ export default {
       const hue = index * 137.508
       return `hsl(${hue % 360}, 50%, 50%)`
     },
-    async onChangePage(page) {
+    //на странице изменений
+    onChangePage(page) {
       this.editorToolStore.setCurrentPage(page)
-      await this.fetchToolsByFilter()
+      this.fetchToolsByFilter()
     },
-    async onUpdateItemsPerPage(itemsPerPage) {
+    //при обновлении элементов на странице
+    onUpdateItemsPerPage(itemsPerPage) {
       this.editorToolStore.setItemsPerPage(itemsPerPage)
-      await this.fetchToolsByFilter()
+      this.fetchToolsByFilter()
     },
     colorClassGrey(item) {
       return { grey: !item.sklad || item.sklad === 0 }
@@ -172,30 +174,36 @@ export default {
     colorClassRed(item) {
       return { red: !item.sklad || item.sklad === 0 }
     },
+    //рассчитать заказ
     calculateOrder(tool) {
       const order = tool.norma - tool.sklad
       return order < 0 ? '' : order
     },
-
+    //при закрытии всплывающего окна
     onClosePopup() {
       this.openDialog = false
     },
+    //при сохранении изменений
     onSaveChanges() {
       this.openDialog = false
       this.fetchToolsDynamicFilters()
       this.fetchToolsByFilter()
     },
+    //при добавлении инструмента
     onAddTool() {
       this.editingToolId = null
       this.openDialog = true
     },
+    //в строке редактирования
     onEditRow(_, { item: tool }) {
       this.editingToolId = tool.id
       this.openDialog = true
     },
+    //получить инструменты по фильтру
     fetchToolsByFilter() {
       this.editorToolStore.fetchToolsByFilter({ search: this.searchQuery }) // Пример
     },
+    //инструменты извлечения динамических фильтров
     fetchToolsDynamicFilters() {
       this.editorToolStore.fetchToolsDynamicFilters()
     },
