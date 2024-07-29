@@ -131,10 +131,10 @@ export const useEditorToolStore = defineStore('editorToolStore', {
     },
   },
   getters: {
-    parentCatalog: (state) => state.parentCatalog,
-    dynamicFilters: (state) => state.dynamicFilters,
-    filters: (state) => ({ ...state.filters }),
-    tool: (state) => {
+    getParentCatalog: (state) => state.parentCatalog,
+    getDynamicFilters: (state) => state.dynamicFilters,
+    getFilters: (state) => ({ ...state.filters }),
+    getTool: (state) => {
       if (state.tool) {
         return {
           ...state.tool,
@@ -145,20 +145,17 @@ export const useEditorToolStore = defineStore('editorToolStore', {
       }
       return null
     },
-    tools: (state) => [...state.tools],
-    formattedTools: (state) =>
+    getTools: (state) => [...state.tools],
+    getFormattedTools: (state) =>
       state.tools.map((tool) => ({
         ...tool,
         ...Object.entries(tool.property).reduce(
-          (acc, [key, { value }]) => ({
-            ...acc,
-            [key]: value,
-          }),
+          (acc, [key, { value }]) => ({ ...acc, [key]: value }),
           {}
         ),
       })),
-    isLoading: (state) => state.isLoading,
-    nameOptions: (state) => state.nameOptions,
-    toolsTotalCount: (state) => state.toolsTotalCount,
+    getIsLoading: (state) => state.isLoading,
+    getNameOptions: (state) => state.nameOptions,
+    getToolsTotalCount: (state) => state.toolsTotalCount,
   },
 })
