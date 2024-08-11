@@ -398,15 +398,15 @@ async function editTool(req, res) {
         .json({ error: 'Specified parent_id does not exist.' })
     }
 
-    if (
-      (norma_green !== null && norma !== null && norma_green < norma) ||
-      (norma !== null && norma_red !== null && norma < norma_red)
-    ) {
-      return res.status(400).json({
-        error:
-          'Некорректные значения норм для светофора: green >= norma >= red.',
-      })
-    }
+    // if (
+    //   (norma_green !== null && norma !== null && norma_green < norma) ||
+    //   (norma !== null && norma_red !== null && norma < norma_red)
+    // ) {
+    //   return res.status(400).json({
+    //     error:
+    //       'Некорректные значения норм для светофора: green >= norma >= red.',
+    //   })
+    // }
 
     const currentSkladResult = await pool.query(
       'SELECT sklad FROM dbo.tool_nom WHERE id = $1',
