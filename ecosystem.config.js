@@ -1,9 +1,8 @@
 module.exports = {
   apps: [
     {
-      name: 'backend soft',
-      script: 'nodemon',
-      args: 'backend/src/app.js',
+      name: 'server',
+      script: 'backend/src/app.js',
       watch: true,
       env: {
         PM2_PUBLIC_KEY: process.env.PM2_PUBLIC_KEY,
@@ -14,7 +13,7 @@ module.exports = {
       exec_mode: 'cluster',
     },
     {
-      name: 'frontend soft',
+      name: 'client',
       script: 'npx',
       args: 'vite --host',
       interpreter: 'none',
