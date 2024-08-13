@@ -24,20 +24,10 @@
       :persistent="true"
       :tool-id="editingToolId"
       :tool-title="editingToolName"
-      тут
       @canceled="onClosePopup"
       @changes-saved="onSaveChanges"
       @close="openDialog = false"
     />
-    <!--    <ModalIssue-->
-    <!--      v-if="openDialog && currentModal === 'issue'"-->
-    <!--      :key="'modal-issue'"-->
-    <!--      :persistent="true"-->
-    <!--      :tool-id="editingToolId"-->
-    <!--      @canceled="onClosePopup"-->
-    <!--      @changes-saved="onSaveChanges"-->
-    <!--      @close="openDialog = false"-->
-    <!--    />-->
     <v-data-table-server
       v-if="isDataLoaded"
       no-data-text="Нет данных"
@@ -70,8 +60,8 @@
       <template #item.sklad="{ item }" #item.norma="{ item }">
         <td :class="colorClassRed(item)" style="white-space: nowrap">
           <v-chip size="large" color="primary" variant="flat">
-            {{ item.sklad }}</v-chip
-          >
+            {{ item.sklad }}
+          </v-chip>
           <span v-if="item.norma" class="grey"> / {{ item.norma }} </span>
         </td>
       </template>
@@ -81,11 +71,6 @@
       <template #item.zakaz="{ item }">
         <td style="white-space: nowrap">{{ calculateOrder(item) }}</td>
       </template>
-      <!--      <template #item.issue="{ item }">-->
-      <!--        <v-btn color="primary" @click="(event) => onIssueTool(event, item)">-->
-      <!--          <v-icon icon="mdi-hand-extended" />-->
-      <!--        </v-btn>-->
-      <!--      </template>-->
       <template #item.damaged="{ item }">
         <v-btn color="red" @click="(event) => onDamagedTool(event, item)">
           <v-icon icon="mdi-image-broken-variant" />
