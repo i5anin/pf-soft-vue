@@ -100,18 +100,6 @@ export default {
 
     ...mapActions('IssueToolStore', ['fetchToolsByFilter']),
 
-    formatOperationOptions(data) {
-      this.operationMapping = {} // Очистка или инициализация перед использованием
-      const uniqueSet = new Set()
-      data.forEach((item) => {
-        const label = `${item.no} - ${item.cnc_type}`
-        if (!uniqueSet.has(label)) {
-          uniqueSet.add(label)
-          this.operationMapping[label] = item.specs_op_id // Теперь безопасно использовать operationMapping
-        }
-      })
-      return Array.from(uniqueSet)
-    },
     async selectItem(item) {
       this.setParentCatalog({ id: item.id, label: item.label })
       this.currentItem = item
