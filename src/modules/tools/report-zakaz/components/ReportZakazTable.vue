@@ -58,21 +58,14 @@
           <span v-if="item.norma_red"> | {{ item.norma_red }}</span>
         </td>
         <td>
-          <!--          <v-chip :color="getToolColor(calcRatio(item))">-->
-          <!--            {{ calcPercent(item) }}%-->
-          <!--          </v-chip>-->
-
           <v-progress-linear
+            rounded
             :model-value="calcPercent(item)"
             height="25"
             :color="getToolColor(calcRatio(item))"
           >
             {{ calcPercent(item) }}%
           </v-progress-linear>
-          <!-- есть {{ calcRatio(item) }} <br />-->
-          есть {{ item.group_sklad || item.sklad }} надо
-          {{ item.norma_green || item.norma }}
-          <!-- нету {{ (1 - calcRatio(item)).toFixed(2) }}-->
         </td>
       </tr>
     </tbody>
