@@ -48,16 +48,31 @@
             <span class="grey"> ({{ item.zakaz }})</span>
           </template>
         </td>
-        <td class="grey">{{ item.sklad }}</td>
+        <td class="grey">
+          {{ item.group_sklad ? `*${item.group_sklad}` : item.sklad }}
+        </td>
+
         <td class="grey">
           <span v-if="item.norma_green">{{ item.norma_green }} | </span>
           {{ item.norma }}
           <span v-if="item.norma_red"> | {{ item.norma_red }}</span>
         </td>
         <td>
-          <v-chip :color="getToolColor(calcRatio(item))">
-            {{ calcPercent(item.sklad, getNormaForCalculation(item)) }}%
-          </v-chip>
+          <!--          <v-chip :color="getToolColor(calcRatio(item))">-->
+          <!--            {{ calcPercent(item) }}%-->
+          <!--          </v-chip>-->
+
+          <v-progress-linear
+            :model-value="calcPercent(item)"
+            height="25"
+            :color="getToolColor(calcRatio(item))"
+          >
+            {{ calcPercent(item) }}%
+          </v-progress-linear>
+          <!-- есть {{ calcRatio(item) }} <br />-->
+          есть {{ item.group_sklad || item.sklad }} надо
+          {{ item.norma_green || item.norma }}
+          <!-- нету {{ (1 - calcRatio(item)).toFixed(2) }}-->
         </td>
       </tr>
     </tbody>
@@ -112,8 +127,12 @@ export default {
         ? Math.floor(count / 10) * 10
         : Math.ceil(count / 10) * 10
     },
-    calcPercent(sklad, norma) {
-      return ((1 - sklad / norma) * 100).toFixed(0)
+    calcPercent(item) {
+      return (
+        (1 -
+          (item.group_sklad || item.sklad) / (item.norma_green || item.norma)) *
+        100
+      ).toFixed(0)
     },
     getToolColor(ratio) {
       if (ratio >= 0.8) {
@@ -125,19 +144,21 @@ export default {
       }
     },
     getNormaForCalculation(tool) {
-      if (tool.norma_green && tool.sklad < tool.norma_green) {
+      let currentSklad = tool.group_sklad || tool.sklad
+
+      if (tool.norma_green && currentSklad < tool.norma_green) {
         return tool.norma_green
-      } else if (tool.norma_red && tool.sklad < tool.norma_red) {
+      } else if (tool.norma_red && currentSklad < tool.norma_red) {
         return tool.norma_red
       } else {
         return tool.norma
       }
     },
     calcRatio(tool) {
-      let sklad = tool.sklad
-      if (tool.group_id && tool.group_sklad) sklad = tool.group_sklad
-      const norma = this.getNormaForCalculation(tool)
-      return sklad / norma
+      let sklad = tool.group_sklad || tool.sklad // Используйте последовательный метод для определения правильного значения склада.
+      const norma = this.getNormaForCalculation(tool) // Определите правильное значение нормы
+      if (norma === 0) return 0 // Предотвратите деление на ноль, гарантируя, что норма не равна нулю
+      return sklad / norma // Рассчитайте соотношение
     },
   },
 }
