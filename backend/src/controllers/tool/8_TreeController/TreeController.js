@@ -174,6 +174,63 @@ async function updateFolderTree(req, res) {
   }
 }
 
+async function getToolsTreeById(parentId = 0, folderNotNull = false) {
+  const stack = [{ parentId: parentId, level: 0 }]
+  const treeData = []
+  const nodesMap = new Map()
+
+  while (stack.length > 0) {
+    const { parentId, level } = stack.pop()
+
+    const { rows } = await pool.query(
+      `SELECT t.id, t.parent_id, t.name,
+              (SELECT COUNT(*) FROM dbo.tool_nom n WHERE n.parent_id = t.id) as element_count,
+              (SELECT COUNT(*) FROM dbo.tool_nom n WHERE n.parent_id = t.id AND n.sklad > 0) as available_count
+       FROM dbo.tool_tree t
+       WHERE t.parent_id = $1
+       ORDER BY t.name ASC`,
+      [parentId]
+    )
+
+    for (const row of rows) {
+      const isFolder = row.element_count > 0 // Определяем, является ли узел папкой
+
+      // Создаем узел только если:
+      // - это корневой уровень (level === 0)
+      // - или это папка (isFolder)
+      // - или folderNotNull = false (нужно показывать все узлы)
+      if (level === 0 || isFolder || !folderNotNull) {
+        const node = {
+          id: row.id,
+          label: row.name,
+          elements: parseInt(row.element_count, 10),
+          available: parseInt(row.available_count, 10),
+          nodes: [],
+          level: level,
+        }
+
+        nodesMap.set(row.id, node)
+
+        if (parentId === 0) {
+          treeData.push(node)
+        } else {
+          const parent = nodesMap.get(parentId)
+          if (parent) {
+            parent.nodes.push(node)
+          }
+        }
+
+        // Добавляем узел в стек только если это папка
+        if (isFolder) {
+          stack.push({ parentId: row.id, level: level + 1 })
+        }
+      }
+    }
+  }
+
+  return treeData
+}
+
 const addBranch = async (req, res) => {
   try {
     // Check for malformed JSON input
@@ -216,6 +273,7 @@ const addBranch = async (req, res) => {
 }
 
 module.exports = {
+  getToolsTreeById,
   updateFolderTree,
   dellFolderTree,
   getToolsTree,
