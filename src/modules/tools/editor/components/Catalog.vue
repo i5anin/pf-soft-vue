@@ -3,7 +3,7 @@
     <folder
       :current-item="currentItem"
       @update:current-item="updateCurrentItem"
-      :refresh-tree="refreshTree"
+      @refresh-tree="refreshTree"
     />
     <v-main>
       <v-container :fluid="true">
@@ -72,11 +72,21 @@ export default {
   methods: {
     async refreshTree() {
       try {
+        console.log('Обновляем дерево...')
         const updatedTree = await toolTreeApi.getTree()
+
+        console.log('Текущее дерево:', this.tree)
+        console.log('Обновлённое дерево:', updatedTree)
+
         this.tree = updatedTree
-        const updatedCurrentItem = updatedTree.find(
-          (item) => item.id === this.currentItem?.id
+        const updatedCurrentItem = this.findItemById(
+          this.currentItem.id,
+          updatedTree
         )
+
+        console.log('Текущий элемент:', this.currentItem)
+        console.log('Обновлённый текущий элемент:', updatedCurrentItem)
+
         this.currentItem = updatedCurrentItem
           ? updatedCurrentItem
           : updatedTree.length > 0

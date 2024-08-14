@@ -45,7 +45,17 @@ import { toolTreeApi } from '@/modules/tools/tree/api/tree'
 
 export default {
   name: 'Folder',
-  props: ['currentItem', 'refreshTree'],
+  props: {
+    currentItem: {
+      type: Object,
+      required: true,
+    },
+    // Добавьте объявление props для refreshTree
+    refreshTree: {
+      type: Function,
+      required: true,
+    },
+  },
   emits: ['update:currentItem'],
   data() {
     return {
@@ -93,6 +103,7 @@ export default {
           await toolTreeApi.addFolder(branchName, this.currentItem.id)
           await this.refreshTree()
         } catch (error) {
+          console.error('Ошибка при добавлении ветки:', error)
           alert('Произошла ошибка при добавлении ветки.')
         }
       }
