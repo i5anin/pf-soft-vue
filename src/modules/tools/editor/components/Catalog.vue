@@ -71,21 +71,6 @@ export default {
   },
 
   methods: {
-    findItemById(itemId, tree) {
-      for (const item of tree) {
-        if (item.id === itemId) {
-          return [item] // Возвращаем найденный элемент в массиве - это будет путь
-        }
-        if (item.nodes) {
-          const path = this.findItemById(itemId, item.nodes)
-          if (path.length) {
-            return [item, ...path] // Добавляем текущий элемент в начало пути
-          }
-        }
-      }
-      return [] // Путь не найден
-    },
-
     async refreshTree() {
       const updatedTree = await toolTreeApi.getTree()
       this.tree = updatedTree
