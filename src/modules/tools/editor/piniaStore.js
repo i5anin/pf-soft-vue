@@ -123,9 +123,6 @@ export const useEditorToolStore = defineStore('editorToolStore', {
         } = this.filters
         const { id: parentId } = this.parentCatalog
 
-        const searchString =
-          typeof search === 'string' ? search : search.toString()
-
         const { tools, totalCount } = await toolApi.getTools(
           search,
           currentPage,
@@ -190,10 +187,6 @@ export const useEditorToolStore = defineStore('editorToolStore', {
 
     setTools(tools) {
       this.tools = tools
-    },
-
-    setOnlyInStock(onlyInStock) {
-      this.filters.onlyInStock = onlyInStock
     },
     goToInTree(index) {
       this.currentItem = this.tree[index]
