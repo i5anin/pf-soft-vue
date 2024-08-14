@@ -50,7 +50,6 @@ export default {
   data() {
     return {
       editorToolStore: useEditorToolStore(),
-      tree: [],
       isEditing: false,
       editableLabel: '',
     }
@@ -61,16 +60,14 @@ export default {
         alert('Не выбрана папка для удаления.')
         return
       }
+
       const itemId = this.currentItem.id
       if (confirm(`Уверены, что хотите удалить ${this.currentItem.label}?`)) {
         try {
           await toolTreeApi.deleteFolder(itemId)
           alert('Папка успешно удалена.')
-          if (this.tree.length > 1) {
-            this.tree.pop()
-            this.$emit('update:currentItem', this.tree[this.tree.length - 1])
-          }
-          await this.$parent.refreshTree()
+          this.$emit('update:currentItem', null) // Очищаем currentItem при удалении
+          await this.$parent.refreshTree() // Обновляем дерево после удаления
         } catch (error) {
           console.error('Ошибка при удалении:', error)
           alert('Произошла ошибка при удалении.')
@@ -97,9 +94,9 @@ export default {
             elements: 0,
             nodes: [],
           }
-          this.currentItem.nodes.push(newFolder)
-          this.$emit('update:currentItem', newFolder)
-          this.tree.push(newFolder)
+          this.currentItem.nodes.push(newFolder) // Добавляем новую папку в nodes текущей
+          this.$emit('update:currentItem', newFolder) // Обновляем currentItem
+          await this.$parent.refreshTree() // Обновляем дерево после добавления
         } catch (error) {
           alert('Произошла ошибка при добавлении ветки.')
         }
@@ -111,21 +108,35 @@ export default {
       this.editableLabel = this.currentItem ? this.currentItem.label : ''
     },
 
-    finishEditing() {
+    async finishEditing() {
       if (
         this.isEditing &&
         this.currentItem &&
         this.editableLabel !== this.currentItem.label
       ) {
-        this.renameCurrentItem()
+        try {
+          await toolTreeApi.renameFolder(
+            this.currentItem.id,
+            this.editableLabel
+          )
+          this.currentItem.label = this.editableLabel // Обновляем label после переименования
+          this.$emit('update:currentItem', this.currentItem) // Обновляем currentItem
+          await this.$parent.refreshTree() // Обновляем дерево после переименования
+        } catch (error) {
+          console.error('Ошибка при переименовании:', error)
+          alert('Произошла ошибка при переименовании.')
+        }
       }
       this.isEditing = false
     },
 
     goBack() {
-      if (this.tree.length > 1) {
-        this.tree.pop()
-        this.$emit('update:currentItem', this.tree[this.tree.length - 1])
+      if (this.$parent.tree.length > 1) {
+        this.$parent.tree.pop()
+        this.$emit(
+          'update:currentItem',
+          this.$parent.tree[this.$parent.tree.length - 1]
+        )
       }
     },
   },
