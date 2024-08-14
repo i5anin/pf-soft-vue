@@ -1,8 +1,8 @@
 <template>
   <v-app class="custom-container">
     <folder
-      :currentItem="currentItem"
-      @update:currentItem="updateCurrentItem"
+      :current-item="currentItem"
+      @update:current-item="updateCurrentItem"
       :refresh-tree="refreshTree"
     />
     <v-main>

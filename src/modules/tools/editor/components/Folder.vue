@@ -45,34 +45,22 @@ import { toolTreeApi } from '@/modules/tools/tree/api/tree'
 
 export default {
   name: 'Folder',
-  props: ['currentItem'],
+  props: ['currentItem', 'refreshTree'],
   emits: ['update:currentItem'],
   data() {
     return {
       editorToolStore: useEditorToolStore(),
       isEditing: false,
       editableLabel: '',
+      newFolder: {
+        id: 0,
+        label: '',
+        elements: 0,
+        nodes: [],
+      },
     }
   },
   methods: {
-    async refreshTree() {
-      try {
-        const updatedTree = await toolTreeApi.getTree()
-        this.tree = updatedTree
-        const updatedCurrentItem = updatedTree.find(
-          (item) => item.id === this.currentItem?.id
-        )
-        this.currentItem = updatedCurrentItem
-          ? updatedCurrentItem
-          : updatedTree.length > 0
-            ? updatedTree[0]
-            : null
-      } catch (error) {
-        console.error('Ошибка при обновлении дерева:', error)
-        // Обработка ошибки, например, отображение сообщения пользователю
-      }
-    },
-
     async deleteItem() {
       if (!this.currentItem) {
         alert('Не выбрана папка для удаления.')
@@ -85,7 +73,7 @@ export default {
           await toolTreeApi.deleteFolder(itemId)
           alert('Папка успешно удалена.')
           this.$emit('update:currentItem', null) // Очищаем currentItem при удалении
-          await this.$parent.refreshTree() // Обновляем дерево после удаления
+          await this.refreshTree() // Обновляем дерево после удаления
         } catch (error) {
           console.error('Ошибка при удалении:', error)
           alert('Произошла ошибка при удалении.')
@@ -102,19 +90,8 @@ export default {
       let branchName = prompt('Введите название новой ветки:')
       if (branchName) {
         try {
-          const newBranch = await toolTreeApi.addFolder(
-            branchName,
-            this.currentItem.id
-          )
-          const newFolder = {
-            id: newBranch.newBranchId,
-            label: branchName,
-            elements: 0,
-            nodes: [],
-          }
-          this.currentItem.nodes.push(newFolder) // Добавляем новую папку в nodes текущей
-          this.$emit('update:currentItem', newFolder) // Обновляем currentItem
-          await this.$parent.refreshTree() // Обновляем дерево после добавления
+          await toolTreeApi.addFolder(branchName, this.currentItem.id)
+          await this.refreshTree()
         } catch (error) {
           alert('Произошла ошибка при добавлении ветки.')
         }
@@ -139,7 +116,7 @@ export default {
           )
           this.currentItem.label = this.editableLabel // Обновляем label после переименования
           this.$emit('update:currentItem', this.currentItem) // Обновляем currentItem
-          await this.$parent.refreshTree() // Обновляем дерево после переименования
+          await this.refreshTree() // Обновляем дерево после переименования
         } catch (error) {
           console.error('Ошибка при переименовании:', error)
           alert('Произошла ошибка при переименовании.')
