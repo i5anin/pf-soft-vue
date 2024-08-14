@@ -114,6 +114,7 @@ export default {
           this.currentItem = newFolder // Обновляем текущий элемент, чтобы отображать новую папку
           this.tree.push(newFolder) // Добавляем новую папку в историю для навигации
         } catch (error) {
+          console.error(error)
           alert('Произошла ошибка при добавлении ветки.')
         }
       }
