@@ -1,9 +1,10 @@
 <template>
   <v-app class="custom-container">
     <folder
+      v-if="currentItem"
       :current-item="currentItem"
       @update:current-item="updateCurrentItem"
-      @refresh-tree="refreshTree"
+      :refresh-tree="refreshTree"
     />
     <v-main>
       <v-container :fluid="true">
@@ -70,32 +71,32 @@ export default {
   },
 
   methods: {
-    async refreshTree() {
-      try {
-        console.log('Обновляем дерево...')
-        const updatedTree = await toolTreeApi.getTree()
-
-        console.log('Текущее дерево:', this.tree)
-        console.log('Обновлённое дерево:', updatedTree)
-
-        this.tree = updatedTree
-        const updatedCurrentItem = this.findItemById(
-          this.currentItem.id,
-          updatedTree
-        )
-
-        console.log('Текущий элемент:', this.currentItem)
-        console.log('Обновлённый текущий элемент:', updatedCurrentItem)
-
-        this.currentItem = updatedCurrentItem
-          ? updatedCurrentItem
-          : updatedTree.length > 0
-            ? updatedTree[0]
-            : null
-      } catch (error) {
-        console.error('Ошибка при обновлении дерева:', error)
-        // Обработка ошибки, например, отображение сообщения пользователю
+    findItemById(itemId, tree) {
+      for (const item of tree) {
+        if (item.id === itemId) {
+          return [item] // Возвращаем найденный элемент в массиве - это будет путь
+        }
+        if (item.nodes) {
+          const path = this.findItemById(itemId, item.nodes)
+          if (path.length) {
+            return [item, ...path] // Добавляем текущий элемент в начало пути
+          }
+        }
       }
+      return [] // Путь не найден
+    },
+
+    async refreshTree() {
+      const updatedTree = await toolTreeApi.getTree()
+      this.tree = updatedTree
+      const updatedCurrentItem = updatedTree.find(
+        (item) => item.id === this.currentItem.id // Проверяем, если текущий элемент присутствует в обновленном дереве
+      )
+      this.currentItem = updatedCurrentItem // Если текущий элемент не найден, обновляем его на первый элемент из дерева или на null, если дерево пустое
+        ? updatedCurrentItem
+        : updatedTree.length > 0
+          ? updatedTree[0]
+          : null
     },
 
     updateCurrentItem(newItem) {

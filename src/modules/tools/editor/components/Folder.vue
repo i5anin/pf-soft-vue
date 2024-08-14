@@ -50,7 +50,6 @@ export default {
       type: Object,
       required: true,
     },
-    // Добавьте объявление props для refreshTree
     refreshTree: {
       type: Function,
       required: true,
@@ -72,18 +71,18 @@ export default {
   },
   methods: {
     async deleteItem() {
-      if (!this.currentItem) {
-        alert('Не выбрана папка для удаления.')
-        return
-      }
-
+      if (!this.currentItem) return alert('Не выбрана папка для удаления.')
       const itemId = this.currentItem.id
       if (confirm(`Уверены, что хотите удалить ${this.currentItem.label}?`)) {
         try {
           await toolTreeApi.deleteFolder(itemId)
           alert('Папка успешно удалена.')
-          this.$emit('update:currentItem', null) // Очищаем currentItem при удалении
-          await this.refreshTree() // Обновляем дерево после удаления
+          if (this.tree.length > 1) {
+            this.tree.pop()
+            this.currentItem = this.tree[this.tree.length - 1]
+          }
+          // Вызываем refreshTree для обновления дерева и currentItem
+          await this.refreshTree()
         } catch (error) {
           console.error('Ошибка при удалении:', error)
           alert('Произошла ошибка при удалении.')
@@ -92,18 +91,26 @@ export default {
     },
 
     async addItem() {
-      if (!this.currentItem || !this.currentItem.nodes) {
-        alert('Выберите категорию для добавления новой папки.')
-        return
-      }
+      if (!this.currentItem || !this.currentItem.nodes)
+        return alert('Выберите категорию для добавления новой папки.')
 
       let branchName = prompt('Введите название новой ветки:')
       if (branchName) {
         try {
-          await toolTreeApi.addFolder(branchName, this.currentItem.id)
-          await this.refreshTree()
+          const newBranch = await toolTreeApi.addFolder(
+            branchName,
+            this.currentItem.id
+          )
+          const newFolder = {
+            id: newBranch.newBranchId,
+            label: branchName,
+            elements: 0,
+            nodes: [],
+          }
+          this.currentItem.nodes.push(newFolder) // Добавляем новую папку в список дочерних элементов текущего элемента
+          this.currentItem = newFolder // Обновляем текущий элемент, чтобы отображать новую папку
+          this.tree.push(newFolder) // Добавляем новую папку в историю для навигации
         } catch (error) {
-          console.error('Ошибка при добавлении ветки:', error)
           alert('Произошла ошибка при добавлении ветки.')
         }
       }
