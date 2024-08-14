@@ -4,7 +4,7 @@
       v-if="currentItem"
       :current-item="currentItem"
       @update:current-item="updateCurrentItem"
-      :refresh-tree="refreshTree"
+      :tree="tree"
     />
     <v-main>
       <v-container :fluid="true">

@@ -14,7 +14,7 @@
           @keyup.enter="finishEditing"
         />
         <span v-else @click="startEditing">
-          {{ currentItem?.label || 'Редактор' }}
+          {{ currentItem?.label || '[НЕТ НАЗВАНИЯ]' }}
           <v-btn
             title="Переименовать папку"
             icon
@@ -50,8 +50,8 @@ export default {
       type: Object,
       required: true,
     },
-    refreshTree: {
-      type: Function,
+    tree: {
+      type: Array,
       required: true,
     },
   },
@@ -147,12 +147,9 @@ export default {
     },
 
     goBack() {
-      if (this.$parent.tree.length > 1) {
-        this.$parent.tree.pop()
-        this.$emit(
-          'update:currentItem',
-          this.$parent.tree[this.$parent.tree.length - 1]
-        )
+      if (this.tree.length > 1) {
+        this.tree.pop()
+        this.$emit('update:currentItem', this.tree[this.tree.length - 1])
       }
     },
   },
