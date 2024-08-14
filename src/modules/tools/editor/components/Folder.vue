@@ -55,6 +55,24 @@ export default {
     }
   },
   methods: {
+    async refreshTree() {
+      try {
+        const updatedTree = await toolTreeApi.getTree()
+        this.tree = updatedTree
+        const updatedCurrentItem = updatedTree.find(
+          (item) => item.id === this.currentItem?.id
+        )
+        this.currentItem = updatedCurrentItem
+          ? updatedCurrentItem
+          : updatedTree.length > 0
+            ? updatedTree[0]
+            : null
+      } catch (error) {
+        console.error('Ошибка при обновлении дерева:', error)
+        // Обработка ошибки, например, отображение сообщения пользователю
+      }
+    },
+
     async deleteItem() {
       if (!this.currentItem) {
         alert('Не выбрана папка для удаления.')

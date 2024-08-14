@@ -3,6 +3,7 @@
     <folder
       :currentItem="currentItem"
       @update:currentItem="updateCurrentItem"
+      :refresh-tree="refreshTree"
     />
     <v-main>
       <v-container :fluid="true">
@@ -69,10 +70,6 @@ export default {
   },
 
   methods: {
-    updateCurrentItem(newItem) {
-      this.currentItem = newItem
-    },
-
     async refreshTree() {
       try {
         const updatedTree = await toolTreeApi.getTree()
@@ -89,6 +86,10 @@ export default {
         console.error('Ошибка при обновлении дерева:', error)
         // Обработка ошибки, например, отображение сообщения пользователю
       }
+    },
+
+    updateCurrentItem(newItem) {
+      this.currentItem = newItem
     },
 
     selectItem(item) {
