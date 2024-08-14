@@ -105,7 +105,10 @@ export default {
             id: newBranch.newBranchId,
             label: branchName,
             elements: 0,
+            available: 0,
             nodes: [],
+            totalAvailable: 0,
+            totalElements: 0,
           }
           this.currentItem.nodes.push(newFolder) // Добавляем новую папку в список дочерних элементов текущего элемента
           this.currentItem = newFolder // Обновляем текущий элемент, чтобы отображать новую папку
