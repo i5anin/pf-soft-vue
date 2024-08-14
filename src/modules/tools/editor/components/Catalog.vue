@@ -1,6 +1,9 @@
 <template>
   <v-app class="custom-container">
-    <folder />
+    <folder
+      :currentItem="currentItem"
+      @update:currentItem="updateCurrentItem"
+    />
     <v-main>
       <v-container :fluid="true">
         <v-row>
@@ -29,10 +32,16 @@ export default {
   components: { TabMainTable, CatalogBreadcrumbs, Folder },
   data() {
     return {
-      editorToolStore: useEditorToolStore(), // Инициализируем store в data()
+      editorToolStore: useEditorToolStore(),
       tree: [],
       currentItem: null,
     }
+  },
+
+  computed: {
+    isTableShown() {
+      return this.editorToolStore.getParentCatalog.id !== 1
+    },
   },
 
   watch: {
@@ -42,54 +51,47 @@ export default {
           id: currentItem?.id,
           label: currentItem?.label,
         })
-        this.editorToolStore.fetchToolsByFilter()
       },
     },
   },
+
   async created() {
-    const toolsTree = await toolTreeApi.getTree()
-    if (toolsTree && toolsTree.length > 0) {
-      this.currentItem = toolsTree[0]
-      this.tree.push(this.currentItem)
+    try {
+      const toolsTree = await toolTreeApi.getTree()
+      if (toolsTree && toolsTree.length > 0) {
+        this.currentItem = toolsTree[0]
+        this.tree.push(this.currentItem)
+      }
+    } catch (error) {
+      console.error('Ошибка при получении дерева инструментов:', error)
+      // Обработка ошибки, например, отображение сообщения пользователю
     }
   },
-  methods: {
-    async renameCurrentItem() {
-      const itemId = this.currentItem.id
-      const newName = this.editableLabel
 
-      try {
-        const response = await toolTreeApi.renameFolder(itemId, newName)
-        if (response && response.message) {
-          alert('Папка успешно переименована.')
-          this.currentItem.label = newName
-          const historyItem = this.tree.find((item) => item.id === itemId)
-          if (historyItem) {
-            historyItem.label = newName
-          }
-        } else {
-          alert('Произошла ошибка при переименовании.')
-        }
-      } catch (error) {
-        console.error('Ошибка при переименовании:', error)
-        alert('Произошла ошибка при переименовании.')
-      }
+  methods: {
+    updateCurrentItem(newItem) {
+      this.currentItem = newItem
     },
 
     async refreshTree() {
-      const updatedTree = await toolTreeApi.getTree()
-      this.tree = updatedTree
-      const updatedCurrentItem = updatedTree.find(
-        (item) => item.id === this.currentItem?.id
-      )
-      this.currentItem = updatedCurrentItem
-        ? updatedCurrentItem
-        : updatedTree.length > 0
-          ? updatedTree[0]
-          : null
+      try {
+        const updatedTree = await toolTreeApi.getTree()
+        this.tree = updatedTree
+        const updatedCurrentItem = updatedTree.find(
+          (item) => item.id === this.currentItem?.id
+        )
+        this.currentItem = updatedCurrentItem
+          ? updatedCurrentItem
+          : updatedTree.length > 0
+            ? updatedTree[0]
+            : null
+      } catch (error) {
+        console.error('Ошибка при обновлении дерева:', error)
+        // Обработка ошибки, например, отображение сообщения пользователю
+      }
     },
 
-    async selectItem(item) {
+    selectItem(item) {
       this.editorToolStore.setParentCatalog({ id: item.id, label: item.label })
       this.currentItem = item
       if (!this.tree.includes(item)) this.tree.push(item)

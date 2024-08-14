@@ -26,12 +26,7 @@
           <v-btn title="Добавить папку" icon small @click.stop="addItem">
             <v-icon icon="mdi-folder-plus" />
           </v-btn>
-          <v-btn
-            title="Удалить папку"
-            icon
-            small
-            @click.stop="deleteItem(currentItem?.id)"
-          >
+          <v-btn title="Удалить папку" icon small @click.stop="deleteItem">
             <v-icon icon="mdi-delete" />
           </v-btn>
         </span>
@@ -50,24 +45,22 @@ import { toolTreeApi } from '@/modules/tools/tree/api/tree'
 
 export default {
   name: 'Folder',
+  props: ['currentItem'],
+  emits: ['update:currentItem'],
   data() {
     return {
-      editorToolStore: useEditorToolStore(), // Инициализируем store в data()
+      editorToolStore: useEditorToolStore(),
       tree: [],
-      currentItem: null,
       isEditing: false,
       editableLabel: '',
     }
   },
-  computed: {
-    isTableShown() {
-      return this.editorToolStore.getParentCatalog.id !== 1 // Доступ к getter через store
-    },
-  },
-
   methods: {
     async deleteItem() {
-      if (!this.currentItem) return alert('Не выбрана папка для удаления.')
+      if (!this.currentItem) {
+        alert('Не выбрана папка для удаления.')
+        return
+      }
       const itemId = this.currentItem.id
       if (confirm(`Уверены, что хотите удалить ${this.currentItem.label}?`)) {
         try {
@@ -75,18 +68,21 @@ export default {
           alert('Папка успешно удалена.')
           if (this.tree.length > 1) {
             this.tree.pop()
-            this.currentItem = this.tree[this.tree.length - 1]
+            this.$emit('update:currentItem', this.tree[this.tree.length - 1])
           }
-          await this.refreshTree()
+          await this.$parent.refreshTree()
         } catch (error) {
           console.error('Ошибка при удалении:', error)
           alert('Произошла ошибка при удалении.')
         }
       }
     },
+
     async addItem() {
-      if (!this.currentItem || !this.currentItem.nodes)
-        return alert('Выберите категорию для добавления новой папки.')
+      if (!this.currentItem || !this.currentItem.nodes) {
+        alert('Выберите категорию для добавления новой папки.')
+        return
+      }
 
       let branchName = prompt('Введите название новой ветки:')
       if (branchName) {
@@ -102,13 +98,14 @@ export default {
             nodes: [],
           }
           this.currentItem.nodes.push(newFolder)
-          this.currentItem = newFolder
+          this.$emit('update:currentItem', newFolder)
           this.tree.push(newFolder)
         } catch (error) {
           alert('Произошла ошибка при добавлении ветки.')
         }
       }
     },
+
     startEditing() {
       this.isEditing = true
       this.editableLabel = this.currentItem ? this.currentItem.label : ''
@@ -128,15 +125,9 @@ export default {
     goBack() {
       if (this.tree.length > 1) {
         this.tree.pop()
-        this.currentItem = this.tree[this.tree.length - 1]
-        this.editorToolStore.setParentCatalog({
-          id: this.currentItem.id,
-          label: this.currentItem.label,
-        })
+        this.$emit('update:currentItem', this.tree[this.tree.length - 1])
       }
     },
   },
 }
 </script>
-
-<style scoped></style>
