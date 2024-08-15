@@ -21,29 +21,8 @@ export const useEditorToolStore = defineStore('editorToolStore', {
     },
     tree: [],
     currentItem: null,
-    currentBranch: [{ id: 1, label: 'Главная' }],
   }),
   actions: {
-    goToInTree(index) {
-      this.currentBranch = this.tree.slice(0, index + 1)
-      this.currentItem = this.currentBranch[index]
-    },
-
-    selectItemInTree(item) {
-      this.currentItem = item
-      // Проверяем, есть ли уже такой элемент в currentBranch
-      const existingItemIndex = this.currentBranch.findIndex(
-        (branchItem) => branchItem.id === item.id
-      )
-      if (existingItemIndex !== -1) {
-        // Если элемент уже есть, обрезаем currentBranch до этого элемента
-        this.currentBranch = this.currentBranch.slice(0, existingItemIndex + 1)
-      } else {
-        // Иначе добавляем новый элемент
-        this.currentBranch.push({ id: item.id, label: item.label })
-      }
-    },
-
     async fetchTree() {
       try {
         const toolsTree = await toolTreeApi.getTree()
@@ -208,6 +187,16 @@ export const useEditorToolStore = defineStore('editorToolStore', {
 
     setTools(tools) {
       this.tools = tools
+    },
+    goToInTree(index) {
+      this.currentItem = this.tree[index]
+      this.tree = this.tree.slice(0, index + 1)
+    },
+    selectItemInTree(item) {
+      this.currentItem = item
+      if (!this.tree.includes(item)) {
+        this.tree.push(item)
+      }
     },
   },
   getters: {
