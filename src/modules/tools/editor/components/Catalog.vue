@@ -14,31 +14,26 @@
 </template>
 
 <script>
+import Folder from './Folder.vue'
 import { useEditorToolStore } from '../piniaStore'
 import CatalogBreadcrumbs from './CatalogBreadcrumbs.vue'
-import Folder from './Folder.vue'
 
 export default {
+  name: 'EditorCatalog',
   components: { CatalogBreadcrumbs, Folder },
   data() {
     return {
-      store: useEditorToolStore(),
+      editorToolStore: useEditorToolStore(),
     }
   },
-  computed: {
-    isLoading() {
-      return this.store.isLoading
-    },
-  },
-  watch: {
-    'store.currentItem': {
-      handler(newItem) {
-        console.log('Текущий элемент в CatalogView:', newItem)
-      },
-    },
-  },
-  created() {
-    this.store.fetchTree()
+
+  async created() {
+    try {
+      await this.editorToolStore.fetchTree()
+    } catch (error) {
+      console.error('Ошибка при получении дерева инструментов:', error)
+      // Обработка ошибки, например, отображение сообщения пользователю
+    }
   },
 }
 </script>
