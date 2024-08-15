@@ -21,17 +21,22 @@ export const useEditorToolStore = defineStore('editorToolStore', {
     },
     tree: [],
     currentItem: null,
+    path: [],
   }),
+
   actions: {
     async fetchTree() {
+      this.isLoading = true
       try {
         const toolsTree = await toolTreeApi.getTree()
-        if (toolsTree && toolsTree.length > 0) {
+        if (toolsTree?.length) {
           this.tree = toolsTree
-          this.currentItem = toolsTree[0]
+          this.setCurrentItem(toolsTree[0])
         }
       } catch (error) {
         console.error('Ошибка при получении дерева инструментов:', error)
+      } finally {
+        this.isLoading = false
       }
     },
 
@@ -50,7 +55,7 @@ export const useEditorToolStore = defineStore('editorToolStore', {
         totalElements: 0,
       }
       this.currentItem.nodes.push(newFolder)
-      this.currentItem = newFolder
+      this.setCurrentItem(newFolder)
       this.tree.push(newFolder)
     },
 
@@ -62,9 +67,10 @@ export const useEditorToolStore = defineStore('editorToolStore', {
     },
 
     goBackInTree() {
-      if (this.tree.length > 1) {
-        this.tree.pop()
-        this.currentItem = this.tree[this.tree.length - 1]
+      if (this.path.length > 1) {
+        const previousItemId = this.path[this.path.length - 2]
+        const previousItem = this.findFolderById(previousItemId)
+        this.setCurrentItem(previousItem)
       }
     },
 
@@ -92,13 +98,13 @@ export const useEditorToolStore = defineStore('editorToolStore', {
     },
 
     async fetchToolsDynamicFilters() {
-      const { id = null } = this.parentCatalog
-      if (id === null) {
+      const { id: parentId = null } = this.parentCatalog
+      if (!parentId) {
         return
       }
 
       try {
-        const dynamicFilters = await toolApi.filterParamsByParentId(id)
+        const dynamicFilters = await toolApi.filterParamsByParentId(parentId)
         this.filters.selectedDynamicFilters = dynamicFilters.reduce(
           (acc, { key }) => ({ ...acc, [key]: null }),
           {}
@@ -189,14 +195,42 @@ export const useEditorToolStore = defineStore('editorToolStore', {
       this.tools = tools
     },
     goToInTree(index) {
-      this.currentItem = this.tree[index]
-      this.tree = this.tree.slice(0, index + 1)
+      const targetItem = this.tree[index]
+      if (targetItem) {
+        this.setCurrentItem(targetItem)
+      }
     },
     selectItemInTree(item) {
-      this.currentItem = item
+      this.setCurrentItem(item)
       if (!this.tree.includes(item)) {
         this.tree.push(item)
       }
+    },
+    setCurrentItem(newItem) {
+      this.currentItem = newItem
+      this.path = this.buildPath(newItem.id)
+    },
+
+    buildPath(itemId) {
+      const findPath = (tree, itemId, currentPath = []) => {
+        for (const item of tree) {
+          if (item.id === itemId) {
+            return [...currentPath, item.id]
+          }
+          if (item.nodes) {
+            const foundPath = findPath(item.nodes, itemId, [
+              ...currentPath,
+              item.id,
+            ])
+            if (foundPath) {
+              return foundPath
+            }
+          }
+        }
+        return null
+      }
+
+      return findPath(this.tree, itemId)
     },
   },
   getters: {
