@@ -1,11 +1,6 @@
 <template>
   <div class="container">
     <Catalog />
-
-    <!--    <div v-if="currentItem" class="catalog-info">-->
-    <!--      {{ currentItem.available }} / {{ currentItem.elements }}-->
-    <!--    </div>-->
-
     <span v-if="currentItem?.elements">
       <ToolFilter />
       <Table />
