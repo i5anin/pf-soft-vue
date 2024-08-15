@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import Catalog from './Catalog.vue'
+import Catalog from './сatalog/Catalog.vue'
 import ToolFilter from './filter/MainFilter.vue'
 import Table from './Table.vue'
 
