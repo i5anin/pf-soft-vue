@@ -64,7 +64,7 @@ async function createExcelFileStream(data) {
         },
       },
     },
-    { header: 'Склад группы', key: 'group_sum', width: 20 },
+    { header: 'Склад группы', key: 'group_sklad', width: 20 },
     { header: 'На складе', key: 'sklad', width: 10 },
     { header: 'Норма', key: 'norma', width: 10 },
     // { header: 'Путь', key: 'tool_path', width: 30 },
@@ -80,6 +80,8 @@ async function createExcelFileStream(data) {
   let index = 1
   data.forEach((item) => {
     let zakazRounded = item.zakaz
+    console.log('Item:', item) // Логируем весь объект item
+    console.log('group_sklad:', item.group_sklad) // Логируем значение group_sklad
     // Round only if the tool path includes "пластины"
     // if (item.tool_path && item.tool_path.toLowerCase().includes('пластины')) {
     //   zakazRounded = getRoundedCount(item.zakaz)
@@ -95,7 +97,7 @@ async function createExcelFileStream(data) {
       group_display: Number(item.group_display) || '',
       group_standard: item.group_standard ? 'Да' : 'Нет',
       // tool_path: item.tool_path ? item.tool_path : 'Не указан',
-      group_sum: Number(item.group_sum) || '',
+      group_sklad: Number(item.group_sklad) || '',
       norma_green: item.norma_green,
       norma_red: item.norma_red,
       is_plate: item.is_plate,
@@ -129,7 +131,7 @@ function generateHtmlTable(data) {
     { header: 'ID', key: 'id_tool' },
     { header: 'Название', key: 'name' },
     { header: 'Заказ', key: 'zakaz' },
-    { header: 'Склад группы', key: 'group_sum' },
+    { header: 'Склад группы', key: 'group_sklad' },
     { header: 'На складе', key: 'sklad' },
     { header: 'Норма', key: 'norma' },
     // { header: 'Группа ID', key: 'group_display' },
