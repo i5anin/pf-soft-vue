@@ -114,13 +114,22 @@ export default {
       },
     }
   },
-
+  computed: {
+    currentItem() {
+      // Добавленное вычисляемое свойство
+      const editorToolStore = useEditorToolStore()
+      return editorToolStore.getCurrentItem
+    },
+  },
   watch: {
-    'editorToolStore.parentCatalog.id'(newId) {
-      if (newId != null) {
-        this.fetchToolsDynamicFilters()
-        this.fetchToolsByFilter()
-      }
+    'currentItem.id': {
+      // Изменено: следим за currentItem.id
+      handler(newId) {
+        if (newId != null) {
+          this.fetchToolsDynamicFilters()
+          this.fetchToolsByFilter()
+        }
+      },
     },
     'editorToolStore.getDynamicFilters': {
       immediate: true,

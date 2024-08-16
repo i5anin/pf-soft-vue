@@ -92,6 +92,7 @@ export const useEditorToolStore = defineStore('editorToolStore', {
     },
 
     async fetchToolsDynamicFilters() {
+      console.log('fetchToolsDynamicFilters')
       const { id = null } = this.parentCatalog
       if (id === null) {
         return
@@ -151,6 +152,7 @@ export const useEditorToolStore = defineStore('editorToolStore', {
 
     setParentCatalog(parentCatalog) {
       this.parentCatalog = { ...parentCatalog }
+      this.currentItem.id = parentCatalog.id // Добавлено обновление currentItem.id
     },
 
     setDynamicFilters(dynamicFilters) {
@@ -191,9 +193,12 @@ export const useEditorToolStore = defineStore('editorToolStore', {
     goToInTree(index) {
       this.currentItem = this.tree[index]
       this.tree = this.tree.slice(0, index + 1)
+      this.currentItem.id = this.currentItem.id // Добавлено обновление currentItem.id
     },
     selectItemInTree(item) {
       this.currentItem = item
+      this.parentCatalog.id = item.id
+      this.currentItem.id = item.id // Добавлено обновление currentItem.id
       if (!this.tree.includes(item)) {
         this.tree.push(item)
       }
