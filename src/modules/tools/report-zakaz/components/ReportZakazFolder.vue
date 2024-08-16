@@ -1,4 +1,3 @@
-<!--ReportZakazFolder.vue-->
 <template>
   <zakaz-tool-modal
     v-if="openDialog"
@@ -13,7 +12,11 @@
         ({{ totalToolCount }})
       </v-btn>
     </div>
-    <div v-for="(group, index) in toolGroups" :key="index" class="tool-group">
+    <div
+      v-for="(group, index) in sortedToolGroups"
+      :key="index"
+      class="tool-group"
+    >
       <v-chip variant="text" size="large" @click="toggleVisibility(index)">
         <template #prepend>
           <v-icon
@@ -35,7 +38,7 @@
       <v-chip color="while">{{ group.tools.length }}</v-chip>
       <div v-if="visibleGroups.includes(index)">
         <group-zakaz-table
-          :items="group.tools"
+          :items="sortedTools(group.tools)"
           :group-path="group.path"
           @lowest-color="updateGroupLowestColor(index, $event)"
         />
@@ -70,6 +73,18 @@ export default {
         0
       )
     },
+    sortedToolGroups() {
+      return this.toolGroups
+        .map((group) => ({
+          ...group,
+          tools: this.sortedTools(group.tools),
+        }))
+        .sort((a, b) => {
+          const lowestPercentA = this.getLowestPercent(a.tools)
+          const lowestPercentB = this.getLowestPercent(b.tools)
+          return lowestPercentB - lowestPercentA
+        })
+    },
   },
   methods: {
     onClosePopup() {
@@ -79,21 +94,18 @@ export default {
       this.toolGroups[index].lowestColor = color
       this.toolGroups[index].hasLowStock = color !== '#28a745'
     },
-
     checkGroupForLowStock(tools) {
       return tools.some((tool) => {
         const ratio = this.calcRatio(tool)
         return (1 - ratio) * 100 >= 20
       })
     },
-
     calcRatio(tool) {
       let sklad = tool.sklad
       if (tool.group_id && tool.group_sklad) sklad = tool.group_sklad
       const norma = this.getNormaForCalculation(tool)
-      return sklad / norma
+      return norma === 0 ? 0 : sklad / norma
     },
-
     getNormaForCalculation(tool) {
       if (tool.norma_green && tool.sklad < tool.norma_green) {
         return tool.norma_green
@@ -103,11 +115,9 @@ export default {
         return tool.norma
       }
     },
-
     async fetchZakazData() {
       try {
         const data = await reportApi.getZakaz()
-        // Calculate color and hasLowStock for each group immediately
         this.toolGroups = data.map((group) => ({
           ...group,
           lowestColor: this.getLowestGroupColor(group.tools),
@@ -117,7 +127,6 @@ export default {
         console.error('Ошибка при получении данных: ', error)
       }
     },
-
     getLowestGroupColor(tools) {
       let lowestRatio = 1
       tools.forEach((tool) => {
@@ -126,7 +135,6 @@ export default {
       })
       return this.getToolColor(lowestRatio)
     },
-
     getToolColor(ratio) {
       if (ratio >= 0.8) {
         return '#28a745' // Green
@@ -136,7 +144,6 @@ export default {
         return '#dc3545' // Red
       }
     },
-
     toggleVisibility(index) {
       const visibleIndex = this.visibleGroups.indexOf(index)
       if (visibleIndex === -1) {
@@ -150,6 +157,26 @@ export default {
       this.visibleGroups = this.isAllVisible
         ? [...Array(this.toolGroups.length).keys()]
         : []
+    },
+    sortedTools(tools) {
+      return [...tools].sort((a, b) => {
+        return this.calcPercent(b) - this.calcPercent(a)
+      })
+    },
+    getLowestPercent(tools) {
+      let lowestPercent = 100
+      tools.forEach((tool) => {
+        const percent = this.calcPercent(tool)
+        if (percent < lowestPercent) {
+          lowestPercent = percent
+        }
+      })
+      return lowestPercent
+    },
+    calcPercent(item) {
+      const sklad = item.group_sklad || item.sklad
+      const norma = this.getNormaForCalculation(item)
+      return ((1 - sklad / norma) * 100).toFixed(0)
     },
   },
 }
