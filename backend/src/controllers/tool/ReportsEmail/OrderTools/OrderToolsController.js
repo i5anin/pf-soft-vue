@@ -80,8 +80,6 @@ async function createExcelFileStream(data) {
   let index = 1
   data.forEach((item) => {
     let zakazRounded = item.zakaz
-    console.log('Item:', item) // Логируем весь объект item
-    console.log('group_sklad:', item.group_sklad) // Логируем значение group_sklad
     // Round only if the tool path includes "пластины"
     // if (item.tool_path && item.tool_path.toLowerCase().includes('пластины')) {
     //   zakazRounded = getRoundedCount(item.zakaz)
