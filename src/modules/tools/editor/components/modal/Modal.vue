@@ -7,7 +7,7 @@
             <v-row>
               <v-col cols="6">
                 <v-text-field
-                  v-model="parentCatalog.label"
+                  v-model="currentItem.label"
                   label="Папка"
                   variant="solo"
                   density="compact"
@@ -20,7 +20,7 @@
                 <v-text-field
                   variant="solo"
                   density="compact"
-                  v-model="parentCatalog.id"
+                  v-model="currentItem.id"
                   label="ID папки"
                   required
                   type="Number"
@@ -217,6 +217,7 @@ import Modal from '@/modules/tools/shared/components/Modal.vue'
 import { getToolParams } from '@/api'
 import { editorToolApi } from '../../api/editor'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
+import { useEditorToolStore } from '@/modules/tools/editor/piniaStore'
 
 export default {
   name: 'FillingModal',
@@ -259,7 +260,11 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('EditorToolStore', ['nameOptions', 'tool', 'parentCatalog']),
+    currentItem() {
+      const editorToolStore = useEditorToolStore()
+      return editorToolStore.getCurrentItem
+    },
+    // ...mapGetters('EditorToolStore', ['nameOptions', 'tool', 'parentCatalog']),
     availableToolParamOptions() {
       // Фильтрация toolParamOptions, чтобы показывать только те, которые еще не выбраны
       return this.allToolParamLabels.filter(

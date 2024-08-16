@@ -1,10 +1,12 @@
 <template>
   <div class="container">
+    {{ currentItem.id }}
+    {{ currentItem.label }}
     <Catalog />
-    <span v-if="currentItem?.elements">
-      <ToolFilter />
-      <Table />
-    </span>
+    <!--    <span v-if="currentItem?.elements">-->
+    <ToolFilter />
+    <Table />
+    <!--    </span>-->
   </div>
 </template>
 
