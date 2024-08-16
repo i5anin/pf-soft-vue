@@ -13,7 +13,7 @@
       :persistent="true"
       :tool-id="editingToolId"
       @canceled="onClosePopup"
-      @changes-saved="onSaveChanges"
+      @changes-saved="handleSaveChanges"
     />
     <v-data-table-server
       v-if="isDataLoaded"
@@ -21,38 +21,35 @@
       items-per-page-text="Пункты на странице:"
       loading-text="Загрузка данных"
       :headers="toolTableHeaders"
-      :items="editorToolStore.getFormattedTools"
-      :items-length="editorToolStore.getToolsTotalCount"
-      :items-per-page="editorToolStore.getFilters.itemsPerPage"
-      :page="editorToolStore.getFilters.currentPage"
-      :loading="editorToolStore.getIsLoading"
+      :items="formattedTools"
+      :items-length="totalToolsCount"
+      :items-per-page="itemsPerPage"
+      :page="currentPage"
+      :loading="isLoading"
       :items-per-page-options="[15, 50, 100, 300]"
       density="compact"
       class="elevation-1 scrollable-table"
       hover
       fixed-header
       width
-      @update:page="onChangePage"
-      @update:items-per-page="onUpdateItemsPerPage"
-      @click:row="onEditRow"
+      @update:page="handlePageChange"
+      @update:items-per-page="handleItemsPerPageChange"
+      @click:row="handleRowClick"
     >
       <template #item.index="{ index }">
         <td class="index">
-          {{
-            index +
-            1 +
-            (editorToolStore.getFilters.currentPage - 1) *
-              editorToolStore.getFilters.itemsPerPage
-          }}
+          {{ calculateItemIndex(index) }}
         </td>
       </template>
       <template #item.name="{ item }">
         <td style="white-space: nowrap">
-          <span :class="colorClassGrey(item)">{{ item.name }}</span>
+          <span :class="{ grey: !item.sklad || item.sklad === 0 }">
+            {{ item.name }}
+          </span>
           <v-chip
             v-if="item.group_id"
             size="x-small"
-            :color="getColorForGroup(item.group_id)"
+            :color="getToolGroupColor(item.group_id)"
             :title="'Группа ' + item.group_id"
           >
             <span v-if="item.group_standard" style="color: yellow">★</span>
@@ -73,7 +70,7 @@
         </td>
       </template>
       <template #item.zakaz="{ item }">
-        <td style="white-space: nowrap">{{ calculateOrder(item) }}</td>
+        <td style="white-space: nowrap">{{ calculateToolOrder(item) }}</td>
       </template>
     </v-data-table-server>
   </v-container>
@@ -95,44 +92,40 @@ export default {
       default: 'tool',
     },
   },
-  emits: [],
   data() {
     return {
-      editorToolStore: useEditorToolStore(), // Инициализируем store
+      editorToolStore: useEditorToolStore(),
       openDialog: false,
       isDataLoaded: false,
       editingToolId: null,
       toolTableHeaders: [],
-      filterParamsList: [],
-      filters: {
-        currentPage: 1,
-        itemsPerPage: 15,
-        search: '',
-        includeNull: false,
-        onlyInStock: null,
-        selectedDynamicFilters: {},
-      },
     }
   },
   computed: {
+    formattedTools() {
+      return this.editorToolStore.getFormattedTools
+    },
+    totalToolsCount() {
+      return this.editorToolStore.getToolsTotalCount
+    },
+    itemsPerPage() {
+      return this.editorToolStore.getFilters.itemsPerPage
+    },
+    currentPage() {
+      return this.editorToolStore.getFilters.currentPage
+    },
+    isLoading() {
+      return this.editorToolStore.getIsLoading
+    },
     currentItem() {
-      console.log('currentItem')
-      const editorToolStore = useEditorToolStore()
-      return editorToolStore.getCurrentItem
+      return this.editorToolStore.getCurrentItem
+    },
+    dynamicFilters() {
+      return this.editorToolStore.getDynamicFilters
     },
   },
   watch: {
-    'currentItem.id': {
-      // FIXME: ТРЕШ 'currentItem.id' СЛИДИМ ЗА ПЕРЕМЕННОЙ
-      handler(newId) {
-        if (newId != null) {
-          this.fetchToolsDynamicFilters()
-          this.fetchToolsByFilter()
-        }
-      },
-    },
-    'editorToolStore.getDynamicFilters': {
-      // FIXME: Я ДУМАЮ МОЖНО ПРОЩЕ И КРАСИВЕЕ
+    dynamicFilters: {
       immediate: true,
       handler(dynamicColumns) {
         this.toolTableHeaders = [
@@ -150,62 +143,64 @@ export default {
         ]
       },
     },
+    'currentItem.id': {
+      handler(newId) {
+        if (newId != null) {
+          this.fetchToolsData()
+        }
+      },
+    },
   },
-
   mounted() {
-    this.fetchToolsDynamicFilters() //динамический фильтр инструментов выборки
-    this.fetchToolsByFilter() //получить инструменты по фильтру
+    this.fetchToolsData()
     this.isDataLoaded = true
   },
   methods: {
-    getColorForGroup(index) {
+    getToolGroupColor(index) {
       const hue = index * 137.508
       return `hsl(${hue % 360}, 50%, 50%)`
     },
-    //на странице изменений
-    onChangePage(page) {
+    handlePageChange(page) {
       this.editorToolStore.setCurrentPage(page)
       this.fetchToolsByFilter()
     },
-    //при обновлении элементов на странице
-    onUpdateItemsPerPage(itemsPerPage) {
+    handleItemsPerPageChange(itemsPerPage) {
       this.editorToolStore.setItemsPerPage(itemsPerPage)
       this.fetchToolsByFilter()
     },
-    colorClassGrey(item) {
-      return { grey: !item.sklad || item.sklad === 0 }
+    calculateItemIndex(index) {
+      return (
+        index +
+        1 +
+        (this.editorToolStore.getFilters.currentPage - 1) *
+          this.editorToolStore.getFilters.itemsPerPage
+      )
     },
-    calculateOrder(tool) {
+    calculateToolOrder(tool) {
       const order = tool.norma - tool.sklad
       return order < 0 ? '' : order
     },
-    //при закрытии всплывающего окна
     onClosePopup() {
       this.openDialog = false
     },
-    //при сохранении изменений
-    onSaveChanges() {
+    handleSaveChanges() {
       this.openDialog = false
-      this.fetchToolsDynamicFilters()
-      this.fetchToolsByFilter()
+      this.fetchToolsData()
     },
-    //при добавлении инструмента
     onAddTool() {
       this.editingToolId = null
       this.openDialog = true
     },
-    //в строке редактирования
-    onEditRow(_, { item: tool }) {
+    handleRowClick(_, { item: tool }) {
       this.editingToolId = tool.id
       this.openDialog = true
     },
-    //получить инструменты по фильтру
     fetchToolsByFilter() {
       this.editorToolStore.fetchToolsByFilter({ search: this.searchQuery })
     },
-    //инструменты извлечения динамических фильтров
-    fetchToolsDynamicFilters() {
+    fetchToolsData() {
       this.editorToolStore.fetchToolsDynamicFilters()
+      this.fetchToolsByFilter()
     },
   },
 }
