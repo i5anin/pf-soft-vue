@@ -70,7 +70,7 @@ async function createExcelFileStream(data) {
     // { header: 'Путь', key: 'tool_path', width: 30 },
     { header: 'Норма Зеленая', key: 'norma_green', width: 30 },
     { header: 'Норма Красная', key: 'norma_red', width: 30 },
-    { header: 'Пластина', key: 'is_plate', width: 30 },
+    // { header: 'Пластина', key: 'is_plate', width: 30 },
     { header: 'Путь', key: 'path_file', width: 30 },
     // { header: 'Группа ID', key: 'group_display', width: 15 },
     // { header: 'Стандарт', key: 'group_standard', width: 15 },
@@ -138,7 +138,7 @@ function generateHtmlTable(data) {
     // { header: 'Путь', key: 'tool_path' },
     { header: 'Норма Зеленая', key: 'norma_green' },
     { header: 'Норма Красная', key: 'norma_red' },
-    { header: 'Пластина', key: 'is_plate' },
+    // { header: 'Пластина', key: 'is_plate' },
     { header: 'Путь', key: 'path_file' },
   ]
   const currentDateTime = format(new Date(), 'yyyy-MM-dd_HH-mm-ss')
