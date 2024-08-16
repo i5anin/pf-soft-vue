@@ -1,5 +1,5 @@
 WITH ToolData AS (
-    SELECT 
+    SELECT
         tool_nom.id AS id_tool,
         tool_nom.name,
         CASE
@@ -14,9 +14,9 @@ WITH ToolData AS (
         tool_nom.group_standard,
         tool_nom.is_plate,
         NULL        AS group_sklad -- Placeholder for consistency
-    FROM 
+    FROM
         dbo.tool_nom
-    WHERE 
+    WHERE
         tool_nom.norma - tool_nom.sklad > 0
         AND (group_id = 0 OR group_id IS NULL)
         AND (norma_red = 0 OR norma_red IS NULL)
@@ -28,42 +28,50 @@ WITH ToolData AS (
 
     UNION
 
-    SELECT 
-        tool_nom.id AS id_tool,
-        tool_nom.name,
-        CASE
-            WHEN tool_nom.is_plate THEN CEIL((tool_nom.norma - tool_nom.sklad) / 10) * 10
-            ELSE tool_nom.norma - tool_nom.sklad
-        END     AS zakaz,
-        tool_nom.sklad,
-        tool_nom.norma,
-        tool_nom.norma_red,
-        tool_nom.norma_green,
-        tool_nom.group_id,
-        tool_nom.group_standard,
-        tool_nom.is_plate,
-        group_totals.group_sklad
-    FROM 
+    SELECT
+    tool_nom.id AS id_tool,
+    tool_nom.name,
+    CASE
+        WHEN tool_nom.is_plate THEN
+            CASE
+                WHEN COALESCE(group_totals.group_sklad, 0) >= tool_nom.norma THEN 0  -- Заказ не нужен
+                ELSE CEIL((tool_nom.norma - COALESCE(group_totals.group_sklad, 0)) / 10) * 10
+            END
+        ELSE
+            CASE
+                WHEN COALESCE(group_totals.group_sklad, 0) >= tool_nom.norma THEN 0  -- Заказ не нужен
+                ELSE tool_nom.norma - COALESCE(group_totals.group_sklad, 0)
+            END
+    END AS zakaz,
+    tool_nom.sklad,
+    tool_nom.norma,
+    tool_nom.norma_red,
+    tool_nom.norma_green,
+    tool_nom.group_id,
+    tool_nom.group_standard,
+    tool_nom.is_plate,
+    group_totals.group_sklad
+FROM
+    dbo.tool_nom
+LEFT JOIN (
+    SELECT
+        group_id,
+        SUM(sklad) AS group_sklad
+    FROM
         dbo.tool_nom
-        LEFT JOIN (
-            SELECT 
-                group_id,
-                SUM(sklad) AS group_sklad
-            FROM 
-                dbo.tool_nom
-            GROUP BY 
-                group_id
-        ) AS group_totals ON tool_nom.group_id = group_totals.group_id
-    WHERE 
-        tool_nom.norma - tool_nom.sklad > 0
-        AND tool_nom.group_id <> 0
-        AND (norma_red = 0 OR norma_red IS NULL)
-        AND (norma_green = 0 OR norma_green IS NULL)
-        AND (tool_nom.norma - group_totals.group_sklad) > 0
+    GROUP BY
+        group_id
+) AS group_totals ON tool_nom.group_id = group_totals.group_id
+WHERE
+    tool_nom.norma - tool_nom.sklad > 0
+    AND tool_nom.group_id <> 0
+    AND (norma_red = 0 OR norma_red IS NULL)
+    AND (norma_green = 0 OR norma_green IS NULL)
+    AND (tool_nom.norma - group_totals.group_sklad) > 0
 
     UNION
 
-    SELECT 
+    SELECT
         tool_nom.id AS id_tool,
         tool_nom.name,
         CASE
@@ -78,9 +86,9 @@ WITH ToolData AS (
         tool_nom.group_standard,
         tool_nom.is_plate,
         NULL        AS group_sklad -- Placeholder for consistency
-    FROM 
+    FROM
         dbo.tool_nom
-    WHERE 
+    WHERE
         tool_nom.norma - tool_nom.sklad > 0
         AND tool_nom.norma_green <> 0
         AND tool_nom.norma_red <> 0
@@ -88,7 +96,7 @@ WITH ToolData AS (
 
     UNION
 
-    SELECT 
+    SELECT
         tool_nom.id AS id_tool,
         tool_nom.name,
         CASE
@@ -104,18 +112,18 @@ WITH ToolData AS (
         tool_nom.group_standard,
         tool_nom.is_plate,
         group_totals.group_sklad
-    FROM 
+    FROM
         dbo.tool_nom
         LEFT JOIN (
-            SELECT 
+            SELECT
                 group_id,
                 SUM(sklad) AS group_sklad
-            FROM 
+            FROM
                 dbo.tool_nom
-            GROUP BY 
+            GROUP BY
                 group_id
         ) AS group_totals ON tool_nom.group_id = group_totals.group_id
-    WHERE 
+    WHERE
         (tool_nom.norma - tool_nom.sklad > 0 OR tool_nom.norma_green - tool_nom.sklad > 0)
         AND ((tool_nom.group_id <> 0 AND (tool_nom.norma - group_totals.group_sklad) > 0)
             OR (tool_nom.group_id = 0 AND tool_nom.norma_green > 0 AND tool_nom.norma_red > 0))
@@ -128,7 +136,7 @@ WITH ToolData AS (
         AND (norma_green <> 0)
         AND tool_nom.group_standard = 'true'
 )
-SELECT 
+SELECT
     td.id_tool,
     td.name,
     td.zakaz,
@@ -141,9 +149,9 @@ SELECT
     td.is_plate,
     td.group_sklad,
     tool_nom.path_file
-FROM 
+FROM
     ToolData td
-JOIN 
+JOIN
     dbo.tool_nom ON td.id_tool = tool_nom.id
-ORDER BY 
+ORDER BY
     tool_nom.path_file ASC;
