@@ -12,11 +12,7 @@
         ({{ totalToolCount }})
       </v-btn>
     </div>
-    <div
-      v-for="(group, index) in sortedToolGroups"
-      :key="index"
-      class="tool-group"
-    >
+    <div v-for="(group, index) in toolGroups" :key="index" class="tool-group">
       <v-chip variant="text" size="large" @click="toggleVisibility(index)">
         <template #prepend>
           <v-icon
@@ -72,18 +68,6 @@ export default {
         (total, group) => total + group.tools.length,
         0
       )
-    },
-    sortedToolGroups() {
-      return this.toolGroups
-        .map((group) => ({
-          ...group,
-          tools: this.sortedTools(group.tools),
-        }))
-        .sort((a, b) => {
-          const lowestPercentA = this.getLowestPercent(a.tools)
-          const lowestPercentB = this.getLowestPercent(b.tools)
-          return lowestPercentB - lowestPercentA
-        })
     },
   },
   methods: {
