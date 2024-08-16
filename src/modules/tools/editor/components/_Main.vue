@@ -1,8 +1,5 @@
 <template>
   <div class="container">
-    <!--    <span v-if="currentItem">-->
-    <!--      {{ currentItem.id }} {{ currentItem.label }}-->
-    <!--    </span>-->
     <Catalog />
     <span v-if="currentItem?.elements">
       <ToolFilter />
@@ -12,8 +9,8 @@
 </template>
 
 <script>
-import Catalog from './сatalog/Catalog.vue'
-import ToolFilter from './filter/MainFilter.vue'
+import Catalog from './сatalog/_Catalog.vue'
+import ToolFilter from './filter/_Filter.vue'
 import Table from './Table.vue'
 import { useEditorToolStore } from '@/modules/tools/editor/piniaStore'
 
@@ -22,6 +19,7 @@ export default {
   components: { Catalog, ToolFilter, Table },
   computed: {
     currentItem() {
+      console.log('currentItem')
       const editorToolStore = useEditorToolStore()
       return editorToolStore.getCurrentItem
     },

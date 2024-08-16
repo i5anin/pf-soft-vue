@@ -261,6 +261,7 @@ export default {
   },
   computed: {
     currentItem() {
+      console.log('currentItem')
       const editorToolStore = useEditorToolStore()
       return editorToolStore.getCurrentItem
     },
@@ -321,6 +322,7 @@ export default {
     ...mapMutations('EditorToolStore', ['setTool']),
 
     async fetchToolData() {
+      if (!this.currentItem) return
       await this.fetchToolParamsByParentId(this.parentCatalog.id)
       await this.fetchToolNamesByParentId(this.parentCatalog.id)
       try {

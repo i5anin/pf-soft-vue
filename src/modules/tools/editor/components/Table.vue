@@ -80,8 +80,8 @@
 </template>
 
 <script>
-import EditorToolModal from './modal/Modal.vue'
-import ToolFilter from './filter/MainFilter.vue'
+import EditorToolModal from './modal/_Modal.vue'
+import ToolFilter from './filter/_Filter.vue'
 import { useEditorToolStore } from '../piniaStore'
 
 export default {
@@ -116,14 +116,14 @@ export default {
   },
   computed: {
     currentItem() {
-      // Добавленное вычисляемое свойство
+      console.log('currentItem')
       const editorToolStore = useEditorToolStore()
       return editorToolStore.getCurrentItem
     },
   },
   watch: {
     'currentItem.id': {
-      // Изменено: следим за currentItem.id
+      // FIXME: ТРЕШ 'currentItem.id' СЛИДИМ ЗА ПЕРЕМЕННОЙ
       handler(newId) {
         if (newId != null) {
           this.fetchToolsDynamicFilters()
@@ -132,6 +132,7 @@ export default {
       },
     },
     'editorToolStore.getDynamicFilters': {
+      // FIXME: Я ДУМАЮ МОЖНО ПРОЩЕ И КРАСИВЕЕ
       immediate: true,
       handler(dynamicColumns) {
         this.toolTableHeaders = [

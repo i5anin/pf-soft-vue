@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import Folder from './Folder.vue'
+import Folder from './EditFolder.vue'
 import Breadcrumbs from './Breadcrumbs.vue'
 import CatalogItem from './CatalogItem.vue'
 import { useEditorToolStore } from '@/modules/tools/editor/piniaStore'

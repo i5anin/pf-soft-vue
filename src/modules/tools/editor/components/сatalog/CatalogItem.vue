@@ -17,6 +17,7 @@
 </template>
 
 <script>
+import { useAppColorStore } from '../../appColor' // Импорт стора appColor
 import { useEditorToolStore } from '@/modules/tools/editor/piniaStore'
 
 export default {
@@ -27,17 +28,14 @@ export default {
       required: true,
     },
   },
-  computed: {
-    appColor() {
-      return import.meta.env.VITE_NODE_ENV === 'build'
-        ? import.meta.env.VITE_BUILD_COLOR
-        : import.meta.env.VITE_DEV_COLOR
-    },
+  setup() {
+    const appColorStore = useAppColorStore()
+    return { appColor: appColorStore.color } // Используйте appColor из стора
   },
   methods: {
     selectItem() {
-      const editorToolStore = useEditorToolStore()
-      editorToolStore.selectItemInTree(this.item)
+      useEditorToolStore().selectItemInTree(this.item)
+      console.log(this.item)
     },
   },
 }
