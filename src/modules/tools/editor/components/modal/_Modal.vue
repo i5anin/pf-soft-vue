@@ -327,18 +327,10 @@ export default {
     await this.initializeToolModel()
   },
   methods: {
-    updateCurrentItemId(newValue) {
-      this.editorToolStore.$patch({
-        currentItem: {
-          ...this.editorToolStore.currentItem,
-          id: parseInt(newValue, 10),
-        },
-      })
-    },
     async fetchToolData() {
       if (!this.currentItem) return
-      await this.fetchToolParamsByParentId(this.tempParentId)
-      await this.fetchToolNamesByParentId(this.tempParentId)
+      await this.fetchToolParamsByParentId(this.currentItem.id)
+      await this.fetchToolNamesByParentId(this.currentItem.id)
       try {
         const rawToolParams = await getToolParams()
         this.toolParams = [...rawToolParams]
