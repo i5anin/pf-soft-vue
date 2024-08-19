@@ -216,7 +216,6 @@
 import Modal from '@/modules/tools/shared/components/Modal.vue'
 import { getToolParams } from '@/api'
 import { editorToolApi } from '../../api/editor'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
 import { useEditorToolStore } from '@/modules/tools/editor/piniaStore'
 
 export default {
@@ -257,17 +256,14 @@ export default {
         (v) => !!v || 'Поле обязательно для заполнения',
         (v) => (v && v.length >= 3) || 'Минимальная длина: 3 символа',
       ],
+      editorToolStore: useEditorToolStore(),
     }
   },
   computed: {
     currentItem() {
-      console.log('currentItem')
-      const editorToolStore = useEditorToolStore()
-      return editorToolStore.getCurrentItem
+      return this.editorToolStore.getCurrentItem
     },
-    // ...mapGetters('EditorToolStore', ['nameOptions', 'tool', 'parentCatalog']),
     availableToolParamOptions() {
-      // Фильтрация toolParamOptions, чтобы показывать только те, которые еще не выбраны
       return this.allToolParamLabels.filter(
         (option) => !this.selectedParams.includes(option)
       )
@@ -280,7 +276,6 @@ export default {
       return uniqueSelectedParamsCount < totalAvailableParams
     },
     selectedParamsInfo() {
-      // Возвращаем информацию о выбранных параметрах на основе текущего состояния toolModel.property
       return Object.entries(this.toolModel.property)
         .map(([key, value]) => {
           const param = this.toolParams.find(
@@ -291,20 +286,22 @@ export default {
         .filter((param) => param !== null)
     },
     popupTitle() {
-      return this.tool?.id != null
-        ? `Редактировать инструмент ID: ${this.tool.id}`
+      return this.toolModel.id != null
+        ? `Редактировать инструмент ID: ${this.toolModel.id}`
         : 'Добавить новый инструмент'
+    },
+    parentCatalog() {
+      return this.editorToolStore.parentCatalog
     },
   },
   watch: {
     toolId: {
       immediate: true,
-      async handler(editingToolId) {
-        if (editingToolId == null) {
-          this.resetToolModel()
+      async handler(toolId) {
+        if (toolId) {
+          await this.loadExistingTool(toolId)
         } else {
-          await this.fetchToolById(editingToolId)
-          this.updateToolModel()
+          this.resetToolModel()
         }
       },
     },
@@ -312,15 +309,8 @@ export default {
   async created() {
     await this.fetchToolData()
     await this.initializeToolModel()
-
-    if (this.toolId) {
-      await this.loadExistingTool()
-    }
   },
   methods: {
-    ...mapActions('EditorToolStore', ['fetchToolsByFilter', 'fetchToolById']),
-    ...mapMutations('EditorToolStore', ['setTool']),
-
     async fetchToolData() {
       if (!this.currentItem) return
       await this.fetchToolParamsByParentId(this.parentCatalog.id)
@@ -333,39 +323,27 @@ export default {
         console.error('Ошибка при загрузке параметров инструмента:', error)
       }
     },
-
     async initializeToolModel() {
-      if (this.toolId == null) {
-        this.setTool({
-          id: null,
-          name: null,
-          property: {},
-        })
+      if (this.toolId) {
+        await this.loadExistingTool(this.toolId)
       } else {
-        await this.fetchToolById(this.toolId)
-        if (this.tool) {
-          // Клонируем объект this.tool, чтобы не изменять его напрямую
-          this.toolModel = JSON.parse(JSON.stringify(this.tool))
-          // Инициализируем property пустым объектом, если он null
-          if (this.toolModel.property === null) {
-            this.toolModel.property = {}
-          }
-          // Загружаем выбранные параметры в selectedParams
-          this.updateSelectedParams()
-        } else {
-          // Обрабатываем случай, когда инструмент не найден
-          this.showErrorSnackbar('Инструмент не найден.')
+        this.resetToolModel()
+      }
+    },
+    async loadExistingTool(toolId) {
+      try {
+        await this.editorToolStore.fetchToolById(toolId)
+        this.toolModel = JSON.parse(
+          JSON.stringify(this.editorToolStore.getTool)
+        )
+        if (this.toolModel.property === null) {
+          this.toolModel.property = {}
         }
+        this.updateSelectedParams()
+      } catch (error) {
+        this.showErrorSnackbar('Инструмент не найден.')
       }
     },
-
-    async loadExistingTool() {
-      await this.fetchToolById(this.toolId)
-      if (this.tool && this.tool.property === null) {
-        this.tool.property = {}
-      }
-    },
-
     showErrorSnackbar(message) {
       this.snackbar.text = message
       this.snackbar.color = 'error'
@@ -379,48 +357,31 @@ export default {
         console.error('Ошибка при получении названий инструментов:', error)
       }
     },
-
     async fetchToolParamsByParentId(parentId) {
       try {
         const paramsData = await editorToolApi.getToolParamsByParentId(parentId)
-        // Создаем новый объект для обновления, чтобы обеспечить реактивность
-        let newToolParamsOptions = {}
-        paramsData.forEach((item) => {
-          newToolParamsOptions[item.id] = item.values
-        })
-        // Прямое обновление toolParamsOptions
-        this.toolParamValues = newToolParamsOptions
+        this.toolParamValues = paramsData.reduce((acc, item) => {
+          acc[item.id] = item.values
+          return acc
+        }, {})
       } catch (error) {
         console.error('Ошибка при получении данных о параметрах:', error)
       }
     },
     removeParameter(id) {
-      // Запрашиваем подтверждение у пользователя
       if (window.confirm('Вы уверены, что хотите удалить этот параметр?')) {
-        // Удаляем параметр из toolModel.property, если пользователь подтвердил удаление
         delete this.toolModel.property[id]
-
-        // Обновляем состояние, чтобы Vue мог отреагировать на изменения
         this.toolModel.property = { ...this.toolModel.property }
-
-        // Обновляем selectedParams и selectedParamsInfo
         this.updateSelectedParams()
       }
     },
-
     selectParam(paramInfo) {
       const selectedParam = this.toolParams.find((p) => p.label === paramInfo)
       if (selectedParam) {
-        // Удаляем временный ключ, если он был использован
         const newProperty = { ...this.toolModel.property }
         delete newProperty[-1]
-
-        // Обновляем значение выбранного параметра
         newProperty[selectedParam.id] = this.toolModel.property[-1] || ''
-
         this.toolModel.property = newProperty
-
-        // Важно! Обновляем список selectedParams после выбора параметра
         this.updateSelectedParams()
       }
     },
@@ -444,40 +405,27 @@ export default {
       }
     },
     addParameterValuePair() {
-      // Проверяем, существует ли уже параметр с временным ID 0 в selectedParams
       if (!this.selectedParams.includes('-1')) {
         const newToolParam = { id: -1, label: null }
         this.toolParams.push(newToolParam)
-
-        // Обновляем toolModel.property для добавления нового параметра с временным значением
         this.toolModel.property[newToolParam.id] = null
-
-        // Обновляем selectedParams, чтобы включить новый временный параметр
         this.updateSelectedParams()
       }
     },
-    updateToolModel() {
-      if (this.tool) {
-        this.toolModel = JSON.parse(JSON.stringify(this.tool))
+    confirmDelete() {
+      if (window.confirm('Вы уверены, что хотите удалить этот инструмент?')) {
+        this.onDelete()
       }
     },
-    confirmDelete() {
-      if (window.confirm('Вы уверены, что хотите удалить этот инструмент?'))
-        this.onDelete()
-    },
     async onDelete() {
-      // Предполагается, что метод onDelete вызывается, когда пользователь подтверждает удаление
-      const { id } = this.toolModel
-      if (id != null) {
-        try {
-          const response = await editorToolApi.deleteTool(id)
-          if (response.success === 'OK') {
-            this.$emit('changes-saved')
-          }
-        } catch (error) {
-          console.error('Ошибка при удалении инструмента:', error)
-          this.showErrorSnackbar('Инструмент используется в истории.')
+      try {
+        const response = await editorToolApi.deleteTool(this.toolModel.id)
+        if (response.success === 'OK') {
+          this.$emit('changes-saved')
         }
+      } catch (error) {
+        console.error('Ошибка при удалении инструмента:', error)
+        this.showErrorSnackbar('Инструмент используется в истории.')
       }
     },
     onCancel() {
@@ -488,9 +436,8 @@ export default {
       const toolDataToSend = {
         ...this.toolModel,
         parent_id: this.parentCatalog.id,
-        editToken: token, // Добавляем токен в данные запроса
+        editToken: token,
       }
-
       try {
         let response
         if (this.toolId) {
@@ -498,7 +445,9 @@ export default {
         } else {
           response = await editorToolApi.addTool(toolDataToSend)
         }
-        if (response.success === 'OK') this.$emit('changes-saved')
+        if (response.success === 'OK') {
+          this.$emit('changes-saved')
+        }
       } catch (error) {
         console.error(
           'Ошибка при сохранении:',
