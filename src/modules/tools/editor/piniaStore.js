@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { toolApi } from '@/api'
 import { toolTreeApi } from '@/modules/tools/tree/api/tree'
+import { editorToolApi } from '@/modules/tools/editor/api/editor'
 
 export const useEditorToolStore = defineStore('editorToolStore', {
   state: () => ({
@@ -26,11 +27,8 @@ export const useEditorToolStore = defineStore('editorToolStore', {
   actions: {
     async fetchTree() {
       try {
-        const toolsTree = await toolTreeApi.getTree()
-        if (toolsTree && toolsTree.length > 0) {
-          this.tree = toolsTree
-          this.currentItem = toolsTree[0]
-        }
+        this.tree = await toolTreeApi.getTree()
+        this.currentItem = this.tree[0]
       } catch (error) {
         console.error('Ошибка при получении дерева инструментов:', error)
       }
@@ -40,7 +38,7 @@ export const useEditorToolStore = defineStore('editorToolStore', {
       await this.fetchTree()
     },
 
-    async addFolderToTree(id, label) {
+    addFolderToTree(id, label) {
       const newFolder = {
         id,
         label,
@@ -55,7 +53,7 @@ export const useEditorToolStore = defineStore('editorToolStore', {
       this.tree.push(newFolder)
     },
 
-    async renameFolderInTree(id, label) {
+    renameFolderInTree(id, label) {
       const folder = this.findFolderById(id)
       if (folder) {
         folder.label = label
@@ -66,8 +64,8 @@ export const useEditorToolStore = defineStore('editorToolStore', {
       if (this.tree.length > 1) {
         this.tree.pop()
         this.currentItem = this.tree[this.tree.length - 1]
-        this.parentCatalog.id = this.currentItem.id // Обновление parentCatalog.id
-        this.fetchToolsData() // Вызываем обновление списка
+        this.parentCatalog.id = this.currentItem.id
+        this.fetchToolsData()
       }
     },
 
@@ -89,13 +87,14 @@ export const useEditorToolStore = defineStore('editorToolStore', {
     async fetchToolById(id) {
       try {
         this.tool = await toolApi.getToolById(id)
+        // Загружаем историю движения после получения данных инструмента
+        await this.fetchMovementHistory(id)
       } catch (error) {
         console.error('Ошибка при загрузке инструмента:', error)
       }
     },
 
     async fetchToolsDynamicFilters() {
-      console.log('fetchToolsDynamicFilters')
       const { id = null } = this.parentCatalog
       if (id === null) {
         return
@@ -155,7 +154,7 @@ export const useEditorToolStore = defineStore('editorToolStore', {
 
     setParentCatalog(parentCatalog) {
       this.parentCatalog = { ...parentCatalog }
-      this.currentItem.id = parentCatalog.id // Добавлено обновление currentItem.id
+      this.currentItem.id = parentCatalog.id
     },
 
     setDynamicFilters(dynamicFilters) {
@@ -197,23 +196,34 @@ export const useEditorToolStore = defineStore('editorToolStore', {
       this.currentItem = this.tree[index]
       this.tree = this.tree.slice(0, index + 1)
       this.parentCatalog.id = this.currentItem.id
-      this.fetchToolsData() // Вызываем обновление списка
+      this.fetchToolsData()
     },
     selectItemInTree(item) {
       this.currentItem = item
       this.parentCatalog.id = item.id
-      this.currentItem.id = item.id // Добавлено обновление currentItem.id
+      this.currentItem.id = item.id
       if (!this.tree.includes(item)) {
         this.tree.push(item)
       }
     },
+
+    // Action для загрузки истории движения инструмента
+    async fetchMovementHistory(toolId) {
+      try {
+        this.movements = (await editorToolApi.getToolMovementById(toolId)).map(
+          (item) => ({
+            ...item,
+            change: (item.new_amount || 0) - (item.old_amount || 0),
+          })
+        )
+      } catch (error) {
+        console.error('Ошибка при загрузке истории движения:', error)
+      }
+    },
   },
   getters: {
-    getMovementHistoryByToolId: (state) => (toolId) => {
-      // Предположим, данные о движении хранятся в state.movements
-      // Замените 'state.movements' на фактическое место хранения данных
-      return state.movements.filter((movement) => movement.tool_id === toolId)
-    },
+    getMovementHistoryByToolId: (state) => (toolId) =>
+      state.movements.filter((movement) => movement.tool_id === toolId),
     getParentCatalog: (state) => state.parentCatalog,
     getDynamicFilters: (state) => state.dynamicFilters,
     getFilters: (state) => ({ ...state.filters }),
