@@ -197,8 +197,8 @@ export default {
     }
   },
   methods: {
-    ...mapActions('EditorToolStore', ['fetchToolsByFilter', 'fetchToolById']),
-    ...mapMutations('EditorToolStore', ['setTool']),
+    // ...mapActions('EditorToolStore', ['fetchToolsByFilter', 'fetchToolById']),
+    // ...mapMutations('EditorToolStore', ['setTool']),
 
     formatDate(date) {
       // замените 'dd.MM.yyyy hh:mm' на нужный вам формат даты и времени
@@ -350,7 +350,8 @@ export default {
       }
     },
     onCancel() {
-      this.$emit('canceled')
+      // Генерируем событие 'close'
+      this.$emit('close')
     },
   },
 }
