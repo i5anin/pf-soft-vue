@@ -82,6 +82,8 @@ async function getTools(req, res) {
              tool_nom.property,
              tool_nom.sklad,
              tool_nom.norma,
+             tool_nom.norma_green,
+             tool_nom.norma_red,
              tool_nom.group_id,
              tool_nom.group_standard
       FROM dbo.tool_nom as tool_nom
@@ -138,6 +140,8 @@ async function getTools(req, res) {
         property: formattedProperty,
         sklad: tool.sklad,
         norma: tool.norma,
+        norma_red: tool.norma_red,
+        norma_green: tool.norma_green,
         group_id: tool.group_id,
         group_standard: tool.group_standard,
       }

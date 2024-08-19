@@ -35,7 +35,6 @@ export default {
   methods: {
     selectItem() {
       useEditorToolStore().selectItemInTree(this.item)
-      console.log(this.item)
     },
   },
 }

@@ -67,7 +67,15 @@
       </template>
       <template #item.norma="{ item }">
         <td style="white-space: nowrap">
-          {{ item.norma_green }} {{ item.norma }} {{ item.norma_red }}
+          <span class="green" v-if="item.norma_green">
+            {{ item.norma_green }}
+            <span class="grey">|</span>
+          </span>
+          {{ item.norma }}
+          <span class="red" v-if="item.norma_red">
+            <span class="grey">|</span>
+            {{ item.norma_red }}
+          </span>
         </td>
       </template>
       <template #item.zakaz="{ item }">
@@ -151,13 +159,6 @@ export default {
         ]
       },
     },
-    'currentItem.id': {
-      handler(newId) {
-        if (newId != null) {
-          this.fetchToolsData()
-        }
-      },
-    },
   },
   mounted() {
     this.fetchToolsData()
@@ -219,5 +220,13 @@ export default {
   max-width: 40px !important;
   font-size: 0.9em;
   color: grey;
+}
+
+.red {
+  color: red;
+}
+
+.green {
+  color: green;
 }
 </style>

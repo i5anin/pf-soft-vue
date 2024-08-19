@@ -20,7 +20,7 @@
                 <v-text-field
                   variant="solo"
                   density="compact"
-                  v-model="currentItem.id"
+                  v-model="tempParentId"
                   label="ID папки"
                   required
                   type="Number"
@@ -228,6 +228,7 @@ export default {
   emits: ['canceled', 'changes-saved'],
   data() {
     return {
+      tempParentId: null,
       snackbar: {
         show: false,
         color: 'error',
@@ -303,6 +304,8 @@ export default {
         } else {
           this.resetToolModel()
         }
+
+        this.tempParentId = this.currentItem.id
       },
     },
   },
@@ -311,10 +314,18 @@ export default {
     await this.initializeToolModel()
   },
   methods: {
+    updateCurrentItemId(newValue) {
+      this.editorToolStore.$patch({
+        currentItem: {
+          ...this.editorToolStore.currentItem,
+          id: parseInt(newValue, 10),
+        },
+      })
+    },
     async fetchToolData() {
       if (!this.currentItem) return
-      await this.fetchToolParamsByParentId(this.parentCatalog.id)
-      await this.fetchToolNamesByParentId(this.parentCatalog.id)
+      await this.fetchToolParamsByParentId(this.tempParentId)
+      await this.fetchToolNamesByParentId(this.tempParentId)
       try {
         const rawToolParams = await getToolParams()
         this.toolParams = [...rawToolParams]
@@ -435,7 +446,7 @@ export default {
       const token = localStorage.getItem('token')
       const toolDataToSend = {
         ...this.toolModel,
-        parent_id: this.parentCatalog.id,
+        parent_id: this.tempParentId,
         editToken: token,
       }
       try {

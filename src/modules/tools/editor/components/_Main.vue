@@ -19,7 +19,6 @@ export default {
   components: { Catalog, ToolFilter, Table },
   computed: {
     currentItem() {
-      console.log('currentItem')
       const editorToolStore = useEditorToolStore()
       return editorToolStore.getCurrentItem
     },
