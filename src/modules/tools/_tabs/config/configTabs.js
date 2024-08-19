@@ -8,7 +8,7 @@ import ToolTabGroup from '@/modules/tools/groups/components/Groups.vue'
 import ToolTabTree from '@/modules/tools/tree/components/Tree.vue'
 import Report from '@/modules/tools/report-zakaz/components/Report.vue'
 
-import EditorCatalog from '@/modules/tools/editor/components/_Main.vue'
+import EditorCatalog from '@/modules/tools/editor/components/Main.vue'
 import IssueCatalog from '@/modules/tools/issue/components/Catalog.vue'
 
 import ViewCatalog from '@/modules/tools/view/components/Catalog.vue'

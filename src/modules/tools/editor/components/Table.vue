@@ -1,6 +1,5 @@
 <template>
   <v-container>
-    {{ currentPage }}
     <div class="text-right">
       <v-btn color="blue" @click="onAddTool">
         <template #prepend>
@@ -86,8 +85,8 @@
 </template>
 
 <script>
-import EditorToolModal from './modal/_Modal.vue'
-import ToolFilter from './filter/_Filter.vue'
+import EditorToolModal from './modal/Modal.vue'
+import ToolFilter from './filter/Filter.vue'
 import { useEditorToolStore } from '../piniaStore'
 
 export default {
