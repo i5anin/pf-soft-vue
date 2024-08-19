@@ -79,7 +79,7 @@ async function getTools(req, res) {
       SELECT tool_nom.id,
              tool_nom.name,
              tool_nom.property,
-             COALESCE(tool_nom.sklad, 0) as sklad,  <-- Используем COALESCE для замены null на 0
+             COALESCE(tool_nom.sklad, 0) as sklad,
              tool_nom.norma,
              tool_nom.norma_green,
              tool_nom.norma_red,
