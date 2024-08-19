@@ -11,9 +11,9 @@ export const reportApi = {
       .get('/report/buch-week')
       .then(handleResponse)
       .catch(handleApiError),
-  genBuchEndOp: async () =>
+  getToolMovementById: async (toolId) =>
     axiosInstance
-      .get('/report/buch-end-op')
+      .get(`/tool-movement/${toolId}`)
       .then(handleResponse)
       .catch(handleApiError),
   genNalad: async (token) =>

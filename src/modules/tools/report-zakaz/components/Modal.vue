@@ -65,7 +65,7 @@
 import Modal from '@/modules/tools/shared/components/Modal.vue'
 import { getToolParams } from '@/api'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
-import { editorToolApi } from '../api/view'
+// import { editorToolApi } from '../api/report'
 import { format, parseISO } from 'date-fns'
 
 // editorToolApi.getToolMovementById - содержит данные просто их вставь!
