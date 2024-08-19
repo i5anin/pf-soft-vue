@@ -6,6 +6,12 @@ function handleResponse(response) {
 }
 
 export const editorToolApi = {
+  // Получить движение инструмента по ID
+  getToolMovementById: async (toolId) =>
+    axiosInstance
+      .get(`/tool-movement/${toolId}`)
+      .then(handleResponse)
+      .catch(handleApiError),
   // Добавить новый инструмент
   addTool: async (toolData) =>
     axiosInstance

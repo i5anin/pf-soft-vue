@@ -48,18 +48,29 @@
               </v-col>
             </v-row>
             <!--левый столбец -->
-            <div>
-              <v-combobox
-                v-model="toolModel.name"
-                variant="outlined"
-                label="Маркировка"
-                :items="toolNameOptions"
-                item-text="text"
-                item-value="value"
-                required
-                :rules="typeRules"
-              />
-            </div>
+            <v-col cols="11" class="pa-1">
+              <div class="d-flex">
+                <v-combobox
+                  v-model="toolModel.name"
+                  variant="outlined"
+                  label="Маркировка"
+                  :items="toolNameOptions"
+                  item-text="text"
+                  item-value="value"
+                  required
+                  :rules="typeRules"
+                />
+                <v-btn
+                  icon="mdi mdi-information-slab-circle-outline"
+                  @click="showMovementModal = true"
+                ></v-btn>
+                <ToolMovementModal
+                  v-if="showMovementModal"
+                  :tool-id="toolId"
+                  @close="showMovementModal = false"
+                />
+              </div>
+            </v-col>
             <h2 class="text-h6">Характеристики:</h2>
             <div v-for="(param, index) in selectedParamsInfo" :key="param.id">
               <v-container>
@@ -213,6 +224,7 @@
 </template>
 
 <script>
+import ToolMovementModal from './MovementModal.vue'
 import Modal from '@/modules/tools/shared/components/Modal.vue'
 import { getToolParams } from '@/api'
 import { editorToolApi } from '../../api/editor'
@@ -220,7 +232,7 @@ import { useEditorToolStore } from '@/modules/tools/editor/piniaStore'
 
 export default {
   name: 'FillingModal',
-  components: { Modal },
+  components: { Modal, ToolMovementModal },
   props: {
     persistent: { type: Boolean, default: false },
     toolId: { type: Number, default: null },
@@ -228,6 +240,7 @@ export default {
   emits: ['canceled', 'changes-saved'],
   data() {
     return {
+      showMovementModal: false,
       tempParentId: null,
       snackbar: {
         show: false,
