@@ -78,9 +78,7 @@ export default defineComponent({
       text: '',
     })
 
-    const movements = computed(() =>
-      editorToolStore.getMovementHistoryByToolId(props.toolId)
-    )
+    const movements = computed(() => editorToolStore.movements)
 
     const popupTitle = computed(() => {
       const tool = editorToolStore.getTool
