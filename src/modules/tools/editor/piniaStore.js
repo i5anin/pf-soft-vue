@@ -19,6 +19,7 @@ export const useEditorToolStore = defineStore('editorToolStore', {
       onlyInStock: null,
       selectedDynamicFilters: {},
     },
+    movements: [],
     tree: [],
     currentItem: null,
   }),
@@ -208,6 +209,11 @@ export const useEditorToolStore = defineStore('editorToolStore', {
     },
   },
   getters: {
+    getMovementHistoryByToolId: (state) => (toolId) => {
+      // Предположим, данные о движении хранятся в state.movements
+      // Замените 'state.movements' на фактическое место хранения данных
+      return state.movements.filter((movement) => movement.tool_id === toolId)
+    },
     getParentCatalog: (state) => state.parentCatalog,
     getDynamicFilters: (state) => state.dynamicFilters,
     getFilters: (state) => ({ ...state.filters }),

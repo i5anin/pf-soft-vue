@@ -469,22 +469,31 @@ async function editTool(req, res) {
 }
 
 async function getToolById(req, res) {
-  const { id } = req.params // Получение ID инструмента из параметров маршрута
+  const { id } = req.params
 
   try {
-    // Измененный запрос для получения данных инструмента и названия папки
-    const query = `
+    // Запрос для получения данных инструмента и названия папки
+    const toolQuery = `
       SELECT dbo.tool_nom.*, dbo.tool_tree.name as folder_name
       FROM dbo.tool_nom
              LEFT JOIN dbo.tool_tree ON dbo.tool_nom.parent_id = dbo.tool_tree.id
       WHERE dbo.tool_nom.id = $1`
 
-    const result = await pool.query(query, [id])
+    const toolResult = await pool.query(toolQuery, [id])
 
-    if (result.rows.length > 0) {
-      const toolData = result.rows[0]
+    if (toolResult.rows.length > 0) {
+      const toolData = toolResult.rows[0]
 
-      // Создание JSON-ответа с данными инструмента и названием папки
+      // Запрос для проверки наличия записей в таблице vue_log для данного инструмента
+      const logQuery = `
+        SELECT 1
+        FROM dbo.vue_log
+        WHERE tool_id = $1
+        LIMIT 1`
+
+      const logResult = await pool.query(logQuery, [id])
+
+      // Создание JSON-ответа с данными инструмента, названием папки и флагом наличия истории
       const jsonResponse = {
         id: toolData.id,
         parent_id: toolData.parent_id,
@@ -495,8 +504,9 @@ async function getToolById(req, res) {
         group_id: toolData.group_id,
         group_standard: toolData.group_standard,
         norma: toolData.norma,
-        norma_red: toolData.norma_red, // Добавлено поле norma_red
-        norma_green: toolData.norma_green, // Добавлено поле norma_green
+        norma_red: toolData.norma_red,
+        norma_green: toolData.norma_green,
+        hasMovementHistory: logResult.rows.length > 0, // true если есть записи в vue_log, иначе false
       }
 
       res.json(jsonResponse)

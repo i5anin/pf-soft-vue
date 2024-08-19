@@ -60,10 +60,13 @@
                   required
                   :rules="typeRules"
                 />
-                <v-btn
-                  icon="mdi mdi-information-slab-circle-outline"
-                  @click="showMovementModal = true"
-                ></v-btn>
+                <div class="pl-10">
+                  <v-btn
+                    icon="mdi mdi-information-slab-circle-outline"
+                    @click="showMovementModal = true"
+                    :disabled="!hasMovementHistory"
+                  />
+                </div>
                 <ToolMovementModal
                   v-if="showMovementModal"
                   :tool-id="toolId"
@@ -240,6 +243,7 @@ export default {
   emits: ['canceled', 'changes-saved'],
   data() {
     return {
+      hasMovementHistory: false,
       showMovementModal: false,
       tempParentId: null,
       snackbar: {
@@ -319,6 +323,7 @@ export default {
         }
 
         this.tempParentId = this.currentItem.id
+        this.hasMovementHistory = this.toolModel.hasMovementHistory
       },
     },
   },

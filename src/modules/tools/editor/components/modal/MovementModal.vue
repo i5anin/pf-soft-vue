@@ -115,30 +115,6 @@ export default {
   },
   computed: {
     ...mapGetters('EditorToolStore', ['nameOptions', 'tool', 'parentCatalog']),
-    availableToolParamOptions() {
-      // Фильтрация toolParamOptions, чтобы показывать только те, которые еще не выбраны
-      return this.toolParamOptions.filter(
-        (option) => !this.selectedParams.includes(option)
-      )
-    },
-    isAddButtonVisible() {
-      const uniqueSelectedParamsCount = new Set(
-        Object.keys(this.toolModel.property)
-      ).size
-      const totalAvailableParams = this.toolParams.length
-      return uniqueSelectedParamsCount < totalAvailableParams
-    },
-    selectedParamsInfo() {
-      // Возвращаем информацию о выбранных параметрах на основе текущего состояния toolModel.property
-      return Object.entries(this.toolModel.property)
-        .map(([key, value]) => {
-          const param = this.toolParams.find(
-            (param) => param.id.toString() === key
-          )
-          return param ? { ...param, value } : null
-        })
-        .filter((param) => param !== null)
-    },
     popupTitle() {
       return this.tool?.id != null
         ? `Движение инструмента на складе: ${this.cartItems[0]?.name} (ID: ${this.tool.id})`
