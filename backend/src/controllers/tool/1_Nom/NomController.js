@@ -36,9 +36,7 @@ function replaceCommaWithDotInNumbers(obj) {
 
 async function getTools(req, res) {
   try {
-    // Объединение параметров из тела POST-запроса и параметров строки запроса GET-запроса
     const params = { ...req.query, ...req.body }
-
     const { search, parent_id, onlyInStock, page = 1, limit = 50 } = params
 
     const pageNumber = parseInt(page, 10)
@@ -47,29 +45,30 @@ async function getTools(req, res) {
 
     let conditions = []
 
-    // Обработка стандартных параметров для фильтрации
-    if (search)
+    if (search) {
       conditions.push(`tool_nom.name ILIKE '%${search.replace(/'/g, "''")}%'`)
+    }
 
-    if (parent_id) conditions.push(`tool_nom.parent_id = ${parent_id}`)
+    if (parent_id) {
+      conditions.push(`tool_nom.parent_id = ${parent_id}`)
+    }
 
-    if (onlyInStock === 'true') conditions.push(`tool_nom.sklad > 0`)
+    if (onlyInStock === 'true') {
+      conditions.push(`tool_nom.sklad > 0`)
+    }
 
-    // Обработка динамических параметров для фильтрации
     let dynamicParams = Object.entries(params)
       .filter(([key, value]) => key.startsWith('param_') && value)
       .map(([key, value]) => {
-        const paramId = key.split('_')[1] // Извлечение ID параметра
+        const paramId = key.split('_')[1]
         return `tool_nom.property ->> '${paramId}' = '${value.replace(/'/g, "''")}'`
       })
 
     conditions = [...conditions, ...dynamicParams]
-
     const whereClause = conditions.length
       ? `WHERE ${conditions.join(' AND ')}`
       : ''
 
-    // SQL запросы для получения инструментов и их количества
     const countQuery = `
       SELECT COUNT(*)
       FROM dbo.tool_nom as tool_nom
@@ -80,7 +79,7 @@ async function getTools(req, res) {
       SELECT tool_nom.id,
              tool_nom.name,
              tool_nom.property,
-             tool_nom.sklad,
+             COALESCE(tool_nom.sklad, 0) as sklad,  <-- Используем COALESCE для замены null на 0
              tool_nom.norma,
              tool_nom.norma_green,
              tool_nom.norma_red,
@@ -95,7 +94,6 @@ async function getTools(req, res) {
       LIMIT ${limitNumber} OFFSET ${offset}
     `
 
-    // Выполнение запросов и получение данных параметров одновременно
     const [countResult, toolsResult, paramsMapping] = await Promise.all([
       pool.query(countQuery),
       pool.query(toolQuery),
@@ -104,7 +102,6 @@ async function getTools(req, res) {
 
     const totalCount = parseInt(countResult.rows[0].count, 10)
 
-    // Обработка инструментов и параметров для ответа
     const uniqueParams = new Set()
     const propertyValues = {}
 
@@ -138,7 +135,7 @@ async function getTools(req, res) {
         id: tool.id,
         name: tool.name,
         property: formattedProperty,
-        sklad: tool.sklad,
+        sklad: tool.sklad, // sklad уже будет равен 0, если в базе данных было null
         norma: tool.norma,
         norma_red: tool.norma_red,
         norma_green: tool.norma_green,
@@ -150,6 +147,7 @@ async function getTools(req, res) {
     Object.keys(propertyValues).forEach((key) => {
       propertyValues[key] = Array.from(propertyValues[key])
     })
+
     Array.from(uniqueParams)
       .map((key) => {
         const values = propertyValues[key]
@@ -163,13 +161,12 @@ async function getTools(req, res) {
         return null
       })
       .filter((item) => item != null)
-    // Отправка ответа
+
     res.json({
       currentPage: pageNumber,
       itemsPerPage: limitNumber,
       totalCount,
       tools: formattedTools,
-      // paramsList, TODO:DEL
     })
   } catch (err) {
     console.error(err)
