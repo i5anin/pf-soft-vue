@@ -1,5 +1,6 @@
 <template>
   <v-container>
+    {{ currentPage }}
     <div class="text-right">
       <v-btn color="blue" @click="onAddTool">
         <template #prepend>
@@ -125,6 +126,13 @@ export default {
     },
   },
   watch: {
+    'editorToolStore.parentCatalog.id': {
+      handler(newParentId) {
+        if (newParentId != null) {
+          this.fetchToolsData()
+        }
+      },
+    },
     dynamicFilters: {
       immediate: true,
       handler(dynamicColumns) {

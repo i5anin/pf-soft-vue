@@ -65,6 +65,8 @@ export const useEditorToolStore = defineStore('editorToolStore', {
       if (this.tree.length > 1) {
         this.tree.pop()
         this.currentItem = this.tree[this.tree.length - 1]
+        this.parentCatalog.id = this.currentItem.id // Обновление parentCatalog.id
+        this.fetchToolsData() // Вызываем обновление списка
       }
     },
 
@@ -193,7 +195,8 @@ export const useEditorToolStore = defineStore('editorToolStore', {
     goToInTree(index) {
       this.currentItem = this.tree[index]
       this.tree = this.tree.slice(0, index + 1)
-      this.currentItem.id = this.currentItem.id // Добавлено обновление currentItem.id
+      this.parentCatalog.id = this.currentItem.id
+      this.fetchToolsData() // Вызываем обновление списка
     },
     selectItemInTree(item) {
       this.currentItem = item
