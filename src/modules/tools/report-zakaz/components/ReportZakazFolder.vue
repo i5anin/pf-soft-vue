@@ -1,10 +1,4 @@
 <template>
-  <zakaz-tool-modal
-    v-if="openDialog"
-    :persistent="true"
-    :tool-id="editingToolId"
-    @canceled="onClosePopup"
-  />
   <div>
     <div class="d-flex justify-end">
       <v-btn variant="text" @click="toggleAllVisibility">
@@ -45,11 +39,10 @@
 
 <script>
 import { reportApi } from '../api/report'
-import ZakazToolModal from '@/modules/tools/view/components/Modal.vue'
 import GroupZakazTable from './ReportZakazTable.vue'
 
 export default {
-  components: { ZakazToolModal, GroupZakazTable },
+  components: { GroupZakazTable },
   data() {
     return {
       toolGroups: [],
@@ -71,9 +64,6 @@ export default {
     },
   },
   methods: {
-    onClosePopup() {
-      this.openDialog = false
-    },
     updateGroupLowestColor(index, color) {
       this.toolGroups[index].lowestColor = color
       this.toolGroups[index].hasLowStock = color !== '#28a745'
@@ -146,16 +136,6 @@ export default {
       return [...tools].sort((a, b) => {
         return this.calcPercent(b) - this.calcPercent(a)
       })
-    },
-    getLowestPercent(tools) {
-      let lowestPercent = 100
-      tools.forEach((tool) => {
-        const percent = this.calcPercent(tool)
-        if (percent < lowestPercent) {
-          lowestPercent = percent
-        }
-      })
-      return lowestPercent
     },
     calcPercent(item) {
       const sklad = item.group_sklad || item.sklad

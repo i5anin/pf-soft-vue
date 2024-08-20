@@ -1,5 +1,11 @@
 <!--ReportZakazTable.vue-->
 <template>
+  <zakaz-tool-modal
+    v-if="openDialog"
+    :persistent="true"
+    :tool-id="editingToolId"
+    @canceled="onClosePopup"
+  />
   <v-table hover dense>
     <thead>
       <tr>
@@ -81,11 +87,17 @@
 
 <script>
 import Modal from './modal/MovementModal.vue'
+import ZakazToolModal from '@/modules/tools/view/components/Modal.vue'
 
 export default {
-  components: { Modal },
+  components: { ZakazToolModal, Modal },
   data() {
     return {
+      toolGroups: [],
+      visibleGroups: [],
+      editingToolId: null,
+      openDialog: false,
+      isAllVisible: false,
       hasMovementHistory: false,
       colors: { red: '#dc3545', yellow: '#ffc107', green: '#28a745' },
       toolTableHeaders: [
@@ -113,6 +125,9 @@ export default {
     this.$emit('lowest-color', this.getLowestGroupColor())
   },
   methods: {
+    onClosePopup() {
+      this.openDialog = false
+    },
     getLowestGroupColor() {
       let lowestRatio = 1
       this.items.forEach((tool) => {
