@@ -19,7 +19,7 @@
         :key="index"
         @click="$emit('row-click', item)"
       >
-        <td class="grey">{{ index + 1 }}</td>
+        <td style="text-align: center" class="grey">{{ index + 1 }}</td>
         <td>
           {{ item.name }}
           <v-chip
@@ -57,7 +57,7 @@
           {{ item.norma }}
           <span v-if="item.norma_red"> | {{ item.norma_red }}</span>
         </td>
-        <td>
+        <td style="text-align: center">
           <v-progress-linear
             rounded
             :model-value="calcPercent(item)"
@@ -66,6 +66,9 @@
           >
             {{ calcPercent(item) }}%
           </v-progress-linear>
+        </td>
+        <td style="text-align: center">
+          <v-icon icon="mdi mdi-history" :disabled="!hasMovementHistory" />
         </td>
       </tr>
     </tbody>
@@ -84,6 +87,7 @@ export default {
         { title: 'Склад', key: 'sklad', width: '150px' },
         { title: 'Норма', key: 'norma', width: '180px' },
         { title: 'Не хватает', key: 'not_enough', width: '150px' },
+        { title: 'История', key: 'history', width: '15px' },
       ],
     }
   },
