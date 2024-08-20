@@ -68,7 +68,11 @@
           </v-progress-linear>
         </td>
         <td style="text-align: center">
-          <v-icon icon="mdi mdi-history" :disabled="!hasMovementHistory" />
+          <v-btn
+            size="small"
+            icon="mdi mdi-history"
+            :disabled="!item.hasMovementHistory"
+          />
         </td>
       </tr>
     </tbody>
@@ -79,6 +83,7 @@
 export default {
   data() {
     return {
+      hasMovementHistory: false,
       colors: { red: '#dc3545', yellow: '#ffc107', green: '#28a745' },
       toolTableHeaders: [
         { title: '№', key: 'index', width: '50px' },

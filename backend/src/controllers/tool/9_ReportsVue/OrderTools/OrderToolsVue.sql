@@ -25,7 +25,8 @@ WITH RECURSIVE
                            ELSE GREATEST(CASE WHEN tn.norma_green > 0 THEN tn.norma_green ELSE tn.norma END - tn.sklad,
                                          0)
                            END             AS zakaz,
-                       t.group_total_sklad AS group_sklad
+                       t.group_total_sklad AS group_sklad,
+                       CASE WHEN EXISTS(SELECT 1 FROM dbo.vue_log vl WHERE vl.tool_id = tn.id) THEN true ELSE false END AS hasMovementHistory
                 FROM dbo.tool_nom tn
                          LEFT JOIN dbo.tool_history_damaged thd ON tn.id = thd.id_tool
                     AND thd.timestamp >= CURRENT_DATE - INTERVAL '7 days'
@@ -52,7 +53,8 @@ SELECT d.parent_id,
                        'zakaz', d.zakaz,
                        'group_id', d.group_id,
                        'group_standard', d.group_standard,
-                       'group_sklad', d.group_sklad
+                       'group_sklad', d.group_sklad,
+                       'hasMovementHistory', d.hasMovementHistory
                )
        ) AS tools
 FROM damaged d
