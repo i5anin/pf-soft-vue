@@ -80,7 +80,7 @@
 </template>
 
 <script>
-import Modal from './MovementModal.vue'
+import Modal from './modal/MovementModal.vue'
 
 export default {
   components: { Modal },

@@ -6,7 +6,7 @@ import HistoryDamaged from '@/modules/tools/history-damaged/components/Table.vue
 import ToolTabParam from '@/modules/tools/params/components/Param.vue'
 import ToolTabGroup from '@/modules/tools/groups/components/Groups.vue'
 import ToolTabTree from '@/modules/tools/tree/components/Tree.vue'
-import Report from '@/modules/tools/report-zakaz/components/Report.vue'
+import Report from '@/modules/tools/report-zakaz/components/ReportSending.vue'
 
 import EditorCatalog from '@/modules/tools/editor/components/Main.vue'
 import IssueCatalog from '@/modules/tools/issue/components/Catalog.vue'

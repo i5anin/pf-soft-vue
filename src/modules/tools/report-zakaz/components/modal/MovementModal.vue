@@ -53,7 +53,7 @@
 <script>
 import { defineComponent, computed, onMounted } from 'vue'
 import Modal from '@/modules/tools/shared/components/Modal.vue'
-import { useEditorToolStore } from '../piniaStore'
+import { useEditorToolStore } from '../../piniaStore'
 import { format, parseISO } from 'date-fns'
 
 export default defineComponent({
