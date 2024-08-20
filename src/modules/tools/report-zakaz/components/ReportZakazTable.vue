@@ -80,7 +80,10 @@
 </template>
 
 <script>
+import Modal from './MovementModal.vue'
+
 export default {
+  components: { Modal },
   data() {
     return {
       hasMovementHistory: false,
