@@ -1,11 +1,6 @@
-// src/router/index.js или src/index.js, в зависимости от структуры вашего проекта
+// src/router/index.js или src/index.js
 
 import { createRouter, createWebHistory } from 'vue-router'
-
-import Tool from '@/modules/tools/_tabs/components/Tabs.vue'
-import QRcode from '@/modules/qr-code/main/components/Table.vue'
-import Login from '@/views/Login.vue'
-import Error404 from '@/views/404.vue'
 
 export const Routes = {
   LOGIN: '/Login',
@@ -13,28 +8,28 @@ export const Routes = {
 
 const routes = [
   {
-    path: '/:catchAll(.*)',
-    name: 'Error404',
-    component: Error404,
-  },
-  {
-    path: '/',
-    redirect: '/Tool', // Добавление перенаправления с главной страницы на /Tool
-  },
-  {
     path: Routes.LOGIN,
     name: 'Login',
-    component: Login,
+    component: () => import('@/views/Login.vue'), // Ленивая загрузка
   },
   {
     path: '/Tool',
     name: 'Tool',
-    component: Tool,
+    component: () => import('@/modules/tools/_tabs/components/Tabs.vue'), // Ленивая загрузка
   },
   {
     path: '/QR-code',
     name: 'QR-code',
-    component: QRcode,
+    component: () => import('@/modules/qr-code/main/components/Table.vue'), // Ленивая загрузка
+  },
+  {
+    path: '/',
+    redirect: '/Tool',
+  },
+  {
+    path: '/:catchAll(.*)',
+    name: 'Error404',
+    component: () => import('@/views/404.vue'), // Ленивая загрузка
   },
 ]
 
@@ -43,9 +38,10 @@ const router = createRouter({
   routes,
 })
 
-// Добавление глобального охранника маршрутов
+// Охранник маршрутов
 router.beforeEach((to, from, next) => {
   const isAuthorized = !!localStorage.getItem('token')
+
   if (!isAuthorized && to.path !== Routes.LOGIN) {
     next({ path: Routes.LOGIN })
   } else if (isAuthorized && to.path === Routes.LOGIN) {
