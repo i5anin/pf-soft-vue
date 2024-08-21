@@ -3,13 +3,13 @@
   "version": "2.0.0",
   "scripts": {
     "test": "jest",
-    "server": "cd backend && npx nodemon src/app.js",
+    "server": "cd server && npx nodemon src/app.js",
     "client": "vite --host",
     "pm": "pm2 start ecosystem.config.js",
-    "build": "vite build",
+    "build": "vite build --mode build",
     "preview": "vite preview",
     "lint": "eslint src --ext --fix .js,.vue",
-    "b_lint": "eslint backend/src --ext .js --fix",
+    "b_lint": "eslint server/src --ext .js --fix",
     "start": "vite build & cd ./dist & npx http-server -p 3002"
   },
   "dependencies": {

@@ -28,5 +28,5 @@ pnpm-debug.log*
 *.zip
 *.meta
 *.ini
-backend/src/controllers/tool/my-sql-file/ost_form_field.js
-backend/src/controllers/tool/ReportsEmail/obmen.js
+server/src/controllers/tool/my-sql-file/ost_form_field.js
+server/src/controllers/tool/ReportsEmail/obmen.js

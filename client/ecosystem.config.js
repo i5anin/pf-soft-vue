@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'server',
-      script: 'backend/src/app.js',
+      script: 'server/src/app.js',
       watch: true,
       env: {
         PM2_PUBLIC_KEY: process.env.PM2_PUBLIC_KEY,
