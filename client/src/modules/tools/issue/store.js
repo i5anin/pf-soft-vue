@@ -116,6 +116,10 @@ export default {
   },
 
   actions: {
+    updateParentCatalog({ commit, dispatch }, parentCatalog) {
+      commit('setParentCatalog', parentCatalog)
+      dispatch('fetchToolsByFilter')
+    },
     // Действие для очистки корзины
     clearCart({ commit }) {
       commit('CLEAR_CART')
