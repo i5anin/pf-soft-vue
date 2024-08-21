@@ -1,0 +1,8 @@
+{
+  "name": "vue-pfforum",
+  "version": "2.0.0",
+  "scripts": {
+    "server": "cd server && npx nodemon src/app.js",
+    "client": "cd client && npx vite --host"
+  }
+}
