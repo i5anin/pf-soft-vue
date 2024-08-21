@@ -205,6 +205,7 @@ export const useEditorToolStore = defineStore('editorToolStore', {
       if (!this.tree.includes(item)) {
         this.tree.push(item)
       }
+      this.fetchToolsData()
     },
 
     // Action для загрузки истории движения инструмента
@@ -218,6 +219,16 @@ export const useEditorToolStore = defineStore('editorToolStore', {
         )
       } catch (error) {
         console.error('Ошибка при загрузке истории движения:', error)
+      }
+    },
+
+    async fetchToolsData() {
+      // Новое action для одновременного вызова
+      try {
+        await this.fetchToolsDynamicFilters()
+        await this.fetchToolsByFilter()
+      } catch (error) {
+        console.error('Ошибка при получении данных инструментов:', error)
       }
     },
   },
