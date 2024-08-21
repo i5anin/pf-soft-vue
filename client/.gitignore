@@ -1,0 +1,32 @@
+.DS_Store
+node_modules
+/dist
+
+
+# local env files
+.env.local
+.env.*.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor directories and files
+#.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.env*
+!.env.example
+*.xml
+*.iml
+*.zip
+*.meta
+*.ini
+server/src/controllers/tool/my-sql-file/ost_form_field.js
+server/src/controllers/tool/ReportsEmail/obmen.js
