@@ -14,6 +14,7 @@ module.exports = {
     },
     {
       name: 'client',
+      cwd: './client',
       script: 'npx',
       args: 'vite --host',
       interpreter: 'none',
