@@ -96,6 +96,7 @@ export default {
     isRail: true,
     isHovered: false,
     userInfo: {},
+    refreshIntervalId: null, // Добавьте свойство для хранения ID интервала
   }),
   computed: {
     ...mapState('IssueToolStore', ['isModalOpen']),
@@ -125,7 +126,16 @@ export default {
     },
   },
   async created() {
-    this.userInfo = await authApi.checkLogin()
+
+
+    await this.updateUserInfo(); // Получаем информацию о пользователе при создании компонента
+    // Устанавливаем интервал для обновления каждые 5 секунд
+    this.refreshIntervalId = setInterval(this.updateUserInfo, 10000); ///TODO: ВРЕМЕННО 
+  },
+
+  beforeUnmount() {
+    // Очищаем интервал при уничтожении компонента
+    clearInterval(this.refreshIntervalId);
   },
 
   methods: {
@@ -165,11 +175,14 @@ export default {
       localStorage.removeItem('token') // Если вы используете Vuex для отслеживания статуса аутентификации
       this.$router.push('/Login') // Перенаправление на страницу входа
     },
+    async updateUserInfo() {
+      this.userInfo = await authApi.checkLogin();
+    },
   },
 }
 </script>
 
-<style scoped lang="css">
+<style scoped lang='css'>
 ::v-deep .v-navigation-drawer__content::-webkit-scrollbar {
   width: 0;
 }
