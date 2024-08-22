@@ -1,67 +1,68 @@
 <template>
   <header>
     <ModalCart
-      v-if="isModalOpen"
-      :persistent="true"
-      @canceled="closeModal"
-      @changes-saved="onSaveChanges"
+      v-if='isModalOpen'
+      :persistent='true'
+      @canceled='closeModal'
+      @changes-saved='onSaveChanges'
     />
 
     <v-navigation-drawer
-      class="header"
-      location="left"
-      width="330"
+      class='header'
+      location='left'
+      width='330'
       permanent
-      :rail="isRail"
+      :rail='isRail'
     >
       <v-list>
         <v-list-item
-          prepend-avatar="@/assets/logoWhite.svg"
-          title="Софт инструмента"
+          prepend-avatar='@/assets/logoWhite.svg'
+          title='Софт инструмента'
         />
       </v-list>
       <v-divider />
       <v-list>
         <v-list-item
-          prepend-avatar="@/assets/avatar.png"
-          :title="userInfo.user"
-          :subtitle="appTitle"
+          prepend-avatar='@/assets/avatar.png'
+          :title='userInfo.user'
+          :subtitle='appTitle'
         />
       </v-list>
       <v-divider />
-      <v-list-item v-if="isHovered">
+      <v-list-item v-if='isHovered'>
         <v-list-item-title>Участки</v-list-item-title>
       </v-list-item>
       <!-- Участки -->
       <menu-list
-        :menu-items="plotsMenuItemsComputed"
-        :group-states="groupStates"
+        :menu-items='plotsMenuItemsComputed'
+        :group-states='groupStates'
       />
     </v-navigation-drawer>
 
-    <v-app-bar :color="appColor" sticky prominent dark>
+    <v-app-bar :color='appColor' sticky prominent dark>
       <!-- Левая кнопка -->
-      <v-app-bar-nav-icon variant="text" @click.stop="isRail = !isRail" />
+      <v-app-bar-nav-icon variant='text' @click.stop='isRail = !isRail' />
 
       <!-- Название -->
       <v-toolbar-title>{{ appTitle }}</v-toolbar-title>
 
       <v-spacer />
       <!-- <div>openDialog: {{ openDialog }}, currentModal: {{ currentModal }}</div>-->
-      <div v-if="cartItemsLength > 0" class="ma-5" @click="openCartModal">
+      <div v-if='cartItemsLength > 0' class='ma-5' @click='openCartModal'>
         <v-btn icon>
           <v-icon>mdi-cart-outline</v-icon>
         </v-btn>
         <!--Позиций {{ cartItemsLength }}-->
-        <div class="d-inline-flex align-center mr-2">Инструмент к выдаче</div>
-        <v-chip color="red" variant="flat">
+        <div class='d-inline-flex align-center mr-2'>Инструмент к выдаче</div>
+        <v-chip color='red' variant='flat'>
           {{ cartItemsTotalQuantity }}
         </v-chip>
       </div>
 
-      <v-chip v-if="userInfo.user" class="ma-2" label dark>
+      <v-chip v-if='userInfo.user' class='ma-2' label dark :color="userInfo.role === 'Editor' ? 'red' : ''"
+              :variant="userInfo.role === 'Editor' ? 'flat' : ''">
         <template #prepend>
-          <v-icon icon="mdi-account" start />
+          <v-icon icon='mdi-account' start />
         </template>
         {{ userInfo.user }}
       </v-chip>
@@ -76,7 +77,7 @@
       <!--        <v-icon>mdi-moon-last-quarter</v-icon>-->
       <!--      </v-btn>-->
       <v-btn icon>
-        <v-icon @click="logout">mdi-exit-to-app</v-icon>
+        <v-icon @click='logout'>mdi-exit-to-app</v-icon>
       </v-btn>
     </v-app-bar>
   </header>
@@ -128,14 +129,14 @@ export default {
   async created() {
 
 
-    await this.updateUserInfo(); // Получаем информацию о пользователе при создании компонента
+    await this.updateUserInfo() // Получаем информацию о пользователе при создании компонента
     // Устанавливаем интервал для обновления каждые 5 секунд
-    this.refreshIntervalId = setInterval(this.updateUserInfo, 10000); ///TODO: ВРЕМЕННО 
+    this.refreshIntervalId = setInterval(this.updateUserInfo, 10000) ///TODO: ВРЕМЕННО
   },
 
   beforeUnmount() {
     // Очищаем интервал при уничтожении компонента
-    clearInterval(this.refreshIntervalId);
+    clearInterval(this.refreshIntervalId)
   },
 
   methods: {
@@ -176,7 +177,7 @@ export default {
       this.$router.push('/Login') // Перенаправление на страницу входа
     },
     async updateUserInfo() {
-      this.userInfo = await authApi.checkLogin();
+      this.userInfo = await authApi.checkLogin()
     },
   },
 }
