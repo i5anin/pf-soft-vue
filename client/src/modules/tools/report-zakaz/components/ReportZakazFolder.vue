@@ -1,36 +1,28 @@
 <template>
   <div>
-    <div class="d-flex justify-end">
-      <v-btn variant="text" @click="toggleAllVisibility">
+    <div class='d-flex justify-end'>
+      <v-btn variant='text' @click='toggleAllVisibility'>
         {{ isAllVisible ? 'Свернуть все' : 'Развернуть все' }}
         ({{ totalToolCount }})
       </v-btn>
     </div>
-    <div v-for="(group, index) in toolGroups" :key="index" class="tool-group">
-      <v-chip variant="text" size="large" @click="toggleVisibility(index)">
+    <div v-for='(group, index) in toolGroups' :key='index' class='tool-group'>
+      <v-chip variant='text' size='large' @click='toggleVisibility(index)'>
         <template #prepend>
           <v-icon
-            v-if="!group.hasLowStock"
-            color="green"
-            icon="mdi-folder"
+            :color='getHexColor(group.color_folder)'
+            :icon="group.color_folder === 'green' ? 'mdi-folder' : 'mdi-folder-alert'"
             start
-          />
-          <v-icon
-            v-else
-            icon="mdi-folder-alert"
-            start
-            :color="group.lowestColor"
-            title="Есть позиции с низким запасом"
+            :title="group.color_folder !== 'green' ? 'Есть позиции с низким запасом' : ''"
           />
         </template>
         {{ group.path }}
       </v-chip>
-      <v-chip color="while">{{ group.tools.length }}</v-chip>
-      <div v-if="visibleGroups.includes(index)">
+      <v-chip color='while'>{{ group.tools.length }}</v-chip>
+      <div v-if='visibleGroups.includes(index)'>
         <group-zakaz-table
-          :items="sortedTools(group.tools)"
-          :group-path="group.path"
-          @lowest-color="updateGroupLowestColor(index, $event)"
+          :items='group.tools'
+          :group-path='group.path'
         />
       </div>
     </div>
@@ -40,11 +32,13 @@
 <script>
 import { reportApi } from '../api/report'
 import GroupZakazTable from './ReportZakazTable.vue'
+import { getHexColor } from '@/utils/colorUtils'
 
 export default {
   components: { GroupZakazTable },
   data() {
     return {
+      color_folder: '',
       toolGroups: [],
       visibleGroups: [],
       editingToolId: null,
@@ -59,71 +53,29 @@ export default {
     totalToolCount() {
       return this.toolGroups.reduce(
         (total, group) => total + group.tools.length,
-        0
+        0,
       )
     },
   },
   methods: {
-    updateGroupLowestColor(index, color) {
-      this.toolGroups[index].lowestColor = color
-      this.toolGroups[index].hasLowStock = color !== '#28a745'
-    },
-    checkGroupForLowStock(tools) {
-      return tools.some((tool) => {
-        const ratio = this.calcRatio(tool)
-        return (1 - ratio) * 100 >= 20
-      })
-    },
-    calcRatio(tool) {
-      let sklad = tool.sklad
-      if (tool.group_id && tool.group_sklad) sklad = tool.group_sklad
-      const norma = this.getNormaForCalculation(tool)
-      return norma === 0 ? 0 : sklad / norma
-    },
-    getNormaForCalculation(tool) {
-      if (tool.norma_green && tool.sklad < tool.norma_green) {
-        return tool.norma_green
-      } else if (tool.norma_red && tool.sklad < tool.norma_red) {
-        return tool.norma_red
-      } else {
-        return tool.norma
-      }
-    },
+
     async fetchZakazData() {
       try {
         const data = await reportApi.getZakaz()
         this.toolGroups = data.map((group) => ({
           ...group,
-          lowestColor: this.getLowestGroupColor(group.tools),
-          hasLowStock: this.checkGroupForLowStock(group.tools),
         }))
       } catch (error) {
         console.error('Ошибка при получении данных: ', error)
       }
     },
-    getLowestGroupColor(tools) {
-      let lowestRatio = 1
-      tools.forEach((tool) => {
-        const ratio = this.calcRatio(tool)
-        if (ratio < lowestRatio) lowestRatio = ratio
-      })
-      return this.getToolColor(lowestRatio)
-    },
-    getToolColor(ratio) {
-      if (ratio >= 0.8) {
-        return '#28a745' // Green
-      } else if (ratio >= 0.4) {
-        return '#ffc107' // Yellow
-      } else {
-        return '#dc3545' // Red
-      }
-    },
+
     toggleVisibility(index) {
-      const visibleIndex = this.visibleGroups.indexOf(index)
-      if (visibleIndex === -1) {
-        this.visibleGroups.push(index)
+      const visibleIndex = this.visibleGroups.indexOf(index);
+      if (visibleIndex > -1) {
+        this.visibleGroups.splice(visibleIndex, 1);
       } else {
-        this.visibleGroups.splice(visibleIndex, 1)
+        this.visibleGroups.push(index);
       }
     },
     toggleAllVisibility() {
@@ -132,16 +84,7 @@ export default {
         ? [...Array(this.toolGroups.length).keys()]
         : []
     },
-    sortedTools(tools) {
-      return [...tools].sort((a, b) => {
-        return this.calcPercent(b) - this.calcPercent(a)
-      })
-    },
-    calcPercent(item) {
-      const sklad = item.group_sklad || item.sklad
-      const norma = this.getNormaForCalculation(item)
-      return ((1 - sklad / norma) * 100).toFixed(0)
-    },
+    getHexColor
   },
 }
 </script>

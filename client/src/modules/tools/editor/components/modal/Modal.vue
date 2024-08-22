@@ -64,7 +64,7 @@
                   <v-btn
                     icon="mdi mdi-information-slab-circle-outline"
                     @click="showMovementModal = true"
-                    :disabled="!hasMovementHistory"
+                    :disabled="!mov_history"
                   />
                 </div>
                 <ToolMovementModal
@@ -243,7 +243,7 @@ export default {
   emits: ['canceled', 'changes-saved'],
   data() {
     return {
-      hasMovementHistory: false,
+      mov_history: false,
       showMovementModal: false,
       tempParentId: null,
       snackbar: {
@@ -323,7 +323,7 @@ export default {
         }
 
         this.tempParentId = this.currentItem.id
-        this.hasMovementHistory = this.toolModel.hasMovementHistory
+        this.mov_history = this.toolModel.mov_history
       },
     },
   },

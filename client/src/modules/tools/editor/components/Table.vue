@@ -49,7 +49,7 @@
           <v-chip
             v-if="item.group_id"
             size="x-small"
-            :color="getToolGroupColor(item.group_id)"
+            :color="getColorForGroup(item.group_id)"
             :title="'Группа ' + item.group_id"
           >
             <span v-if="item.group_standard" style="color: yellow">★</span>
@@ -88,6 +88,7 @@
 import EditorToolModal from './modal/Modal.vue'
 import ToolFilter from './filter/Filter.vue'
 import { useEditorToolStore } from '../piniaStore'
+import { getColorForGroup } from '@/utils/colorUtils'
 
 export default {
   components: {
@@ -172,10 +173,7 @@ export default {
     this.isDataLoaded = true
   },
   methods: {
-    getToolGroupColor(index) {
-      const hue = index * 137.508
-      return `hsl(${hue % 360}, 50%, 50%)`
-    },
+    getColorForGroup,
     handlePageChange(page) {
       this.editorToolStore.setCurrentPage(page)
       this.fetchToolsByFilter()

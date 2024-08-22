@@ -89,6 +89,7 @@
 <script>
 import { toolGroupsApi } from '../api/groups' // Импортируем API
 import GroupsToolModal from './Modal.vue'
+import { getColorForGroup } from '@/utils/colorUtils'
 
 export default {
   components: { GroupsToolModal },
@@ -137,10 +138,7 @@ export default {
     onClosePopup() {
       this.openDialog = false
     },
-    getColorForGroup(index) {
-      const hue = index * 137.508 // используем золотое сечение
-      return `hsl(${hue % 360}, 50%, 50%)`
-    },
+    getColorForGroup,
     async fetchGroupsData() {
       try {
         this.toolGroups = await toolGroupsApi.getToolGroups()

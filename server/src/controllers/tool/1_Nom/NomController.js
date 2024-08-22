@@ -506,7 +506,7 @@ async function getToolById(req, res) {
         norma: toolData.norma,
         norma_red: toolData.norma_red,
         norma_green: toolData.norma_green,
-        hasMovementHistory: logResult.rows.length > 0, // true если есть записи в vue_log, иначе false
+        mov_history: logResult.rows.length > 0, // true если есть записи в vue_log, иначе false
       }
 
       res.json(jsonResponse)
