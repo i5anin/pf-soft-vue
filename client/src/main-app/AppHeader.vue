@@ -32,7 +32,6 @@
       <v-list-item v-if="isHovered">
         <v-list-item-title>Участки</v-list-item-title>
       </v-list-item>
-      <!-- Участки -->
       <menu-list
         :menu-items="plotsMenuItemsComputed"
         :group-states="groupStates"
@@ -40,20 +39,17 @@
     </v-navigation-drawer>
 
     <v-app-bar :color="appColor" sticky prominent dark>
-      <!-- Левая кнопка -->
       <v-app-bar-nav-icon variant="text" @click.stop="isRail = !isRail" />
-
-      <!-- Название -->
       <v-toolbar-title>{{ appTitle }}</v-toolbar-title>
-
       <v-spacer />
-      <!-- <div>openDialog: {{ openDialog }}, currentModal: {{ currentModal }}</div>-->
+
       <div v-if="cartItemsLength > 0" class="ma-5" @click="openCartModal">
         <v-btn icon>
           <v-icon>mdi-cart-outline</v-icon>
         </v-btn>
-        <!--Позиций {{ cartItemsLength }}-->
-        <div class="d-inline-flex align-center mr-2">Инструмент к выдаче</div>
+        <div class="d-inline-flex align-center mr-2">
+          Инструмент к выдаче
+        </div>
         <v-chip color="red" variant="flat">
           {{ cartItemsTotalQuantity }}
         </v-chip>
@@ -65,16 +61,7 @@
         </template>
         {{ userInfo.user }}
       </v-chip>
-      <!-- Три кнопки справа -->
-      <!--      <v-btn icon>-->
-      <!--        <v-icon>mdi-magnify</v-icon>-->
-      <!--      </v-btn>-->
-      <!--      <v-btn icon>-->
-      <!--        <v-icon>mdi-fullscreen</v-icon>-->
-      <!--      </v-btn>-->
-      <!--      <v-btn icon>-->
-      <!--        <v-icon>mdi-moon-last-quarter</v-icon>-->
-      <!--      </v-btn>-->
+
       <v-btn icon>
         <v-icon @click="logout">mdi-exit-to-app</v-icon>
       </v-btn>
@@ -83,11 +70,11 @@
 </template>
 
 <script>
-import { plotsMenuItems } from '@/main-app/data/menuItems'
-import ModalCart from '@/modules/tools/issue/components/ModalCart.vue'
-import MenuList from '@/main-app/SidebarMenuList.vue'
-import { authApi } from '@/api/login'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { plotsMenuItems } from '@/main-app/data/menuItems';
+import ModalCart from '@/modules/tools/issue/components/ModalCart.vue';
+import MenuList from '@/main-app/SidebarMenuList.vue';
+import { authApi } from '@/api/login';
+import { mapActions, mapGetters, mapState } from 'vuex';
 
 export default {
   name: 'AppHeader',
@@ -101,72 +88,91 @@ export default {
     ...mapState('IssueToolStore', ['isModalOpen']),
     ...mapGetters({ cartItems: 'IssueToolStore/cartItems' }),
     cartItemsLength() {
-      return this.cartItems ? this.cartItems.length : 0
+      return this.cartItems ? this.cartItems.length : 0;
     },
-
     cartItemsTotalQuantity() {
       return this.cartItems
         ? this.cartItems.reduce((total, item) => total + item.quantity, 0)
-        : 0
+        : 0;
     },
     appTitle() {
-      return import.meta.env.VITE_APP_TITLE || 'LOGO'
+      return import.meta.env.VITE_APP_TITLE || 'LOGO';
     },
     appColor() {
       return import.meta.env.VITE_NODE_ENV === 'build'
         ? import.meta.env.VITE_BUILD_COLOR
-        : import.meta.env.VITE_DEV_COLOR
+        : import.meta.env.VITE_DEV_COLOR;
     },
     plotsMenuItemsComputed() {
-      return this.filterForHohlov(plotsMenuItems)
+      return this.filterForHohlov(plotsMenuItems);
     },
     groupStates() {
-      return []
+      return [];
     },
   },
-  async created() {
-    this.userInfo = await authApi.checkLogin()
+  created() {
+    this.fetchUserInfo();
+    window.addEventListener('storage', this.handleStorageChange);
   },
-
+  beforeUnmount() {
+    window.removeEventListener('storage', this.handleStorageChange);
+  },
   methods: {
     ...mapActions('IssueToolStore', ['openModal', 'closeModal']),
-
-    operationId() {
-      return this.selectedOperationId
+    async fetchUserInfo() {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          this.userInfo = await authApi.checkLogin();
+        } catch (error) {
+          console.error('Ошибка получения пользователя:', error);
+          // Выходим, если не удалось получить информацию о пользователе
+          this.logout();
+        }
+      } else {
+        // Если токена нет, сбрасываем userInfo
+        this.userInfo = {};
+      }
     },
-
+    handleStorageChange(event) {
+      if (event.key === 'token') {
+        this.fetchUserInfo();
+      }
+    },
+    operationId() {
+      return this.selectedOperationId;
+    },
     openCartModal() {
-      this.openModal()
+      this.openModal();
     },
     onClosePopup() {
-      this.openDialog = false
-      this.currentModal = null
+      this.openDialog = false;
+      this.currentModal = null;
     },
     onSaveChanges() {
-      this.onClosePopup()
+      this.onClosePopup();
     },
     filterForHohlov(items) {
       return items
         .filter((item) => item.access && item.access.includes('hohlov'))
         .map((item) => {
-          // Задаем иконку по умолчанию, если не задана
-          if (!item.icon) item.icon = 'mdi-circle-outline'
-          // Проверяем подпункты
+          if (!item.icon) item.icon = 'mdi-circle-outline';
           if (item.items) {
             item.items = item.items.map((subItem) => {
-              if (!subItem.icon) subItem.icon = 'mdi-circle-outline'
-              return subItem
-            })
+              if (!subItem.icon) subItem.icon = 'mdi-circle-outline';
+              return subItem;
+            });
           }
-          return item
-        })
+          return item;
+        });
     },
     logout() {
-      localStorage.removeItem('token') // Если вы используете Vuex для отслеживания статуса аутентификации
-      this.$router.push('/Login') // Перенаправление на страницу входа
+      localStorage.removeItem('token');
+      this.$router.push('/Login');
+      this.userInfo = {}; // Сбрасываем userInfo после выхода
     },
   },
-}
+};
 </script>
 
 <style scoped lang="css">
