@@ -1,10 +1,10 @@
 <template>
   <div class="container">
     <Catalog />
-    <span v-if="currentItem?.elements">
+<!--    <span v-if="currentItem?.elements">-->
       <ToolFilter />
       <Table />
-    </span>
+<!--    </span>-->
   </div>
 </template>
 
