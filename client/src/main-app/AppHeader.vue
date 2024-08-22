@@ -66,16 +66,6 @@
         </template>
         {{ userInfo.user }}
       </v-chip>
-      <!-- Три кнопки справа -->
-      <!--      <v-btn icon>-->
-      <!--        <v-icon>mdi-magnify</v-icon>-->
-      <!--      </v-btn>-->
-      <!--      <v-btn icon>-->
-      <!--        <v-icon>mdi-fullscreen</v-icon>-->
-      <!--      </v-btn>-->
-      <!--      <v-btn icon>-->
-      <!--        <v-icon>mdi-moon-last-quarter</v-icon>-->
-      <!--      </v-btn>-->
       <v-btn icon>
         <v-icon @click='logout'>mdi-exit-to-app</v-icon>
       </v-btn>
