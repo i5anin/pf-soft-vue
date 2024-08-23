@@ -10,6 +10,7 @@ import Report from '@/modules/tools/report-zakaz/components/ReportSending.vue'
 
 import EditorCatalog from '@/modules/tools/editor/components/Main.vue'
 import IssueCatalog from '@/modules/tools/issue/components/Catalog.vue'
+import IssueCatalogT from '@/modules/tools/issue-test/components/Main.vue'
 
 import ViewCatalog from '@/modules/tools/view/components/Catalog.vue'
 
@@ -40,6 +41,13 @@ const tabs = [
     url: '#issue',
     component: markRaw(IssueCatalog),
     access: ['Admin', 'Editor', 'Issue'],
+    ico: 'mdi-list-status',
+  },
+  {
+    name: '222 Выдать / поврежден',
+    url: '#issueT',
+    component: markRaw(IssueCatalogT),
+    access: ['Admin'],
     ico: 'mdi-list-status',
   },
   {
