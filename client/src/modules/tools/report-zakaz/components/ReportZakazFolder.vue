@@ -1,7 +1,12 @@
 <template>
   <div>
     <div class='d-flex justify-end'>
-      <v-btn variant='text' @click='toggleAllVisibility'>
+      <v-btn
+        variant='text'
+        :disabled='!toolGroups.length || (isAllVisible && totalToolCount === 0)'
+        :loading='isLoading'
+        @click='toggleAllVisibility'
+      >
         {{ isAllVisible ? 'Свернуть все' : 'Развернуть все' }}
         ({{ totalToolCount }})
       </v-btn>
@@ -44,6 +49,7 @@ export default {
       editingToolId: null,
       openDialog: false,
       isAllVisible: false,
+      isLoading: true,
     }
   },
   mounted() {
@@ -61,12 +67,15 @@ export default {
 
     async fetchZakazData() {
       try {
+        this.isLoading = true; // Включить индикатор загрузки
         const data = await reportApi.getZakaz()
         this.toolGroups = data.map((group) => ({
           ...group,
         }))
+        this.isLoading = false; // Выключить индикатор загрузки
       } catch (error) {
         console.error('Ошибка при получении данных: ', error)
+        this.isLoading = false; // Выключить индикатор загрузки
       }
     },
 

@@ -79,6 +79,7 @@ import ModalCart from '@/modules/tools/issue/components/ModalCart.vue'
 import MenuList from '@/main-app/SidebarMenuList.vue'
 import { authApi } from '@/api/login'
 import { mapActions, mapGetters, mapState } from 'vuex'
+import { appColor } from '@/utils/colorUtils'
 
 export default {
   name: 'AppHeader',
@@ -104,11 +105,7 @@ export default {
     appTitle() {
       return import.meta.env.VITE_APP_TITLE || 'LOGO'
     },
-    appColor() {
-      return import.meta.env.VITE_NODE_ENV === 'build'
-        ? import.meta.env.VITE_BUILD_COLOR
-        : import.meta.env.VITE_DEV_COLOR
-    },
+    appColor,
     plotsMenuItemsComputed() {
       return this.filterForHohlov(plotsMenuItems)
     },

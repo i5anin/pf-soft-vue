@@ -38,6 +38,8 @@
 </template>
 
 <script>
+import { appColor } from '@/utils/colorUtils'
+
 export default {
   name: 'TreeNode',
   props: {
@@ -49,11 +51,7 @@ export default {
     }
   },
   computed: {
-    appColor() {
-      return import.meta.env.VITE_NODE_ENV === 'build'
-        ? import.meta.env.VITE_BUILD_COLOR
-        : import.meta.env.VITE_DEV_COLOR
-    },
+    appColor,
   },
   methods: {
     toggle() {

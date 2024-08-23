@@ -30,6 +30,7 @@
 <script>
 import tabs from '../config/configTabs'
 import { authApi } from '@/api/login'
+import { appColor } from '@/utils/colorUtils'
 
 export default {
   data() {
@@ -37,11 +38,7 @@ export default {
   },
 
   computed: {
-    appColor() {
-      return import.meta.env.VITE_NODE_ENV === 'build'
-        ? import.meta.env.VITE_BUILD_COLOR
-        : import.meta.env.VITE_DEV_COLOR
-    },
+    appColor,
   },
   watch: {
     tab() {

@@ -35,6 +35,8 @@
 </template>
 
 <script>
+import { appColor } from '@/utils/colorUtils'
+
 export default {
   name: 'CatalogBreadcrumbs',
   props: {
@@ -49,11 +51,7 @@ export default {
   },
   emits: ['go-to', 'item-selected'],
   computed: {
-    appColor() {
-      return import.meta.env.VITE_NODE_ENV === 'build'
-        ? import.meta.env.VITE_BUILD_COLOR
-        : import.meta.env.VITE_DEV_COLOR
-    },
+    appColor,
   },
   methods: {
     getBreadcrumbClass(index) {

@@ -16,7 +16,7 @@
               <td>{{ report.info }}</td>
               <td>
                 <v-btn
-                  color="primary"
+                  :color="appColor()"
                   :loading="report.loading"
                   :disabled="report.loading"
                   @click="sendEmailReport(report)"
@@ -37,6 +37,7 @@
 import { reportApi } from '../api/report'
 import ReportZakaz from './ReportZakazFolder.vue'
 import { authApi } from '@/api/login'
+import { appColor } from '@/utils/colorUtils'
 
 export default {
   components: { ReportZakaz },
@@ -68,6 +69,7 @@ export default {
     this.checkLogin()
   },
   methods: {
+    appColor,
     async sendEmailReport(report) {
       report.loading = true // Начинаем анимацию загрузки и блокируем кнопку
       try {

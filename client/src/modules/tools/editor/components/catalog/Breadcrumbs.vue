@@ -33,6 +33,7 @@
 
 <script>
 import { useEditorToolStore } from '@/modules/tools/editor/piniaStore'
+import { appColor } from '@/utils/colorUtils'
 
 export default {
   name: 'CatalogBreadcrumbs',
@@ -43,14 +44,7 @@ export default {
     }
   },
   computed: {
-    appColor() {
-      return import.meta.env.VITE_NODE_ENV === 'build'
-        ? import.meta.env.VITE_BUILD_COLOR
-        : import.meta.env.VITE_DEV_COLOR
-    },
-    getCurrentItem() {
-      return this.editorToolStore.getCurrentItem
-    },
+    appColor,
     getTree() {
       return this.editorToolStore.getTree
     },
