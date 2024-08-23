@@ -96,4 +96,11 @@ FROM sorted_damaged sd -- Используем sorted_damaged вместо damag
          JOIN folder_colors fc ON sd.parent_id = fc.parent_id
 GROUP BY sd.parent_id, tp.path, fc.color_folder
 HAVING SUM(sd.zakaz) > 0
-ORDER BY tp.path;
+ORDER BY
+    CASE
+        WHEN fc.color_folder = 'red' THEN 1
+        WHEN fc.color_folder = 'yellow' THEN 2
+        WHEN fc.color_folder = 'green' THEN 3
+        ELSE 4  --  Этот пункт может быть не нужен, если вы уверены, что будут только 3 цвета.
+        END,
+    tp.path;
