@@ -17,7 +17,7 @@ export const useEditorToolStore = defineStore('editorToolStore', {
       itemsPerPage: 15,
       search: '',
       includeNull: false,
-      onlyInStock: null,
+      onlyInStock: true,
       selectedDynamicFilters: {},
     },
     movements: [],
@@ -104,7 +104,7 @@ export const useEditorToolStore = defineStore('editorToolStore', {
         const dynamicFilters = await toolApi.filterParamsByParentId(id)
         this.filters.selectedDynamicFilters = dynamicFilters.reduce(
           (acc, { key }) => ({ ...acc, [key]: null }),
-          {}
+          {},
         )
         this.dynamicFilters = dynamicFilters
       } catch (e) {
@@ -113,8 +113,8 @@ export const useEditorToolStore = defineStore('editorToolStore', {
     },
 
     async fetchToolsByFilter() {
-      this.isLoading = true
-      this.tools = []
+      this.isLoading = true;
+      this.tools = [];
       try {
         const {
           currentPage,
@@ -123,8 +123,9 @@ export const useEditorToolStore = defineStore('editorToolStore', {
           includeNull,
           onlyInStock,
           selectedDynamicFilters,
-        } = this.filters
-        const { id: parentId } = this.parentCatalog
+        } = this.editorToolStore.getFilters;
+
+        const { id: parentId } = this.editorToolStore.parentCatalog;
 
         const { tools, totalCount } = await toolApi.getTools(
           search,
@@ -132,19 +133,19 @@ export const useEditorToolStore = defineStore('editorToolStore', {
           itemsPerPage,
           includeNull,
           parentId,
-          onlyInStock,
+          onlyInStock, // Передаем в toolApi.getTools
           Object.entries(selectedDynamicFilters).reduce(
             (acc, [key, value]) => ({ ...acc, [`param_${key}`]: value }),
-            {}
-          )
-        )
+            {},
+          ),
+        );
 
-        this.tools = tools
-        this.toolsTotalCount = totalCount
+        this.tools = tools;
+        this.toolsTotalCount = totalCount;
       } catch (error) {
-        console.error('getTools. Ошибка при получении данных:', error)
+        console.error('getTools. Ошибка при получении данных:', error);
       } finally {
-        this.isLoading = false
+        this.isLoading = false;
       }
     },
 
@@ -215,7 +216,7 @@ export const useEditorToolStore = defineStore('editorToolStore', {
           (item) => ({
             ...item,
             change: (item.new_amount || 0) - (item.old_amount || 0),
-          })
+          }),
         )
       } catch (error) {
         console.error('Ошибка при загрузке истории движения:', error)
@@ -255,7 +256,7 @@ export const useEditorToolStore = defineStore('editorToolStore', {
         ...tool,
         ...Object.entries(tool.property).reduce(
           (acc, [key, { value }]) => ({ ...acc, [key]: value }),
-          {}
+          {},
         ),
       })),
     getIsLoading: (state) => state.isLoading,

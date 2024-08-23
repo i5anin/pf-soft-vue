@@ -85,7 +85,7 @@
 </template>
 
 <script>
-import EditorToolModal from './modal/Modal.vue'
+import EditorToolModal from './modal/ModalCart.vue'
 import ToolFilter from './filter/Filter.vue'
 import { useEditorToolStore } from '../piniaStore'
 import { getColorForGroup } from '@/utils/colorUtils'
@@ -147,7 +147,10 @@ export default {
         this.toolTableHeaders = [
           { title: '№', key: 'index', sortable: false },
           { title: 'Маркировка', key: 'name', sortable: false },
-          { title: 'Склад', key: 'sklad', sortable: false },
+          { title: '⭐Склад / Норма', key: 'sklad', sortable: false },
+          // { title: 'Норма', key: 'norma', sortable: false },
+          { title: 'Выдать', key: 'cart', sortable: false },
+          { title: 'Поврежден', key: 'damaged', sortable: false },
           { title: 'Норма', key: 'norma', sortable: false },
           ...(dynamicColumns && dynamicColumns.length > 0
             ? dynamicColumns.map(({ label: title, key }) => ({

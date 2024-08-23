@@ -118,7 +118,7 @@ export default {
 
     await this.updateUserInfo() // Получаем информацию о пользователе при создании компонента
     // Устанавливаем интервал для обновления каждые 5 секунд
-    this.refreshIntervalId = setInterval(this.updateUserInfo, 10000) ///TODO: ВРЕМЕННО
+    this.refreshIntervalId = setInterval(this.updateUserInfo, 20000) ///TODO: ВРЕМЕННО
   },
 
   beforeUnmount() {
