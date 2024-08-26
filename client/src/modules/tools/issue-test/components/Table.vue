@@ -1,7 +1,7 @@
 <template>
   <v-container>
-    <div class="text-right">
-      <v-btn color="blue" @click="onAddTool">
+    <div class='text-right'>
+      <v-btn color='blue' @click='onAddTool'>
         <template #prepend>
           <v-icon>mdi-file-plus</v-icon>
         </template>
@@ -9,76 +9,76 @@
       </v-btn>
     </div>
     <editor-tool-modal
-      v-if="openDialog"
-      :persistent="true"
-      :tool-id="editingToolId"
-      @canceled="onClosePopup"
-      @changes-saved="handleSaveChanges"
+      v-if='openDialog'
+      :persistent='true'
+      :tool-id='editingToolId'
+      @canceled='onClosePopup'
+      @changes-saved='handleSaveChanges'
     />
     <v-data-table-server
-      v-if="isDataLoaded"
-      no-data-text="Нет данных"
-      items-per-page-text="Пункты на странице:"
-      loading-text="Загрузка данных"
-      :headers="toolTableHeaders"
-      :items="formattedTools"
-      :items-length="totalToolsCount"
-      :items-per-page="itemsPerPage"
-      :page="currentPage"
-      :loading="isLoading"
-      :items-per-page-options="[15, 50, 100, 300]"
-      density="compact"
-      class="elevation-1 scrollable-table"
+      v-if='isDataLoaded'
+      no-data-text='Нет данных'
+      items-per-page-text='Пункты на странице:'
+      loading-text='Загрузка данных'
+      :headers='toolTableHeaders'
+      :items='formattedTools'
+      :items-length='totalToolsCount'
+      :items-per-page='itemsPerPage'
+      :page='currentPage'
+      :loading='isLoading'
+      :items-per-page-options='[15, 50, 100, 300]'
+      density='compact'
+      class='elevation-1 scrollable-table'
       hover
       fixed-header
       width
-      @update:page="handlePageChange"
-      @update:items-per-page="handleItemsPerPageChange"
-      @click:row="handleRowClick"
+      @update:page='handlePageChange'
+      @update:items-per-page='handleItemsPerPageChange'
+      @click:row='handleRowClick'
     >
-      <template #item.index="{ index }">
-        <td class="index">
+      <template #item.index='{ index }'>
+        <td class='index'>
           {{ calculateItemIndex(index) }}
         </td>
       </template>
-      <template #item.name="{ item }">
-        <td style="white-space: nowrap">
-          <span :class="{ grey: !item.sklad || item.sklad === 0 }">
+      <template #item.name='{ item }'>
+        <td style='white-space: nowrap'>
+          <span :class='{ grey: !item.sklad || item.sklad === 0 }'>
             {{ item.name }}
           </span>
           <v-chip
-            v-if="item.group_id"
-            size="x-small"
-            :color="getColorForGroup(item.group_id)"
+            v-if='item.group_id'
+            size='x-small'
+            :color='getColorForGroup(item.group_id)'
             :title="'Группа ' + item.group_id"
           >
-            <span v-if="item.group_standard" style="color: yellow">★</span>
+            <span v-if='item.group_standard' style='color: yellow'>★</span>
             G{{ item.group_id }}
           </v-chip>
         </td>
       </template>
-      <template #item.sklad="{ item }">
-        <td style="white-space: nowrap">
+      <template #item.sklad='{ item }'>
+        <td style='white-space: nowrap'>
           <v-chip :color="item.sklad === 0 ? 'red' : ''">
             {{ item.sklad }}
           </v-chip>
         </td>
       </template>
-      <template #item.norma="{ item }">
-        <td style="white-space: nowrap">
-          <span class="green" v-if="item.norma_green">
+      <template #item.norma='{ item }'>
+        <td style='white-space: nowrap'>
+          <span class='green' v-if='item.norma_green'>
             {{ item.norma_green }}
-            <span class="grey">|</span>
+            <span class='grey'>|</span>
           </span>
           {{ item.norma }}
-          <span class="red" v-if="item.norma_red">
-            <span class="grey">|</span>
+          <span class='red' v-if='item.norma_red'>
+            <span class='grey'>|</span>
             {{ item.norma_red }}
           </span>
         </td>
       </template>
-      <template #item.zakaz="{ item }">
-        <td style="white-space: nowrap">{{ calculateToolOrder(item) }}</td>
+      <template #item.zakaz='{ item }'>
+        <td style='white-space: nowrap'>{{ calculateToolOrder(item) }}</td>
       </template>
     </v-data-table-server>
   </v-container>
@@ -154,10 +154,10 @@ export default {
           { title: 'Норма', key: 'norma', sortable: false },
           ...(dynamicColumns && dynamicColumns.length > 0
             ? dynamicColumns.map(({ label: title, key }) => ({
-                title,
-                key,
-                sortable: false,
-              }))
+              title,
+              key,
+              sortable: false,
+            }))
             : []),
         ]
       },
@@ -190,7 +190,7 @@ export default {
         index +
         1 +
         (this.editorToolStore.getFilters.currentPage - 1) *
-          this.editorToolStore.getFilters.itemsPerPage
+        this.editorToolStore.getFilters.itemsPerPage
       )
     },
     calculateToolOrder(tool) {
