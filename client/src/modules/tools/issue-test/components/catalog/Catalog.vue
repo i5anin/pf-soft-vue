@@ -6,7 +6,8 @@
         <v-row>
           <v-col cols="12">
             <Breadcrumbs />
-            <div v-for="item in currentItems" :key="item.id">
+            <v-progress-linear v-if="editorToolStore.isLoading" indeterminate />
+            <div v-if="currentItems && !editorToolStore.isLoading" v-for="item in currentItems" :key="item.id">
               <CatalogItem :item="item" />
             </div>
           </v-col>
@@ -20,7 +21,7 @@
 import Folder from './EditFolder.vue'
 import Breadcrumbs from './Breadcrumbs.vue'
 import CatalogItem from './CatalogItem.vue'
-import { useEditorToolStore } from '@/modules/tools/editor/piniaStore'
+import { useEditorToolStore } from '../../store'
 
 export default {
   name: 'Catalog',

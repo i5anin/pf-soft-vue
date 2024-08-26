@@ -24,7 +24,7 @@
 
 <script>
 import { debounce } from 'lodash'
-import { useEditorToolStore } from '../../piniaStore'
+import { useEditorToolStore } from '../../store'
 import DynamicFilters from './DynamicFilters.vue'
 
 export default {

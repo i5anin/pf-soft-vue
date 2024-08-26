@@ -44,7 +44,7 @@ const tabs = [
     ico: 'mdi-list-status',
   },
   {
-    name: '222 Выдать / поврежден',
+    name: '⭐ Выдать / поврежден',
     url: '#issueT',
     component: markRaw(IssueCatalogT),
     access: ['Admin'],
