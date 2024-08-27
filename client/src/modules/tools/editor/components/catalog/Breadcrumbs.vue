@@ -7,27 +7,6 @@
       </span>
       <span v-if="index < getTree.length - 1">   /   </span>
     </span>
-
-    <!--    <div v-if="getCurrentItem && getCurrentItem.nodes">-->
-    <!--      <v-list-item-->
-    <!--        v-for="item in getCurrentItem.nodes"-->
-    <!--        :key="item.id"-->
-    <!--        class="align-center"-->
-    <!--        @click="selectItem(item)"-->
-    <!--      >-->
-    <!--        <div class="flex">-->
-    <!--          <v-icon :color="appColor" icon="mdi-folder" class="icon" />-->
-    <!--          <v-list-item-title :class="{ 'text-grey': item.totalElements === 0 }">-->
-    <!--            {{ item.label }}-->
-    <!--            <span v-if="item.elements !== 0" style="color: grey">-->
-    <!--              <v-chip variant="text">-->
-    <!--                {{ item.available }} / {{ item.elements }}-->
-    <!--              </v-chip>-->
-    <!--            </span>-->
-    <!--          </v-list-item-title>-->
-    <!--        </div>-->
-    <!--      </v-list-item>-->
-    <!--    </div>-->
   </div>
 </template>
 
