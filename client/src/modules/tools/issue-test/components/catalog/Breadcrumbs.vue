@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import { useEditorToolStore } from '@/modules/tools/editor/piniaStore'
+import { useEditorToolStore } from '../../piniaStore'
 import { appColor } from '@/utils/colorUtils'
 
 export default {
