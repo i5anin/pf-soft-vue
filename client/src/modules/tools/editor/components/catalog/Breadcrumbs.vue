@@ -38,9 +38,6 @@ export default {
     goTo(index) {
       this.editorToolStore.goToInTree(index)
     },
-    selectItem(item) {
-      this.editorToolStore.selectItemInTree(item)
-    },
   },
 }
 </script>

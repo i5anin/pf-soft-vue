@@ -59,6 +59,7 @@ export const useEditorToolStore = defineStore('editorToolStore', {
       }
     },
 
+
     goBackInTree() {
       if (this.tree.length > 1) {
         this.tree.pop()
@@ -220,14 +221,16 @@ export const useEditorToolStore = defineStore('editorToolStore', {
     },
 
     async fetchToolsData() {
-      // Новое action для одновременного вызова
       try {
-        await this.fetchToolsDynamicFilters()
-        await this.fetchToolsByFilter()
+        // Загрузите динамические фильтры и дождитесь завершения
+        await this.fetchToolsDynamicFilters();
+
+        // После загрузки динамических фильтров, загрузите инструменты
+        await this.fetchToolsByFilter();
       } catch (error) {
-        console.error('Ошибка при получении данных инструментов:', error)
+        console.error('Ошибка при получении данных инструментов:', error);
       }
-    },
+    }
   },
   getters: {
     getMovementHistoryByToolId: (state) => (toolId) =>

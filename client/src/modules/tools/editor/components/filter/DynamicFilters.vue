@@ -1,4 +1,5 @@
 <template>
+  {{ selectedValues }}
   <v-row
     v-for="(group, index) in filters"
     :key="`group-${index}`"
@@ -32,18 +33,17 @@ export default {
   },
   data() {
     return {
-      selectedValues: {}, // Храним выбранные значения фильтров
-    }
+      selectedValues: {}, // Храним выбранные значения в компоненте
+    };
   },
   methods: {
     updateFilterValue({ key, value }) {
       this.selectedValues = {
         ...this.selectedValues,
         [key]: value,
-      }
-      // Эмитим событие с обновленными фильтрами
-      this.$emit('filter-update', this.selectedValues)
+      };
+      this.$emit('filter-update', this.selectedValues);
     },
   },
-}
+};
 </script>

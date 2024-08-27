@@ -1,23 +1,24 @@
 <template>
-  <div class="pt-4">
-    <v-row v-if="hasDynamicFilters">
-      <v-col cols="12">
+  <div class='pt-4'>
+<!--    {{hasDynamicFilters}}-->
+    <v-row v-if='hasDynamicFilters'>
+      <v-col cols='12'>
         <v-text-field
-          v-model="searchQuery"
-          variant="outlined"
+          v-model='searchQuery'
+          variant='outlined'
           clearable
-          prepend-inner-icon="mdi-magnify"
-          label="Поиск по инструменту"
+          prepend-inner-icon='mdi-magnify'
+          label='Поиск по инструменту'
           hide-details
-          @input="debounceSearch"
+          @input='debounceSearch'
         />
       </v-col>
     </v-row>
 
     <DynamicFilters
-      v-if="hasDynamicFilters"
-      :filters="groupedFilters"
-      @filter-update="onParamsFilterUpdate"
+      v-if='hasDynamicFilters'
+      :filters='groupedFilters'
+      @filter-update='onParamsFilterUpdate'
     />
   </div>
 </template>
@@ -51,15 +52,12 @@ export default {
     hasDynamicFilters() {
       return this.editorToolStore.getDynamicFilters.length > 0 // Доступ к getter
     },
-    getIsLoading() {
-      return this.editorToolStore.getIsLoading
-    },
     getFilters() {
       return this.editorToolStore.getFilters
     },
   },
   methods: {
-    debounceSearch: debounce(function () {
+    debounceSearch: debounce(function() {
       this.editorToolStore.setSearch(this.searchQuery)
       this.fetchToolsByFilter()
     }, 500),
