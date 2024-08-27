@@ -1,6 +1,7 @@
 <template>
+  {{ selectedValues }}
   <v-row
-    v-for="(group, index) in groupedFilters"
+    v-for="(group, index) in filters"
     :key="`group-${index}`"
     cols="12"
     sm="6"
@@ -22,26 +23,23 @@
 </template>
 
 <script>
-import { useEditorToolStore } from '@/store/editorToolStore'; // Импортируйте ваш store
-
 export default {
   emits: ['filter-update'],
-  // Удаляем props: filters
+  props: {
+    filters: {
+      type: Array,
+      required: true,
+    },
+  },
   data() {
     return {
-      selectedValues: {},
-      editorToolStore: useEditorToolStore(), // Создаем экземпляр store
+      selectedValues: {}, // Храним выбранные значения в компоненте
     };
-  },
-  computed: {
-    groupedFilters() {
-      // Используем getter из стора
-      return this.editorToolStore.getGroupedFilters;
-    },
   },
   methods: {
     updateFilterValue({ key, value }) {
       this.selectedValues = {
+        ...this.selectedValues,
         [key]: value,
       };
       this.$emit('filter-update', this.selectedValues);
