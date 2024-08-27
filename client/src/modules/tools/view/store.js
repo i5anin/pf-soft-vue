@@ -17,7 +17,6 @@ export default {
       currentPage: 1,
       itemsPerPage: 15,
       search: '',
-      includeNull: false,
       selectedDynamicFilters: {},
     },
   }),
@@ -92,7 +91,6 @@ export default {
         currentPage,
         itemsPerPage,
         search, // Используем search из filters
-        includeNull,
         onlyInStock = null,
         selectedDynamicFilters,
       } = state.filters
@@ -102,7 +100,6 @@ export default {
       const params = new URLSearchParams({
         page: currentPage,
         limit: itemsPerPage,
-        includeNull: includeNull,
         onlyInStock: onlyInStock,
         search: search, // Используем search непосредственно для запроса
       })
@@ -113,7 +110,6 @@ export default {
           search,
           currentPage,
           itemsPerPage,
-          includeNull,
           parentId,
           onlyInStock,
           Object.entries(selectedDynamicFilters).reduce(

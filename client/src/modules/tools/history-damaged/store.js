@@ -23,7 +23,6 @@ export default {
       groups: [],
       materials: [],
       selectedParams: [],
-      includeNull: false,
     },
   }),
   mutations: {
@@ -67,7 +66,7 @@ export default {
 
     async fetchToolsByFilter({ commit, state }) {
       commit('setIsLoading', true)
-      const { currentPage, itemsPerPage, search, includeNull, selectedParams } =
+      const { currentPage, itemsPerPage, search, selectedParams } =
         state.filters
       const { id: parentId } = state.idParent
       try {
@@ -75,7 +74,6 @@ export default {
           search,
           currentPage,
           itemsPerPage,
-          includeNull,
           parentId,
           selectedParams
         )

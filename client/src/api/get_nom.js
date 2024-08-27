@@ -8,7 +8,6 @@ export const toolApi = {
    * @param search Поиск по ключевым словам.
    * @param page Номер страницы для пагинации.
    * @param limit Количество элементов на странице.
-   * @param includeNull  Включать ли в результаты элементы с нулевыми значениями.
    * @param parentId Идентификатор родительской категории.
    * @param onlyInStock Показывать только те элементы, которые есть в наличии.
    * @param filters Объект с дополнительными фильтрами.
@@ -17,7 +16,6 @@ export const toolApi = {
     search = '',
     page = 1,
     limit = 10,
-    includeNull = false,
     parentId = null,
     onlyInStock = true,
     filters = {}
@@ -27,7 +25,6 @@ export const toolApi = {
       search,
       page,
       limit,
-      includeNull,
       onlyInStock,
       parent_id: parentId,
       ...filters,

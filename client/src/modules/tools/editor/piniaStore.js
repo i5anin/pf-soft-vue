@@ -16,7 +16,6 @@ export const useEditorToolStore = defineStore('editorToolStore', {
       currentPage: 1,
       itemsPerPage: 15,
       search: '',
-      includeNull: false,
       onlyInStock: null,
       selectedDynamicFilters: {},
     },
@@ -120,7 +119,6 @@ export const useEditorToolStore = defineStore('editorToolStore', {
           currentPage,
           itemsPerPage,
           search,
-          includeNull,
           onlyInStock,
           selectedDynamicFilters,
         } = this.filters
@@ -130,7 +128,6 @@ export const useEditorToolStore = defineStore('editorToolStore', {
           search,
           currentPage,
           itemsPerPage,
-          includeNull,
           parentId,
           onlyInStock,
           Object.entries(selectedDynamicFilters).reduce(

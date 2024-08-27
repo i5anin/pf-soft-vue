@@ -19,10 +19,9 @@ export const issueHistoryApi = {
     search = '',
     page = 1,
     limit = 100,
-    includeNull = false,
     parentId = null
   ) => {
-    const params = { search, page, limit, includeNull }
+    const params = { search, page, limit }
     if (parentId !== null) params.parent_id = parentId
 
     return axiosInstance
