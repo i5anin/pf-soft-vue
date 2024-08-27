@@ -18,7 +18,7 @@
 
 <script>
 import { useAppColorStore } from '../../appColor' // Импорт стора appColor
-import { useEditorToolStore } from '../../store'
+import { useEditorToolStore } from '@/modules/tools/editor/piniaStore'
 
 export default {
   name: 'CatalogItem',

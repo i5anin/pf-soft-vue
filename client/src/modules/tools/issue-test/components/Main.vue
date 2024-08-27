@@ -2,8 +2,8 @@
   <div class="container">
     <Catalog />
 <!--    <span v-if="currentItem?.elements">-->
-<!--      <ToolFilter />-->
-<!--      <Table />-->
+      <ToolFilter />
+      <Table />
 <!--    </span>-->
   </div>
 </template>
@@ -12,7 +12,7 @@
 import Catalog from './catalog/Catalog.vue'
 import ToolFilter from './filter/Filter.vue'
 import Table from './Table.vue'
-import { useEditorToolStore } from '../store'
+import { useEditorToolStore } from '@/modules/tools/editor/piniaStore'
 
 export default {
   name: 'Main',

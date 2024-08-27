@@ -87,7 +87,7 @@
 <script>
 import EditorToolModal from './modal/ModalCart.vue'
 import ToolFilter from './filter/Filter.vue'
-import { useEditorToolStore } from '../store'
+import { useEditorToolStore } from '../piniaStore'
 import { getColorForGroup } from '@/utils/colorUtils'
 
 export default {

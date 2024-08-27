@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import { useEditorToolStore } from '../../store'
+import { useEditorToolStore } from '@/modules/tools/editor/piniaStore'
 import { toolTreeApi } from '@/modules/tools/tree/api/tree'
 
 export default {
