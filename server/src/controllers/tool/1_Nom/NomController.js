@@ -46,7 +46,7 @@ async function getTools(req, res) {
     let conditions = []
 
     if (search) {
-      conditions.push(`tool_nom.name ILIKE '%${search.replace(/'/g, '\'\'')}%'`)
+      conditions.push(`tool_nom.name ILIKE '%${search.replace(/'/g, "''")}%'`)
     }
 
     if (parent_id) {
@@ -61,7 +61,7 @@ async function getTools(req, res) {
       .filter(([key, value]) => key.startsWith('param_') && value)
       .map(([key, value]) => {
         const paramId = key.split('_')[1]
-        return `tool_nom.property ->> '${paramId}' = '${value.replace(/'/g, '\'\'')}'`
+        return `tool_nom.property ->> '${paramId}' = '${value.replace(/'/g, "''")}'`
       })
 
     conditions = [...conditions, ...dynamicParams]
@@ -70,26 +70,26 @@ async function getTools(req, res) {
       : ''
 
     const countQuery = `
-        SELECT COUNT(*)
-        FROM dbo.tool_nom as tool_nom
-            ${whereClause}
+      SELECT COUNT(*)
+      FROM dbo.tool_nom as tool_nom
+        ${whereClause}
     `
 
     const toolQuery = `
-        SELECT tool_nom.id,
-               tool_nom.name,
-               tool_nom.property,
-               COALESCE(tool_nom.sklad, 0) as sklad,
-               tool_nom.norma,
-               tool_nom.norma_green,
-               tool_nom.norma_red,
-               tool_nom.group_id,
-               tool_nom.group_standard
-        FROM dbo.tool_nom as tool_nom
-            ${whereClause}
-        ORDER BY
-            CASE WHEN tool_nom.sklad > 0 THEN 1 ELSE 2
-        END,
+      SELECT tool_nom.id,
+             tool_nom.name,
+             tool_nom.property,
+             COALESCE(tool_nom.sklad, 0) as sklad,
+             tool_nom.norma,
+             tool_nom.norma_green,
+             tool_nom.norma_red,
+             tool_nom.group_id,
+             tool_nom.group_standard
+      FROM dbo.tool_nom as tool_nom
+        ${whereClause}
+      ORDER BY
+        CASE WHEN tool_nom.sklad > 0 THEN 1 ELSE 2
+      END,
         tool_nom.name
       LIMIT ${limitNumber} OFFSET ${offset}
     `
@@ -127,7 +127,7 @@ async function getTools(req, res) {
             }
             return acc
           },
-          {},
+          {}
         )
       }
 
@@ -182,7 +182,7 @@ async function deleteTool(req, res) {
       `SELECT 1
        FROM dbo.tool_history_nom
        WHERE id_tool = $1`,
-      [id],
+      [id]
     )
 
     // Проверяем наличие инструмента в списке уничтоженных
@@ -190,7 +190,7 @@ async function deleteTool(req, res) {
       `SELECT 1
        FROM dbo.tool_history_damaged
        WHERE id_tool = $1`,
-      [id],
+      [id]
     )
 
     if (toolInIssueHistory.rowCount > 0 || toolInDamagedHistory.rowCount > 0) {
@@ -206,7 +206,7 @@ async function deleteTool(req, res) {
       `SELECT id
        FROM dbo.tool_nom
        WHERE id = $1`,
-      [id],
+      [id]
     )
 
     if (toolExists.rowCount > 0) {
@@ -214,7 +214,7 @@ async function deleteTool(req, res) {
         `DELETE
          FROM dbo.tool_nom
          WHERE id = $1`,
-        [id],
+        [id]
       )
       res.json({ success: 'OK' })
     } else {
@@ -266,7 +266,7 @@ async function addTool(req, res) {
     if (property && property.id) {
       const propertyIdCheckResult = await pool.query(
         'SELECT id FROM dbo.tool_params WHERE id = $1',
-        [property.id],
+        [property.id]
       )
 
       if (propertyIdCheckResult.rowCount === 0) {
@@ -278,7 +278,7 @@ async function addTool(req, res) {
 
     const parentCheckResult = await pool.query(
       'SELECT id FROM dbo.tool_tree WHERE id = $1',
-      [parent_id],
+      [parent_id]
     )
 
     if (parentCheckResult.rowCount === 0) {
@@ -293,13 +293,13 @@ async function addTool(req, res) {
     if (group_standard && group_id) {
       await pool.query(
         'UPDATE dbo.tool_nom SET group_standard = false WHERE group_id = $1',
-        [group_id],
+        [group_id]
       )
     }
 
     const toolInsertResult = await pool.query(
       'INSERT INTO dbo.tool_nom (name, parent_id, property, sklad, norma, group_id, group_standard, norma_red, norma_green) ' +
-      'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
+        'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
       [
         name,
         parent_id,
@@ -310,7 +310,7 @@ async function addTool(req, res) {
         group_standard,
         norma_red,
         norma_green,
-      ],
+      ]
     )
 
     const toolId = toolInsertResult.rows[0].id
@@ -319,13 +319,13 @@ async function addTool(req, res) {
     const logMessage = `Добавлен новый инструмент ID.`
     await pool.query(
       'INSERT INTO dbo.vue_log (message, tool_id, user_id, datetime_log, new_amount) VALUES ($1, $2, $3, NOW(), $4)',
-      [logMessage, toolId, userId, sklad], // Используем userId из токена
+      [logMessage, toolId, userId, sklad] // Используем userId из токена
     )
     // --- Конец логирования ---
 
     const newToolResult = await pool.query(
       'SELECT * FROM dbo.tool_nom WHERE id = $1',
-      [toolId],
+      [toolId]
     )
 
     if (newToolResult.rowCount > 0) {
@@ -378,7 +378,7 @@ async function editTool(req, res) {
     if (property && property.id) {
       const propertyIdCheckResult = await pool.query(
         'SELECT id FROM dbo.tool_params WHERE id = $1',
-        [property.id],
+        [property.id]
       )
 
       if (propertyIdCheckResult.rowCount === 0) {
@@ -390,7 +390,7 @@ async function editTool(req, res) {
 
     const parentCheckResult = await pool.query(
       'SELECT id FROM dbo.tool_tree WHERE id = $1',
-      [parent_id],
+      [parent_id]
     )
 
     if (parentCheckResult.rowCount === 0) {
@@ -411,7 +411,7 @@ async function editTool(req, res) {
 
     const currentSkladResult = await pool.query(
       'SELECT sklad FROM dbo.tool_nom WHERE id = $1',
-      [id],
+      [id]
     )
 
     if (currentSkladResult.rowCount === 0) {
@@ -427,7 +427,7 @@ async function editTool(req, res) {
     if (group_standard) {
       await pool.query(
         'UPDATE dbo.tool_nom SET group_standard=false WHERE group_id=$1 AND id<>$2',
-        [group_id, id],
+        [group_id, id]
       )
     }
 
@@ -449,13 +449,13 @@ async function editTool(req, res) {
         group_standard,
         norma_red,
         norma_green,
-      ],
+      ]
     )
 
     if (result.rowCount > 0) {
       await pool.query(
         'INSERT INTO dbo.vue_log (message, tool_id, user_id, datetime_log, old_amount, new_amount) VALUES ($1, $2, $3, NOW(), $4, $5)',
-        [`Обновлен ID инструмента`, id, userId, oldSklad, newSklad],
+        [`Обновлен ID инструмента`, id, userId, oldSklad, newSklad]
       )
 
       res.status(200).json({ success: 'OK', data: result.rows[0] })
@@ -474,10 +474,10 @@ async function getToolById(req, res) {
   try {
     // Запрос для получения данных инструмента и названия папки
     const toolQuery = `
-        SELECT dbo.tool_nom.*, dbo.tool_tree.name as folder_name
-        FROM dbo.tool_nom
-                 LEFT JOIN dbo.tool_tree ON dbo.tool_nom.parent_id = dbo.tool_tree.id
-        WHERE dbo.tool_nom.id = $1`
+      SELECT dbo.tool_nom.*, dbo.tool_tree.name as folder_name
+      FROM dbo.tool_nom
+             LEFT JOIN dbo.tool_tree ON dbo.tool_nom.parent_id = dbo.tool_tree.id
+      WHERE dbo.tool_nom.id = $1`
 
     const toolResult = await pool.query(toolQuery, [id])
 
@@ -486,10 +486,10 @@ async function getToolById(req, res) {
 
       // Запрос для проверки наличия записей в таблице vue_log для данного инструмента
       const logQuery = `
-          SELECT 1
-          FROM dbo.vue_log
-          WHERE tool_id = $1
-          LIMIT 1`
+        SELECT 1
+        FROM dbo.vue_log
+        WHERE tool_id = $1
+        LIMIT 1`
 
       const logResult = await pool.query(logQuery, [id])
 
@@ -538,7 +538,7 @@ async function filterParamsParentId(req, res) {
         acc[id] = { label, param_order }
         return acc
       },
-      {},
+      {}
     )
 
     // Запрос на получение свойств инструментов
@@ -550,8 +550,9 @@ async function filterParamsParentId(req, res) {
     // Проверяем, найден ли инструмент
     if (rows.length === 0) {
       return res.status(200).json({ // todo: возможно надо вернуть 404
-
-      })
+        message: 'Инструменты с указанным parent_id не найдены',
+        data: []
+      });
     }
 
     const paramsAggregation = {}
@@ -603,7 +604,7 @@ async function getToolNameId(req, res) {
   } catch (error) {
     console.error(
       'Ошибка при получении названий инструментов по parent_id:',
-      error,
+      error
     )
     res.status(500).send('Server error')
   }
