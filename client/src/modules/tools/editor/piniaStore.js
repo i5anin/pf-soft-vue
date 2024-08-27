@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { toolApi } from '@/api'
 import { toolTreeApi } from '@/modules/tools/tree/api/tree'
-import { editorToolApi } from '@/modules/tools/editor/api/editor'
 
 export const useEditorToolStore = defineStore('editorToolStore', {
   state: () => ({
@@ -22,6 +21,7 @@ export const useEditorToolStore = defineStore('editorToolStore', {
     movements: [],
     tree: [],
     currentItem: null,
+    groupedFilters: [], // Добавляем groupedFilters в state
   }),
   actions: {
     async fetchTree() {
@@ -59,13 +59,20 @@ export const useEditorToolStore = defineStore('editorToolStore', {
       }
     },
 
-
-    goBackInTree() {
+    async goBackInTree() {
       if (this.tree.length > 1) {
         this.tree.pop()
         this.currentItem = this.tree[this.tree.length - 1]
         this.parentCatalog.id = this.currentItem.id
-        this.fetchToolsData()
+
+        // Сбрасываем фильтры и groupedFilters:
+        this.setSelectedDynamicFilters({})
+        this.clearGroupedFilters()
+
+        // Обновляем dynamicFilters и groupedFilters:
+        await this.fetchToolsDynamicFilters()
+
+        await this.fetchToolsData()
       }
     },
 
@@ -87,7 +94,6 @@ export const useEditorToolStore = defineStore('editorToolStore', {
     async fetchToolById(id) {
       try {
         this.tool = await toolApi.getToolById(id)
-        // Загружаем историю движения после получения данных инструмента
         await this.fetchMovementHistory(id)
       } catch (error) {
         console.error('Ошибка при загрузке инструмента:', error)
@@ -104,9 +110,12 @@ export const useEditorToolStore = defineStore('editorToolStore', {
         const dynamicFilters = await toolApi.filterParamsByParentId(id)
         this.filters.selectedDynamicFilters = dynamicFilters.reduce(
           (acc, { key }) => ({ ...acc, [key]: null }),
-          {}
+          {},
         )
         this.dynamicFilters = dynamicFilters
+
+        // Группируем фильтры:
+        this.groupedFilters = this.groupFilters(dynamicFilters)
       } catch (e) {
         console.error('Ошибка при загрузке динамических фильтров:', e)
       }
@@ -133,8 +142,8 @@ export const useEditorToolStore = defineStore('editorToolStore', {
           onlyInStock,
           Object.entries(selectedDynamicFilters).reduce(
             (acc, [key, value]) => ({ ...acc, [`param_${key}`]: value }),
-            {}
-          )
+            {},
+          ),
         )
 
         this.tools = tools
@@ -183,10 +192,20 @@ export const useEditorToolStore = defineStore('editorToolStore', {
       this.filters.itemsPerPage = itemsPerPage
     },
 
-    setToolsTotalCount(toolTotalCount) {
-      this.toolsTotalCount = toolTotalCount
+    // Action для очистки groupedFilters:
+    clearGroupedFilters() {
+      this.groupedFilters = []
     },
 
+    // Функция для группировки фильтров:
+    groupFilters(filters) {
+      const filtersPerRow = 4
+      const result = []
+      for (let i = 0; i < filters.length; i += filtersPerRow) {
+        result.push(filters.slice(i, i + filtersPerRow))
+      }
+      return result
+    },
     setTools(tools) {
       this.tools = tools
     },
@@ -205,7 +224,6 @@ export const useEditorToolStore = defineStore('editorToolStore', {
       }
       this.fetchToolsData()
     },
-
     // Action для загрузки истории движения инструмента
     async fetchMovementHistory(toolId) {
       try {
@@ -231,6 +249,7 @@ export const useEditorToolStore = defineStore('editorToolStore', {
         console.error('Ошибка при получении данных инструментов:', error);
       }
     }
+
   },
   getters: {
     getMovementHistoryByToolId: (state) => (toolId) =>
@@ -263,5 +282,10 @@ export const useEditorToolStore = defineStore('editorToolStore', {
     getToolsTotalCount: (state) => state.toolsTotalCount,
     getCurrentItem: (state) => state.currentItem,
     getTree: (state) => state.tree,
+
+    // Getter для groupedFilters:
+    getGroupedFilters(state) {
+      return state.groupedFilters
+    },
   },
 })

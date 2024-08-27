@@ -1,6 +1,5 @@
 <template>
   <div class='pt-4'>
-<!--    {{hasDynamicFilters}}-->
     <v-row v-if='hasDynamicFilters'>
       <v-col cols='12'>
         <v-text-field
@@ -15,11 +14,7 @@
       </v-col>
     </v-row>
 
-    <DynamicFilters
-      v-if='hasDynamicFilters'
-      :filters='groupedFilters'
-      @filter-update='onParamsFilterUpdate'
-    />
+    <DynamicFilters @filter-update='onParamsFilterUpdate' />
   </div>
 </template>
 
@@ -54,6 +49,12 @@ export default {
     },
     getFilters() {
       return this.editorToolStore.getFilters
+    },
+  },
+  watch: {
+    'editorToolStore.parentCatalog.id': function() {
+      // Вызываем clearGroupedFilters() при изменении папки
+      this.editorToolStore.clearGroupedFilters()
     },
   },
   methods: {
