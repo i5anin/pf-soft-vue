@@ -231,7 +231,7 @@ import ToolMovementModal from './MovementModal.vue'
 import Modal from '@/modules/tools/shared/components/Modal.vue'
 import { getToolParams } from '@/api'
 import { editorToolApi } from '../../api/editor'
-import { useEditorToolStore } from '@/modules/tools/editor/piniaStore'
+import { useEditorToolStore } from '../../piniaStore'
 
 export default {
   name: 'FillingModal',

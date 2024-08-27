@@ -12,7 +12,7 @@
 import Catalog from './catalog/Catalog.vue'
 import ToolFilter from './filter/Filter.vue'
 import Table from './Table.vue'
-import { useEditorToolStore } from '@/modules/tools/editor/piniaStore'
+import { useEditorToolStore } from '../piniaStore'
 
 export default {
   name: 'Main',
