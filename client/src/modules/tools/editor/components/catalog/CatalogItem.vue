@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import { useAppColorStore } from '../../appColor' // Импорт стора appColor
+import { appColor } from '@/utils/colorUtils'
 import { useEditorToolStore } from '../../piniaStore'
 
 export default {
@@ -29,7 +29,7 @@ export default {
     },
   },
   setup() {
-    const appColorStore = useAppColorStore()
+    const appColorStore = appColor()
     return { appColor: appColorStore.color } // Используйте appColor из стора
   },
   methods: {
