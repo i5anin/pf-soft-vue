@@ -549,7 +549,10 @@ async function filterParamsParentId(req, res) {
 
     // Проверяем, найден ли инструмент
     if (rows.length === 0) {
-      return res.status(404).json({ error: 'Инструмент не найден' })
+      return res.status(200).json({ // todo: возможно надо вернуть 404
+        message: 'Инструменты с указанным parent_id не найдены',
+        data: []
+      });
     }
 
     const paramsAggregation = {}

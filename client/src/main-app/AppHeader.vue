@@ -60,7 +60,7 @@
       </div>
 
       <v-chip v-if='userInfo.user' class='ma-2' label dark :color="userInfo.role === 'Editor' ? 'red' : ''"
-              :variant="userInfo.role === 'Editor' ? 'flat' : ''">
+              :variant="userInfo.role === 'Editor' ? 'flat' : 'text'">
         <template #prepend>
           <v-icon icon='mdi-account' start />
         </template>
