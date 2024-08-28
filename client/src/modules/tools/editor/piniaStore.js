@@ -105,7 +105,8 @@ export const useEditorToolStore = defineStore('editorToolStore', {
         )
         this.dynamicFilters = dynamicFilters
       } catch (e) {
-        // console.error('Ошибка при загрузке динамических фильтров:', e)
+        console.error('Ошибка при загрузке динамических фильтров:', e)
+        this.dynamicFilters = [];
       }
     },
 
