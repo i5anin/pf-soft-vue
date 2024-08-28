@@ -1,6 +1,5 @@
 <template>
   <div class='pt-4'>
-<!--    {{hasDynamicFilters}}-->
     <v-row v-if='hasDynamicFilters'>
       <v-col cols='12'>
         <v-text-field
@@ -18,7 +17,7 @@
     <DynamicFilters
       v-if='hasDynamicFilters'
       :filters='groupedFilters'
-      @filter-update='onParamsFilterUpdate'
+      @filter-update='updateFiltersAndFetch'
     />
   </div>
 </template>
@@ -29,9 +28,7 @@ import { useEditorToolStore } from '../../piniaStore'
 import DynamicFilters from './DynamicFilters.vue'
 
 export default {
-  components: {
-    DynamicFilters,
-  },
+  components: { DynamicFilters },
   data() {
     return {
       searchQuery: '',
@@ -62,7 +59,8 @@ export default {
       this.fetchToolsByFilter()
     }, 500),
 
-    onParamsFilterUpdate(updatedFilters) {
+    updateFiltersAndFetch(updatedFilters) {
+      console.log('[ToolSearch] Обновление фильтров...', updatedFilters)
       this.editorToolStore.setSelectedDynamicFilters({
         ...this.getFilters.selectedDynamicFilters,
         ...updatedFilters,
@@ -71,14 +69,17 @@ export default {
     },
 
     fetchToolsByFilter() {
+      console.log('[store] Вызываем метод для получения инструментов')
       this.editorToolStore.fetchToolsByFilter()
     },
 
     async fetchToolsDynamicFilters() {
+      console.log('[store] Получаем динамические фильтры для инструментов.')
       await this.editorToolStore.fetchToolsDynamicFilters()
     },
   },
   async mounted() {
+    console.log('ToolSearch: Загружаем динамические фильтры...')
     await this.fetchToolsDynamicFilters()
   },
 }

@@ -96,23 +96,21 @@ export const useEditorToolStore = defineStore('editorToolStore', {
 
     async fetchToolsDynamicFilters() {
       const { id = null } = this.parentCatalog
-      if (id === null) {
-        return
-      }
-
+      if (id === null) return
       try {
         const dynamicFilters = await toolApi.filterParamsByParentId(id)
         this.filters.selectedDynamicFilters = dynamicFilters.reduce(
           (acc, { key }) => ({ ...acc, [key]: null }),
-          {}
+          {},
         )
         this.dynamicFilters = dynamicFilters
       } catch (e) {
-        console.error('Ошибка при загрузке динамических фильтров:', e)
+        // console.error('Ошибка при загрузке динамических фильтров:', e)
       }
     },
 
     async fetchToolsByFilter() {
+      console.log('[store] fetchToolsByFilter Получение инструментов с возможностью фильтрации')
       this.isLoading = true
       this.tools = []
       try {
@@ -133,8 +131,8 @@ export const useEditorToolStore = defineStore('editorToolStore', {
           onlyInStock,
           Object.entries(selectedDynamicFilters).reduce(
             (acc, [key, value]) => ({ ...acc, [`param_${key}`]: value }),
-            {}
-          )
+            {},
+          ),
         )
 
         this.tools = tools
@@ -213,7 +211,7 @@ export const useEditorToolStore = defineStore('editorToolStore', {
           (item) => ({
             ...item,
             change: (item.new_amount || 0) - (item.old_amount || 0),
-          })
+          }),
         )
       } catch (error) {
         console.error('Ошибка при загрузке истории движения:', error)
@@ -223,14 +221,14 @@ export const useEditorToolStore = defineStore('editorToolStore', {
     async fetchToolsData() {
       try {
         // Загрузите динамические фильтры и дождитесь завершения
-        await this.fetchToolsDynamicFilters();
+        await this.fetchToolsDynamicFilters()
 
         // После загрузки динамических фильтров, загрузите инструменты
-        await this.fetchToolsByFilter();
+        await this.fetchToolsByFilter()
       } catch (error) {
-        console.error('Ошибка при получении данных инструментов:', error);
+        console.error('Ошибка при получении данных инструментов:', error)
       }
-    }
+    },
   },
   getters: {
     getMovementHistoryByToolId: (state) => (toolId) =>
@@ -255,7 +253,7 @@ export const useEditorToolStore = defineStore('editorToolStore', {
         ...tool,
         ...Object.entries(tool.property).reduce(
           (acc, [key, { value }]) => ({ ...acc, [key]: value }),
-          {}
+          {},
         ),
       })),
     getIsLoading: (state) => state.isLoading,
