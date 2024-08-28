@@ -25,6 +25,8 @@ const reportRevisionController = require('./controllers/tool/ReportsEmail/Revisi
 const reportVueZakazController = require('./controllers/tool/9_ReportsVue/OrderTools/OrderToolsController')
 const reportVueBuhController = require('./controllers/tool/9_ReportsVue/BuchWeekController')
 
+const reportComingTool = require('./controllers/tool/10_ReportsVue/ComingеToolController')
+
 const groupsController = require('./controllers/tool/3_Group/GroupController')
 
 // 'Аутентификация'
@@ -112,5 +114,8 @@ router.get('/report/red-alert', reportRedAlertController.genRedAlert) //в ре�
 // "Vue"
 router.get('/report/get-zakaz', reportVueZakazController.getTableReportData) // заявка на инструмент	раз в неделю каждый ЧТ в 12:00 (за неделю)
 router.get('/report/getBuchWeek', reportVueBuhController.getTableReportData) //❓ бухгалтерию исключен сломанный	раз в неделю каждый ПТ в 12:00 (за неделю)
+
+// "Vue"
+router.get('/report/coming', reportComingTool.getComingTool)
 
 module.exports = router
