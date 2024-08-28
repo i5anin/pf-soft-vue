@@ -177,6 +177,7 @@ export default {
         commit('setDynamicFilters', dynamicFilters)
       } catch (e) {
         console.error('Ошибка при загрузке динамических фильтров:', e)
+        commit('setDynamicFilters', []);
       }
     },
 
