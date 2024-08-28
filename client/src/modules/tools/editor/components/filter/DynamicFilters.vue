@@ -1,5 +1,5 @@
 <template>
-  {{ selectedValues }}
+  selectedValues = {{ selectedValues }}
   <v-row
     v-for="(group, index) in filters"
     :key="`group-${index}`"
