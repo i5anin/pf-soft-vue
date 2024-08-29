@@ -7,6 +7,7 @@ import ToolTabParam from '@/modules/tools/params/components/Param.vue'
 import ToolTabGroup from '@/modules/tools/groups/components/Groups.vue'
 import ToolTabTree from '@/modules/tools/tree/components/Tree.vue'
 import Report from '@/modules/tools/report-zakaz/components/ReportSending.vue'
+import AddingTable from '@/modules/tools/history-adding/components/Table.vue'
 
 import EditorCatalog from '@/modules/tools/editor/components/EditorPanel.vue'
 import IssueCatalog from '@/modules/tools/issue/components/Catalog.vue'
@@ -43,13 +44,13 @@ const tabs = [
     access: ['Admin', 'Editor', 'Issue'],
     ico: 'mdi-list-status',
   },
-  {
-    name: '222 Выдать / поврежден',
-    url: '#issueT',
-    component: markRaw(IssueCatalogT),
-    access: ['Admin'],
-    ico: 'mdi-list-status',
-  },
+  // {
+  //   name: '222 Выдать / поврежден',
+  //   url: '#issueT',
+  //   component: markRaw(IssueCatalogT),
+  //   access: ['Admin'],
+  //   ico: 'mdi-list-status',
+  // },
   {
     name: 'История выдачи',
     url: '#history_issue',
@@ -84,6 +85,13 @@ const tabs = [
     component: markRaw(Report),
     access: ['Admin', 'Editor', 'Issue'],
     ico: 'mdi-package-variant',
+  },
+  {
+    name: 'Приход',
+    url: '#adding',
+    component: markRaw(AddingTable),
+    access: ['Admin', 'Editor'],
+    ico: 'mdi-history',
   },
   // {
   //   name: 'Отчёт бухгалтерия',

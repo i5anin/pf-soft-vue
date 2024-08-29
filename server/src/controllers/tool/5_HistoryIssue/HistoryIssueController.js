@@ -130,20 +130,20 @@ async function getToolMovementById(req, res) {
 
   try {
     const query = `
-      SELECT "l".id     AS log_id,
-             "l".message,
-             "l".datetime_log,
-             "l".new_amount,
-             "l".old_amount,
-             "tn".name  AS tool_name,
-             "vu".login AS user_login,
-             "tn".id    AS tool_nom_id,
-             "vu".id    AS vue_users_id
-      FROM "dbo"."vue_log" "l"
-             LEFT JOIN "dbo"."tool_nom" "tn" ON "l".tool_id = "tn".id
-             LEFT JOIN "dbo"."vue_users" "vu" ON "l".user_id = "vu".id
-      WHERE "l".tool_id = $1
-      ORDER BY "l".datetime_log DESC;
+        SELECT
+            vue_log.id AS log_id,
+            vue_log.message,
+            vue_log.datetime_log,
+            vue_log.new_amount,
+            vue_log.old_amount,
+            tool_nom.name AS tool_name,
+            vue_users.login AS user_login
+        FROM dbo.vue_log
+                 LEFT JOIN dbo.tool_nom ON vue_log.tool_id = tool_nom.id
+                 LEFT JOIN dbo.vue_users ON vue_log.user_id = vue_users.id
+        WHERE vue_log.tool_id = $1
+          AND vue_log.new_amount <> vue_log.old_amount -- Исключаем строки, где new_amount = old_amount
+        ORDER BY vue_log.datetime_log DESC;
     `
 
     const result = await pool.query(query, [toolId])

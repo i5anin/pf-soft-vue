@@ -115,7 +115,8 @@ router.get('/report/red-alert', reportRedAlertController.genRedAlert) //в ре�
 router.get('/report/get-zakaz', reportVueZakazController.getTableReportData) // заявка на инструмент	раз в неделю каждый ЧТ в 12:00 (за неделю)
 router.get('/report/getBuchWeek', reportVueBuhController.getTableReportData) //❓ бухгалтерию исключен сломанный	раз в неделю каждый ПТ в 12:00 (за неделю)
 
-// "Vue"
+// "Приход"
 router.get('/report/coming', reportComingTool.getComingTool)
+router.get('/report/data-coming', reportComingTool.getComingToolDates)
 
 module.exports = router
