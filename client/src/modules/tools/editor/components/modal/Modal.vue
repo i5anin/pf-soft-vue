@@ -200,12 +200,13 @@
               </v-col>
               <v-col cols='4'>
                 <v-btn
-                  color='yellow'
-                  @click='applyIncoming'
-                  :disabled='!toolModel.incoming'
+                  :color="toolModel.incoming ? 'yellow' : null"
+                  @click="applyIncoming"
+                  :disabled="!toolModel.incoming"
                 >
                   Внести
                 </v-btn>
+
               </v-col>
             </v-row>
           </v-col>
@@ -235,7 +236,7 @@
       <v-btn
         prepend-icon='mdi-check'
         class='text-none text-subtitle-1 pl-3'
-        color='green'
+        :color="!toolModel.incoming ? 'green' : null"
         size='large'
         variant='flat'
         @click='onSave'
