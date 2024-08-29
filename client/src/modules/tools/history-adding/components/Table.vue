@@ -62,7 +62,7 @@ export default {
   emits: ['error'],
   data() {
     return {
-      selectedDate: '',
+      selectedDate: null,
       dateOptions: [],
       filters: { itemsPerPage: 15, currentPage: 1 },
       isLoading: false,
