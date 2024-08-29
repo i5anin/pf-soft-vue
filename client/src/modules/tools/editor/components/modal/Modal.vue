@@ -132,7 +132,7 @@
 
             <v-divider class='my-1' />
             <v-row>
-              <v-col cols='3'>
+              <v-col cols='4'>
                 <v-text-field
                   :disabled='toolModel.group_id && !toolModel.group_standard'
                   v-model='toolModel.norma_green'
@@ -146,7 +146,7 @@
                   </template>
                 </v-text-field>
               </v-col>
-              <v-col cols='3'>
+              <v-col cols='4'>
                 <v-text-field
                   :disabled='toolModel.group_id && !toolModel.group_standard'
                   v-model='toolModel.norma'
@@ -160,7 +160,7 @@
                   </template>
                 </v-text-field>
               </v-col>
-              <v-col cols='3'>
+              <v-col cols='4'>
                 <v-text-field
                   :disabled='toolModel.group_id && !toolModel.group_standard'
                   v-model='toolModel.norma_red'
@@ -175,14 +175,34 @@
                   </template>
                 </v-text-field>
               </v-col>
-              <v-col cols='3'>
+
+            </v-row>
+            <v-row>
+              <v-col cols='4'>
                 <v-text-field
                   append-inner-icon='mdi-package'
+                  :disabled='true'
                   v-model='toolModel.sklad'
                   type='number'
                   label='Склад'
                   required
                 />
+              </v-col>
+              <v-col cols='4'>
+                <v-text-field
+                  append-inner-icon='mdi-package-down'
+                  v-model='toolModel.incoming'
+                  type='number'
+                  label='Приход'
+                  required
+                />
+              </v-col>
+              <v-col cols='4'>
+                <v-btn
+                  color='yellow'
+                  @click="applyIncoming">
+                  Внести
+                </v-btn>
               </v-col>
             </v-row>
           </v-col>
@@ -246,6 +266,7 @@ export default {
       mov_history: false,
       showMovementModal: false,
       tempParentId: null,
+      initialSklad: null,
       snackbar: {
         show: false,
         color: 'error',
@@ -257,6 +278,7 @@ export default {
         group_id: null,
         group_standard: null,
         sklad: null,
+        incoming: null,
         norma: null,
         norma_green: null,
         norma_red: null,
@@ -332,6 +354,13 @@ export default {
     await this.initializeToolModel()
   },
   methods: {
+    applyIncoming() {
+      this.toolModel.sklad = (Number(this.toolModel.sklad) || 0) + (Number(this.toolModel.incoming) || 0);
+      this.toolModel.incoming = null;
+    },
+    updateSklad() {
+      this.toolModel.sklad = Number(this.initialSklad || 0) + Number(this.toolModel.incoming || 0)
+    },
     async fetchToolData() {
       if (!this.currentItem) return
       await this.fetchToolParamsByParentId(this.currentItem.id)
@@ -460,25 +489,19 @@ export default {
         editToken: token,
       }
       try {
-        let response
-        if (this.toolId) {
-          response = await editorToolApi.updateTool(this.toolId, toolDataToSend)
-        } else {
-          response = await editorToolApi.addTool(toolDataToSend)
-        }
+        const response = await editorToolApi.saveTool(toolDataToSend)
         if (response.success === 'OK') {
           this.$emit('changes-saved')
         }
       } catch (error) {
-        console.error(
-          'Ошибка при сохранении:',
-          error.response ? error.response.data : error,
-        )
+        console.error('Ошибка при сохранении инструмента:', error)
+        this.showErrorSnackbar('Ошибка при сохранении данных.')
       }
     },
   },
 }
 </script>
+
 <style scoped>
 .delete-icon:hover .v-icon {
   color: red;
