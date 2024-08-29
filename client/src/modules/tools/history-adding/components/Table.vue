@@ -35,6 +35,9 @@
       @update:page='onChangePage'
       @update:items-per-page='onUpdateItemsPerPage'
     >
+      <template #item.index='{ index }'>
+        <td style='color: grey;'>{{ calculateItemIndex(index) }}</td>
+      </template>
       <template #item.datetime_log='{ item }'>
         <td>{{ formatDate(item.datetime_log) }}</td>
       </template>
@@ -67,16 +70,25 @@ export default {
       totalCount: 0,
       headers: [
         {
+          title: '№',
+          value: 'index',
+          sortable: false,
+          width: '50px',
+        },
+        {
           title: 'Дата и время',
           value: 'datetime_log',
           sortable: false,
         },
         { title: 'Инструмент', value: 'tool_name', sortable: false },
-        { title: 'Пользователь', value: 'user_name', sortable: false },
         {
           title: 'Приход',
           value: 'coming',
           sortable: false,
+        },
+        {
+          title: 'Пользователь', value: 'user_name', sortable: false,
+          width: '150px',
         },
       ],
     }
@@ -86,6 +98,9 @@ export default {
     await this.fetchComingTools()
   },
   methods: {
+    calculateItemIndex(index) {
+      return (this.filters.currentPage - 1) * this.filters.itemsPerPage + index + 1
+    },
     async fetchDateOptions() {
       this.isLoading = true
 
