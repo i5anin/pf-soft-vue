@@ -48,7 +48,7 @@
         </template>
         <template
           v-if="
-              item.norma >= item.sklad &&
+          item.norma >= item.sklad &&
               groupPath.includes('Пластины') &&
               item.zakaz !== 0 &&
               item.zakaz !== getRoundedCount(item.zakaz)
@@ -60,6 +60,7 @@
       <td class='grey'>
         {{ item.group_sklad ? `*${item.group_sklad}` : item.sklad }}
       </td>
+
       <td class='grey'>
         <span v-if='item.norma_green'>{{ item.norma_green }} | </span>
         {{ item.norma }}
@@ -75,7 +76,11 @@
         </v-chip>
       </td>
       <td style='text-align: center'>
-        <v-btn size='small' icon='mdi mdi-history' @click='openToolHistory(item.id)' />
+        <v-btn
+          size='small'
+          icon='mdi mdi-history'
+          :disabled='!item.mov_history'
+        />
       </td>
     </tr>
     </tbody>
@@ -83,16 +88,22 @@
 </template>
 
 <script>
+import Modal from './modal/MovementModal.vue'
 import ZakazToolModal from '@/modules/tools/view/components/Modal.vue'
-import { getColorForGroup, getHexColor } from '@/utils/colorUtils'
+import { getHexColor, getColorForGroup } from '@/utils/colorUtils';
 
 export default {
-  components: { ZakazToolModal },
-  emits: ['row-click'], // Объявляем, что компонент испускает событие 'row-click'
+  components: { ZakazToolModal, Modal },
   data() {
     return {
+      toolGroups: [],
+      visibleGroups: [],
       editingToolId: null,
       openDialog: false,
+      isAllVisible: false,
+      mov_history: false,
+      status_color: false,
+      missing_percent: false,
       toolTableHeaders: [
         { title: '№', key: 'index', width: '50px' },
         { title: 'Название', key: 'name' },
@@ -126,12 +137,16 @@ export default {
         ? Math.floor(count / 10) * 10
         : Math.ceil(count / 10) * 10
     },
-    openToolHistory(toolId) {
-      // При клике на кнопку "История" сохраняем ID инструмента
-      // и открываем модальное окно
-      this.editingToolId = toolId
-      this.openDialog = true
-    },
   },
 }
 </script>
+
+<style>
+.grey {
+  color: grey;
+}
+
+.tool-group + .tool-group {
+  margin-top: 10px;
+}
+</style>

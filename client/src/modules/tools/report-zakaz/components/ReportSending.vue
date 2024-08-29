@@ -1,36 +1,36 @@
 <template>
   <v-container>
-    <v-row v-if='hasAccess'>
-      <v-col cols='12'>
+    <v-row v-if="hasAccess">
+      <v-col cols="12">
         <v-table>
           <thead>
-          <tr>
-            <th class='text-left'>Название</th>
-            <th class='text-left'>Информация</th>
-            <th class='text-left'>На почту</th>
-          </tr>
+            <tr>
+              <th class="text-left">Название</th>
+              <th class="text-left">Информация</th>
+              <th class="text-left">На почту</th>
+            </tr>
           </thead>
           <tbody>
-          <tr v-for='(report, index) in reports' :key='index'>
-            <td>{{ report.name }}</td>
-            <td>{{ report.info }}</td>
-            <td>
-              <v-btn
-                :color='appColor()'
-                :loading='report.loading'
-                :disabled='report.loading'
-                @click='sendEmailReport(report)'
-              >
-                Email
-              </v-btn>
-            </td>
-          </tr>
+            <tr v-for="(report, index) in reports" :key="index">
+              <td>{{ report.name }}</td>
+              <td>{{ report.info }}</td>
+              <td>
+                <v-btn
+                  :color="appColor()"
+                  :loading="report.loading"
+                  :disabled="report.loading"
+                  @click="sendEmailReport(report)"
+                >
+                  Email
+                </v-btn>
+              </td>
+            </tr>
           </tbody>
         </v-table>
       </v-col>
     </v-row>
   </v-container>
-  <ReportZakaz @row-click='openToolHistoryModal' />
+  <ReportZakaz />
 </template>
 
 <script>
@@ -54,29 +54,32 @@ export default {
           info: 'весь инструмент',
           action: this.genRevisionInstrWeek,
         },
+
         {
           name: 'По наладкам',
           info: 'Дополнительно',
           action: this.genNalad,
         },
       ],
-      hasAccess: false,
-      selectedToolId: null, // Добавьте свойство для хранения ID выбранного инструмента
+      hasAccess: false, // Флаг для проверки прав доступа
     }
   },
   mounted() {
+    // Проверяем права доступа
     this.checkLogin()
   },
   methods: {
     appColor,
     async sendEmailReport(report) {
-      report.loading = true
+      report.loading = true // Начинаем анимацию загрузки и блокируем кнопку
       try {
-        await report.action()
+        await report.action() // Вызываем соответствующую функцию генерации отчета
+        // Дополнительные действия после успешной отправки, например, сообщение об успехе
       } catch (error) {
         console.error('Ошибка при отправке отчета:', error)
+        // Обработка ошибки, например, сообщение об ошибке
       } finally {
-        report.loading = false
+        report.loading = false // Останавливаем анимацию и разблокируем кнопку
       }
     },
     async genNalad() {
@@ -91,6 +94,7 @@ export default {
         console.error('Error while generating report:', error)
       }
     },
+
     async genZayavInstrWeek() {
       const token = localStorage.getItem('token')
       if (!token) {
@@ -118,6 +122,7 @@ export default {
     async checkLogin() {
       const token = localStorage.getItem('token')
       if (!token) {
+        // Если токена нет, пользователь не авторизован, доступ запрещен
         this.hasAccess = false
         return
       }
@@ -125,20 +130,17 @@ export default {
         const response = await authApi.checkLogin(token)
         if (response.status === 'ok') {
           this.userRole = response.role
+          // Проверяем роль и устанавливаем hasAccess в true, если это необходимо
           this.hasAccess =
             this.userRole === 'Editor' || this.userRole === 'Admin'
         } else {
+          // Если checkLogin вернул ошибку или не 'ok', доступ запрещен
           this.hasAccess = false
         }
       } catch (error) {
         console.error('Ошибка при проверке логина:', error)
-        this.hasAccess = false
+        this.hasAccess = false // В случае ошибки доступ запрещен
       }
-    },
-    openToolHistoryModal(tool) {
-      // Здесь вы можете открыть модальное окно и передать tool.id в него
-      this.selectedToolId = tool.id
-      // Например: this.$refs.yourModal.openModal(tool.id);
     },
   },
 }
