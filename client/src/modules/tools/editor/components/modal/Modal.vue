@@ -195,12 +195,15 @@
                   type='number'
                   label='Приход'
                   required
+                  clearable
                 />
               </v-col>
               <v-col cols='4'>
                 <v-btn
                   color='yellow'
-                  @click="applyIncoming">
+                  @click='applyIncoming'
+                  :disabled='!toolModel.incoming'
+                >
                   Внести
                 </v-btn>
               </v-col>
@@ -215,6 +218,7 @@
         variant='text'
         class='text-none text-subtitle-1 ml-3'
         @click='confirmDelete'
+        :disabled='toolModel.incoming'
       >
         Удалить
       </v-btn>
@@ -224,6 +228,7 @@
         variant='text'
         class='text-none text-subtitle-1 ml-3'
         @click='onCancel'
+        :disabled='toolModel.incoming'
       >
         Закрыть
       </v-btn>
@@ -234,6 +239,7 @@
         size='large'
         variant='flat'
         @click='onSave'
+        :disabled='toolModel.incoming'
       >
         Сохранить
       </v-btn>
@@ -355,8 +361,8 @@ export default {
   },
   methods: {
     applyIncoming() {
-      this.toolModel.sklad = (Number(this.toolModel.sklad) || 0) + (Number(this.toolModel.incoming) || 0);
-      this.toolModel.incoming = null;
+      this.toolModel.sklad = (Number(this.toolModel.sklad) || 0) + (Number(this.toolModel.incoming) || 0)
+      this.toolModel.incoming = null
     },
     updateSklad() {
       this.toolModel.sklad = Number(this.initialSklad || 0) + Number(this.toolModel.incoming || 0)
@@ -489,13 +495,20 @@ export default {
         editToken: token,
       }
       try {
-        const response = await editorToolApi.saveTool(toolDataToSend)
+        let response
+        if (this.toolId) {
+          response = await editorToolApi.updateTool(this.toolId, toolDataToSend)
+        } else {
+          response = await editorToolApi.addTool(toolDataToSend)
+        }
         if (response.success === 'OK') {
           this.$emit('changes-saved')
         }
       } catch (error) {
-        console.error('Ошибка при сохранении инструмента:', error)
-        this.showErrorSnackbar('Ошибка при сохранении данных.')
+        console.error(
+          'Ошибка при сохранении:',
+          error.response ? error.response.data : error,
+        )
       }
     },
   },
