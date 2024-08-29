@@ -74,8 +74,7 @@ async function getComingToolDates(req, res) {
       const day = ('0' + row.date.getDate()).slice(-2)
       return `${year}-${month}-${day}`
     })
-
-    console.log(dates) // Проверьте консоль на корректность формата
+    
     res.json(dates)
   } catch (error) {
     console.error('Ошибка при получении данных:', error)
