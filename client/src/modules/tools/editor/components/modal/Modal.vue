@@ -193,7 +193,7 @@
                   append-inner-icon='mdi-package-down'
                   v-model='toolModel.incoming'
                   type='number'
-                  label='Приход'
+                  label='Внесение инструмента'
                   required
                   clearable
                 />

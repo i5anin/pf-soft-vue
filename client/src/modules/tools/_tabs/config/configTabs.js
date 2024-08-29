@@ -87,7 +87,7 @@ const tabs = [
     ico: 'mdi-package-variant',
   },
   {
-    name: 'Приход',
+    name: 'Внесение инстр.',
     url: '#adding',
     component: markRaw(AddingTable),
     access: ['Admin', 'Editor'],

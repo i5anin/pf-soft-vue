@@ -82,7 +82,7 @@ export default {
         },
         { title: 'Инструмент', value: 'tool_name', sortable: false },
         {
-          title: 'Приход',
+          title: 'Внесено',
           value: 'coming',
           sortable: false,
         },
@@ -151,7 +151,7 @@ export default {
         this.comingTools = response.comingTools
         this.totalCount = response.totalCount
       } catch (error) {
-        console.error('Ошибка при получении данных о приходе инструментов:', error)
+        console.error('Ошибка при получении данных о внесении инструментов:', error)
         this.$emit('error', error)
       } finally {
         this.isLoading = false
