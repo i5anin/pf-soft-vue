@@ -1,3 +1,4 @@
+<!--ReportZakazFolder.vue-->
 <template>
   <div>
     <div class='d-flex justify-end'>
@@ -28,7 +29,7 @@
         <group-zakaz-table
           :items='group.tools'
           :group-path='group.path'
-        />
+          @row-click="$emit('row-click', $event)" />
       </div>
     </div>
   </div>
@@ -41,13 +42,11 @@ import { getHexColor } from '@/utils/colorUtils'
 
 export default {
   components: { GroupZakazTable },
+  emits: ['row-click'], // Добавлено для передачи события клика на строку
   data() {
     return {
-      color_folder: '',
       toolGroups: [],
       visibleGroups: [],
-      editingToolId: null,
-      openDialog: false,
       isAllVisible: false,
       isLoading: true,
     }
@@ -64,27 +63,25 @@ export default {
     },
   },
   methods: {
-
     async fetchZakazData() {
       try {
-        this.isLoading = true; // Включить индикатор загрузки
+        this.isLoading = true
         const data = await reportApi.getZakaz()
         this.toolGroups = data.map((group) => ({
           ...group,
         }))
-        this.isLoading = false; // Выключить индикатор загрузки
+        this.isLoading = false
       } catch (error) {
         console.error('Ошибка при получении данных: ', error)
-        this.isLoading = false; // Выключить индикатор загрузки
+        this.isLoading = false
       }
     },
-
     toggleVisibility(index) {
-      const visibleIndex = this.visibleGroups.indexOf(index);
+      const visibleIndex = this.visibleGroups.indexOf(index)
       if (visibleIndex > -1) {
-        this.visibleGroups.splice(visibleIndex, 1);
+        this.visibleGroups.splice(visibleIndex, 1)
       } else {
-        this.visibleGroups.push(index);
+        this.visibleGroups.push(index)
       }
     },
     toggleAllVisibility() {
@@ -93,13 +90,7 @@ export default {
         ? [...Array(this.toolGroups.length).keys()]
         : []
     },
-    getHexColor
+    getHexColor,
   },
 }
 </script>
-
-<style>
-.tool-group + .tool-group {
-  margin-top: 10px;
-}
-</style>
