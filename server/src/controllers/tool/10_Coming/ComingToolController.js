@@ -5,12 +5,12 @@ const dbConfig = getDbConfig()
 const pool = new Pool(dbConfig)
 
 const selectComingToolQuery = `
-  SELECT vue_log.*,
-         vue_users.login AS user_name,
-         tool_nom.name   AS tool_name
-  FROM dbo.vue_log
-           LEFT JOIN dbo.vue_users ON vue_log.user_id = vue_users.id
-           LEFT JOIN dbo.tool_nom ON vue_log.tool_id = tool_nom.id
+    SELECT vue_log.*,
+           vue_users.login AS user_name,
+           tool_nom.name   AS tool_name
+    FROM dbo.vue_log
+             LEFT JOIN dbo.vue_users ON vue_log.user_id = vue_users.id
+             LEFT JOIN dbo.tool_nom ON vue_log.tool_id = tool_nom.id
 `
 
 const getComingToolWhereClause = (date) => {
@@ -40,12 +40,12 @@ const getComingTools = async (page, limit, date) => {
 const getTotalCount = async (date) => {
   const whereClause = getComingToolWhereClause(date)
   const countQuery = `
-        SELECT COUNT(*) AS total_count
-        FROM dbo.vue_log
-                 LEFT JOIN dbo.vue_users ON vue_log.user_id = vue_users.id
-                 LEFT JOIN dbo.tool_nom ON vue_log.tool_id = tool_nom.id
-            ${whereClause}
-    `
+      SELECT COUNT(*) AS total_count
+      FROM dbo.vue_log
+               LEFT JOIN dbo.vue_users ON vue_log.user_id = vue_users.id
+               LEFT JOIN dbo.tool_nom ON vue_log.tool_id = tool_nom.id
+          ${whereClause}
+  `
   const countResult = await pool.query(countQuery)
   return parseInt(countResult.rows[0].total_count, 10)
 }

@@ -25,7 +25,7 @@ const reportRevisionController = require('./controllers/tool/ReportsEmail/Revisi
 const reportVueZakazController = require('./controllers/tool/9_ReportsVue/OrderTools/OrderToolsController')
 const reportVueBuhController = require('./controllers/tool/9_ReportsVue/BuchWeekController')
 
-const reportComingTool = require('./controllers/tool/10_ReportsVue/ComingеToolController')
+const reportComingTool = require('./controllers/tool/10_Coming/ComingToolController')
 
 const groupsController = require('./controllers/tool/3_Group/GroupController')
 
