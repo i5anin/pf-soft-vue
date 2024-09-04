@@ -48,7 +48,17 @@
         <td>{{ item.user_name }}</td>
       </template>
       <template #item.coming='{ item }'>
-        <td>{{ item.new_amount - item.old_amount }}</td>
+        <td class='text-center'>
+    <span v-if='item.new_amount > item.old_amount'>
+     {{ item.new_amount - item.old_amount }}
+    </span>
+          <span v-else-if='item.new_amount < item.old_amount' class='text-danger'>
+      {{ item.new_amount - item.old_amount }} <v-icon color='red'>mdi-arrow-down</v-icon>
+    </span>
+          <span v-else>
+      {{ item.new_amount - item.old_amount }}
+    </span>
+        </td>
       </template>
     </v-data-table-server>
   </v-container>
