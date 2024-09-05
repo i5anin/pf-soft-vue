@@ -3,6 +3,11 @@
 const express = require('express')
 const router = express.Router()
 
+// for(let module of Modules)
+// {
+//   var [module.name] = require(module.url)
+// }
+
 const loginController = require('./controllers/login/LoginController')
 const nomController = require('./controllers/tool/1_Nom/NomController')
 const paramController = require('./controllers/tool/2_ParamController/ParamController')
