@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'server',
       script: 'server/src/app.js',
-      watch: true,
+      watch: ['server/src', 'server/config.js'],
       env: {
         PM2_PUBLIC_KEY: process.env.PM2_PUBLIC_KEY,
         PM2_SECRET_KEY: process.env.PM2_SECRET_KEY,
