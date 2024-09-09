@@ -434,7 +434,7 @@ async function editTool(req, res) {
     norma = norma === '' || norma === 0 ? null : norma
     norma_red = norma_red === '' || norma_red === 0 ? null : norma_red
     norma_green = norma_green === '' || norma_green === 0 ? null : norma_green
-    newSklad = newSklad === '' || newSklad === 0 ? null : newSklad
+    newSklad = newSklad === '' || newSklad === 0 ? 0 : newSklad;
 
     const result = await pool.query(
       'UPDATE dbo.tool_nom SET name=$1, parent_id=$2, property=$3, sklad=$4, norma=$5, group_id=$7, group_standard=$8, norma_red=$9, norma_green=$10 WHERE id=$6 RETURNING *',
