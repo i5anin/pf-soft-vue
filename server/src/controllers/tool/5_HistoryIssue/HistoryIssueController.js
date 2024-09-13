@@ -149,7 +149,7 @@ async function getToolMovementById(req, res) {
         WHERE vl.tool_id = $1
           AND vl.new_amount <> vl.old_amount
         ORDER BY vl.datetime_log DESC
-        LIMIT 60;
+        LIMIT 120;
     `
 
     const result = await pool.query(query, [toolId])
