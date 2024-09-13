@@ -47,7 +47,6 @@ export default {
       toolGroups: [],
       visibleGroups: [],
       editingToolId: null,
-      openDialog: false,
       isAllVisible: false,
       isLoading: true,
     }

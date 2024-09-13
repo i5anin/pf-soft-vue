@@ -66,7 +66,7 @@
 </template>
 
 <script>
-import EditorToolModal from './Modal.vue'
+import EditorToolModal from './MovementModal.vue'
 import ToolFilter from './ToolFilter.vue'
 
 import { mapActions, mapMutations, mapGetters } from 'vuex'

@@ -1,10 +1,10 @@
 <!--ReportZakazTable.vue-->
 <template>
   <zakaz-tool-modal
-    v-if='openDialog'
+    v-if='openDialog && editingToolId'
     :persistent='true'
     :tool-id='editingToolId'
-    @canceled='onClosePopup'
+    @canceled="onClosePopup"
   />
   <v-table hover dense>
     <thead>
@@ -80,6 +80,7 @@
           size='small'
           icon='mdi mdi-history'
           :disabled='!item.mov_history'
+          @click='openModal(item.id_tool)'
         />
       </td>
     </tr>
@@ -88,12 +89,13 @@
 </template>
 
 <script>
-import Modal from './modal/MovementModal.vue'
-import ZakazToolModal from '@/modules/tools/view/components/Modal.vue'
-import { getHexColor, getColorForGroup } from '@/utils/colorUtils';
+// import Modal from './modal/MovementModal.vue'
+import ZakazToolModal from '@/modules/tools/view/components/MovementModal.vue'
+import { getColorForGroup, getHexColor } from '@/utils/colorUtils'
 
 export default {
-  components: { ZakazToolModal, Modal },
+  emits: [],
+  components: { ZakazToolModal },
   data() {
     return {
       toolGroups: [],
@@ -128,8 +130,9 @@ export default {
   methods: {
     getHexColor,
     getColorForGroup,
-    onClosePopup() {
-      this.openDialog = false
+    openModal(toolId) {
+      this.editingToolId = toolId
+      this.openDialog = true
     },
     getRoundedCount(count) {
       if (count < 10) return 10
@@ -137,6 +140,10 @@ export default {
         ? Math.floor(count / 10) * 10
         : Math.ceil(count / 10) * 10
     },
+    onClosePopup() {
+      this.openDialog = false // Эта переменная должна контролировать открытие модального окна.
+    },
+
   },
 }
 </script>

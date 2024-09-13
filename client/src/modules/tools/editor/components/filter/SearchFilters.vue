@@ -74,12 +74,12 @@ export default {
     },
 
     async fetchToolsDynamicFilters() {
-      console.log('[store] Получаем динамические фильтры для инструментов.')
+      // console.log('[store] Получаем динамические фильтры для инструментов.')
       await this.editorToolStore.fetchToolsDynamicFilters()
     },
   },
   async mounted() {
-    console.log('ToolSearch: Загружаем динамические фильтры...')
+    // console.log('ToolSearch: Загружаем динамические фильтры...')
     await this.fetchToolsDynamicFilters()
   },
 }

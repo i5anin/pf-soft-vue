@@ -1,5 +1,5 @@
 <template>
-  <Modal :title="popupTitle" width-default="1550px">
+  <Modal :title="popupTitle" width-default="650px">
     <template #content>
       <v-container>
         <v-table hover>
@@ -57,18 +57,19 @@ import { useEditorToolStore } from '../../piniaStore'
 import { format, parseISO } from 'date-fns'
 
 export default defineComponent({
+  emits: ['close'],
   name: 'FillingModal',
   components: { Modal },
   props: {
     toolId: { type: Number, default: null },
   },
   setup(props) {
-    const editorToolStore = useEditorToolStore()
+    // const editorToolStore = useEditorToolStore()
 
-    const movements = computed(() => editorToolStore.movements)
+    // const movements = computed(() => editorToolStore.movements)
 
     const popupTitle = computed(() => {
-      const tool = editorToolStore.getTool
+      const tool = this.toolId
       return tool?.id != null
         ? `Движение инструмента на складе: ${tool.name} (ID: ${tool.id})`
         : 'Движение инструмента'
@@ -76,7 +77,7 @@ export default defineComponent({
 
     onMounted(async () => {
       if (props.toolId) {
-        await editorToolStore.fetchMovementHistory(props.toolId)
+        // await editorToolStore.fetchMovementHistory(props.toolId)
       }
     })
 
@@ -85,7 +86,7 @@ export default defineComponent({
     }
 
     return {
-      movements,
+      // movements,
       popupTitle,
       formatDate,
     }
