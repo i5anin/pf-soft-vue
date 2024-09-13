@@ -33,12 +33,11 @@ WITH RECURSIVE
                                  0)
                    END             AS zakaz,
                t.group_total_sklad AS group_sklad,
+               -- Измененная строка:
                CASE
                    WHEN EXISTS(SELECT 1 FROM dbo.vue_log vl WHERE vl.tool_id = tn.id) THEN true
                    ELSE false END  AS mov_history
         FROM dbo.tool_nom tn
-                 LEFT JOIN dbo.tool_history_damaged thd ON tn.id = thd.id_tool
-            AND thd.timestamp >= CURRENT_DATE - INTERVAL '7 days'
                  LEFT JOIN totals t ON tn.group_id = t.group_id
         WHERE CASE
                   WHEN t.group_total_sklad > 0
