@@ -18,24 +18,24 @@ async function getReportData() {
   return rows
 }
 
-function getCurrentMonthDates() {
-  const currentDate = new Date()
-  const firstDayOfMonth = new Date(
-    currentDate.getFullYear(),
-    currentDate.getMonth(),
-    1
-  )
-  const lastDayOfMonth = new Date(
-    currentDate.getFullYear(),
-    currentDate.getMonth() + 1,
-    0
-  )
-
-  const firstDate = firstDayOfMonth.toISOString().split('T')[0]
-  const lastDate = lastDayOfMonth.toISOString().split('T')[0]
-
-  return { firstDate, lastDate }
-}
+// function getCurrentMonthDates() {
+//   const currentDate = new Date()
+//   const firstDayOfMonth = new Date(
+//     currentDate.getFullYear(),
+//     currentDate.getMonth(),
+//     1
+//   )
+//   const lastDayOfMonth = new Date(
+//     currentDate.getFullYear(),
+//     currentDate.getMonth() + 1,
+//     0
+//   )
+//
+//   const firstDate = firstDayOfMonth.toISOString().split('T')[0]
+//   const lastDate = lastDayOfMonth.toISOString().split('T')[0]
+//
+//   return { firstDate, lastDate }
+// }
 
 //  Функция для создания Excel файла и возврата его как потока данных
 async function createExcelFileStream(data) {
@@ -196,7 +196,7 @@ async function sendEmailWithExcelStream(email, text, excelStream, data) {
     auth: { user: emailConfig.user, pass: emailConfig.pass },
   })
 
-  const { firstDate, lastDate } = getCurrentMonthDates()
+  // const { firstDate, lastDate } = getCurrentMonthDates()
   const envPrefix = process.env.NODE_ENV === 'development' ? 'development ' : ''
   const currentDateTime = format(new Date(), 'yyyy-MM-dd_HH-mm-ss')
   const subject = `${envPrefix}Заказ: Журнал инструмента ${currentDateTime}`
