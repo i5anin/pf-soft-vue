@@ -137,16 +137,14 @@ async function getToolMovementById(req, res) {
             vue_log.new_amount,
             vue_log.old_amount,
             tool_nom.name AS tool_name,
-            vue_users.login AS user_login,
-            tool_history_nom.specs_nom_id
+            vue_users.login AS user_login
         FROM dbo.vue_log
                  LEFT JOIN dbo.tool_nom ON vue_log.tool_id = tool_nom.id
                  LEFT JOIN dbo.vue_users ON vue_log.user_id = vue_users.id
-                 LEFT JOIN dbo.tool_history_nom ON vue_log.tool_id = tool_history_nom.id_tool
         WHERE vue_log.tool_id = $1
           AND vue_log.new_amount <> vue_log.old_amount
         ORDER BY vue_log.datetime_log DESC
-        LIMIT 60; -- Добавляем LIMIT 
+        LIMIT 60;
     `
 
     const result = await pool.query(query, [toolId])
