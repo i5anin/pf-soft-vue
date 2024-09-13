@@ -89,7 +89,7 @@ WITH ToolData AS (SELECT tool_nom.id AS id_tool,
                          CASE
                              WHEN tool_nom.is_plate
                                  THEN CEIL((tool_nom.norma_green - group_totals.group_sklad) / 10) * 10
-                             WHEN tool_nom.group_id <> 0 AND tool_nom.group_standard = true
+                             WHEN tool_nom.group_id <> 0
                                  THEN tool_nom.norma - group_totals.group_sklad
                              ELSE tool_nom.norma_green - group_totals.group_sklad
                              END     AS zakaz,
@@ -117,8 +117,7 @@ WITH ToolData AS (SELECT tool_nom.id AS id_tool,
                              ELSE tool_nom.norma_green - group_totals.group_sklad
                       END) > 0
                     AND (norma_red <> 0)
-                    AND (norma_green <> 0)
-                    AND tool_nom.group_standard = true)
+                    AND (norma_green <> 0))
 SELECT td.id_tool,
        td.name,
        td.zakaz,
