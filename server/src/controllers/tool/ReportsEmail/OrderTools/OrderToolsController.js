@@ -72,7 +72,8 @@ async function createExcelFileStream(data) {
     { header: 'Норма Красная', key: 'norma_red', width: 30 },
     // { header: 'Пластина', key: 'is_plate', width: 30 },
     { header: 'Путь', key: 'path_file', width: 30 },
-    // { header: 'Группа ID', key: 'group_display', width: 15 },
+    { header: '', key: 'null', width: 30 },
+    // { header: 'Группа ID', key: 'group_id', width: 15 },
     // { header: 'Стандарт', key: 'group_standard', width: 15 },
   ]
 
@@ -93,7 +94,7 @@ async function createExcelFileStream(data) {
       norma: Number(item.norma) || '',
       zakaz: Number(zakazRounded) || '',
       group_display: Number(item.group_display) || '',
-      group_standard: item.group_standard ? 'Да' : 'Нет',
+      group_standard: item.group_standard ? 'Да' : '',
       // tool_path: item.tool_path ? item.tool_path : 'Не указан',
       group_sklad: Number(item.group_sklad) || '',
       norma_green: item.norma_green,
@@ -132,14 +133,12 @@ function generateHtmlTable(data) {
     { header: 'Склад группы', key: 'group_sklad' },
     { header: 'На складе', key: 'sklad' },
     { header: 'Норма', key: 'norma' },
-    // { header: 'Группа ID', key: 'group_display' },
-    { header: 'Стандарт', key: 'group_standard' },
-    // { header: 'Путь', key: 'tool_path' },
-    // { header: 'Путь', key: 'tool_path' },
     { header: 'Норма Зеленая', key: 'norma_green' },
     { header: 'Норма Красная', key: 'norma_red' },
-    // { header: 'Пластина', key: 'is_plate' },
     { header: 'Путь', key: 'path_file' },
+    // { header: 'Пластина', key: 'is_plate' },
+    { header: 'Группа ID', key: 'group_id' },
+    { header: 'Стандарт', key: 'group_standard' },
   ]
   const currentDateTime = format(new Date(), 'yyyy-MM-dd_HH-mm-ss')
   let htmlContent = `<h2>Заказ: Журнал инструмента ${currentDateTime}</h2>`
