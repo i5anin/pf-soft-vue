@@ -201,8 +201,8 @@
               <v-col cols='4'>
                 <v-btn
                   :color="toolModel.incoming ? 'yellow' : null"
-                  @click='applyIncoming'
-                  :disabled='!toolModel.incoming'
+                  @click="applyIncoming"
+                  :disabled="!toolModel.incoming"
                 >
                   Внести
                 </v-btn>
@@ -365,6 +365,9 @@ export default {
       this.toolModel.sklad = (Number(this.toolModel.sklad) || 0) + (Number(this.toolModel.incoming) || 0)
       this.toolModel.incoming = null
     },
+    updateSklad() {
+      this.toolModel.sklad = Number(this.initialSklad || 0) + Number(this.toolModel.incoming || 0)
+    },
     async fetchToolData() {
       if (!this.currentItem) return
       await this.fetchToolParamsByParentId(this.currentItem.id)
@@ -486,33 +489,29 @@ export default {
       this.$emit('canceled')
     },
     async onSave() {
-      const authToken = localStorage.getItem('token');
-      const toolData = {
+      const token = localStorage.getItem('token')
+      const toolDataToSend = {
         ...this.toolModel,
-        parentId: this.tempParentId,
-        authToken,
-      };
-
+        parent_id: this.tempParentId,
+        editToken: token,
+      }
       try {
-        const response = this.toolId
-          ? await editorToolApi.updateTool(this.toolId, toolData)
-          : await editorToolApi.addTool(toolData);
-
-        if (response.success === 'OK') {
-          if (!this.toolId) {
-            await this.editorToolStore.addTool(response.data);
-          }
-          this.$emit('changes-saved');
+        let response
+        if (this.toolId) {
+          response = await editorToolApi.updateTool(this.toolId, toolDataToSend)
         } else {
-          throw new Error('Не удалось сохранить инструмент.');
+          response = await editorToolApi.addTool(toolDataToSend)
+        }
+        if (response.success === 'OK') {
+          this.$emit('changes-saved')
         }
       } catch (error) {
-        console.error('Ошибка при сохранении:', error);
-        this.showErrorSnackbar('Произошла ошибка при сохранении инструмента.');
+        console.error(
+          'Ошибка при сохранении:',
+          error.response ? error.response.data : error,
+        )
       }
     },
-
-
   },
 }
 </script>

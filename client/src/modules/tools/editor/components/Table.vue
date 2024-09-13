@@ -85,8 +85,8 @@
 </template>
 
 <script>
-import EditorToolModal from './modal/_Modal.vue'
-import ToolFilter from './filter/_SearchFilters.vue'
+import EditorToolModal from './modal/Modal.vue'
+import ToolFilter from './filter/SearchFilters.vue'
 import { useEditorToolStore } from '../piniaStore'
 import { getColorForGroup } from '@/utils/colorUtils'
 

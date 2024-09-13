@@ -9,8 +9,8 @@
 </template>
 
 <script>
-import Catalog from './catalog/_Catalog.vue'
-import ToolFilter from './filter/_SearchFilters.vue'
+import Catalog from './catalog/Catalog.vue'
+import ToolFilter from './filter/SearchFilters.vue'
 import Table from './Table.vue'
 import { useEditorToolStore } from '../piniaStore'
 

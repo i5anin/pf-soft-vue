@@ -65,13 +65,11 @@ export default {
         ...this.getFilters.selectedDynamicFilters,
         ...updatedFilters,
       })
-      console.log("updateFiltersAndFetch")
       this.fetchToolsByFilter()
     },
 
     fetchToolsByFilter() {
       console.log('[store] Вызываем метод для получения инструментов')
-      console.log("fetchToolsByFilter")
       this.editorToolStore.fetchToolsByFilter()
     },
 
