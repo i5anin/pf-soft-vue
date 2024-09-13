@@ -159,14 +159,6 @@ export default {
         ]
       },
     },
-    // 'currentItem.id': {
-    //   handler(newId, oldId) {
-    //     if (newId !== oldId) {
-    //       // Проверяем, изменился ли id
-    //       this.fetchToolsData()
-    //     }
-    //   },
-    // },
   },
   mounted() {
     this.fetchToolsData()
