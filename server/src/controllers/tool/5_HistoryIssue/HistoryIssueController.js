@@ -137,12 +137,14 @@ async function getToolMovementById(req, res) {
             vue_log.new_amount,
             vue_log.old_amount,
             tool_nom.name AS tool_name,
-            vue_users.login AS user_login
+            vue_users.login AS user_login,
+            tool_history_nom.specs_nom_id  -- Добавили specs_nom_id
         FROM dbo.vue_log
                  LEFT JOIN dbo.tool_nom ON vue_log.tool_id = tool_nom.id
                  LEFT JOIN dbo.vue_users ON vue_log.user_id = vue_users.id
+                 LEFT JOIN dbo.tool_history_nom ON vue_log.tool_id = tool_history_nom.id_tool -- Связь с tool_history_nom
         WHERE vue_log.tool_id = $1
-          AND vue_log.new_amount <> vue_log.old_amount -- Исключаем строки, где new_amount = old_amount
+          AND vue_log.new_amount <> vue_log.old_amount
         ORDER BY vue_log.datetime_log DESC;
     `
 
@@ -160,6 +162,7 @@ async function getToolMovementById(req, res) {
           user_login: row.user_login,
           tool_nom_id: row.tool_nom_id,
           vue_users_id: row.vue_users_id,
+          specs_nom_id: row.specs_nom_id,
         }))
       )
     } else {

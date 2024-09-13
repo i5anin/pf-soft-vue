@@ -1,16 +1,17 @@
 <template>
   <!-- todo ПЕРЕИСПОЛЬЗУЕМАЯ -->
-  <Modal :title='popupTitle' width-default='850px'>
+  <Modal :title='popupTitle' width-default='950px'>
     <template #content>
       <v-container>
-<!-- <span v-if="cartItems && cartItems.length > 0">-->
-<!-- {{ cartItems[0]?.name }}-->
-<!-- </span>-->
+        <!-- <span v-if="cartItems && cartItems.length > 0">-->
+        <!-- {{ cartItems[0]?.name }}-->
+        <!-- </span>-->
         <v-table hover>
           <thead>
           <tr>
             <th />
-<!-- <th>Инструмент</th>-->
+            <!-- <th>Инструмент</th>-->
+            <th>Партия</th>
             <th>Дата</th>
             <th>Комментарий</th>
             <th>Было</th>
@@ -23,6 +24,7 @@
           <tbody>
           <tr v-for='(item, index) in cartItems' :key='item.id'>
             <td class='gray'>{{ index + 1 }}</td>
+            <td>{{ item.specs_nom_id }}</td>
             <!-- <td>{{ item.name }}</td>-->
             <td>{{ item.date }}</td>
             <td>{{ item.comment }}</td>
@@ -58,7 +60,7 @@
   <!-- v-snackbar для отображения сообщений об ошибке -->
   <v-snackbar v-model='snackbar.show' :color='snackbar.color' bottom right>
     {{ snackbar.text }}
-    <v-btn color='white' text @click='snackbar.show = false' >Закрыть</v-btn>
+    <v-btn color='white' text @click='snackbar.show = false'>Закрыть</v-btn>
   </v-snackbar>
 </template>
 
@@ -182,9 +184,10 @@ export default {
             date: this.formatDate(item.datetime_log),
             was: item.old_amount,
             now: item.new_amount,
-            change: item.new_amount - item.old_amount , // Если old_amount == null, то изменение = 0
+            change: item.new_amount - item.old_amount, // Если old_amount == null, то изменение = 0
             comment: item.message,
-            user: item.user_login || '', // Предоставим значение по умолчанию, если user_login равен null
+            user: item.user_login || '',
+            specs_nom_id: item.specs_nom_id,
           }))
         } catch (error) {
           console.error(
