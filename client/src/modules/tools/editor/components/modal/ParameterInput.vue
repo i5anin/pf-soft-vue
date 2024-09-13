@@ -193,8 +193,8 @@ export default {
     }
   },
   methods: {
-    ...mapActions('EditorToolStore', ['fetchToolsByFilter', 'fetchToolById']),
-    ...mapMutations('EditorToolStore', ['setTool']),
+    // ...mapActions('EditorToolStore', ['fetchToolsByFilter', 'fetchToolById']),
+    // ...mapMutations('EditorToolStore', ['setTool']),
 
     // Добавьте этот метод в объект methods вашего компонента
     removeParameter(id) {
