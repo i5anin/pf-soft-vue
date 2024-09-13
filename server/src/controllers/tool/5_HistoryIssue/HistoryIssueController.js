@@ -131,19 +131,24 @@ async function getToolMovementById(req, res) {
   try {
     const query = `
         SELECT
-            vue_log.id AS log_id,
-            vue_log.message,
-            vue_log.datetime_log,
-            vue_log.new_amount,
-            vue_log.old_amount,
-            tool_nom.name AS tool_name,
-            vue_users.login AS user_login
-        FROM dbo.vue_log
-                 LEFT JOIN dbo.tool_nom ON vue_log.tool_id = tool_nom.id
-                 LEFT JOIN dbo.vue_users ON vue_log.user_id = vue_users.id
-        WHERE vue_log.tool_id = $1
-          AND vue_log.new_amount <> vue_log.old_amount
-        ORDER BY vue_log.datetime_log DESC
+            vl.id AS log_id,
+            vl.message,
+            vl.datetime_log,
+            vl.new_amount,
+            vl.old_amount,
+            tn.name AS tool_name,
+            vu.login AS user_login,
+            thn.specs_nom_id
+        FROM dbo.vue_log vl
+                 LEFT JOIN dbo.tool_nom tn ON vl.tool_id = tn.id
+                 LEFT JOIN dbo.vue_users vu ON vl.user_id = vu.id
+                 LEFT JOIN dbo.tool_history_nom thn
+                           ON vl.tool_id = thn.id_tool
+                               AND vl.datetime_log = thn."timestamp" -- Связь по времени выдачи
+                               AND vu.id = thn.issuer_id -- Связь по ID того, кто выдал
+        WHERE vl.tool_id = $1
+          AND vl.new_amount <> vl.old_amount
+        ORDER BY vl.datetime_log DESC
         LIMIT 60;
     `
 
