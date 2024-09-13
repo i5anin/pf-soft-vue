@@ -355,6 +355,8 @@ export default {
     },
 
     async sendIssueDataToApi() {
+      const clientTime = Date.now(); // Получаем clientTime здесь
+
       const issueData = {
         // Составление данных для отправки API
         issueToken: this.issueToken,
@@ -365,7 +367,8 @@ export default {
           toolId: item.toolId,
           quantity: item.quantity,
         })),
-      }
+        clientTime: clientTime, // Добавляем clientTime к данным
+      };
 
       try {
         const response = await issueToolApi.addHistoryTools(issueData)
