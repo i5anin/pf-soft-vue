@@ -37,41 +37,7 @@ async function getFioOperators(req, res) {
 }
 
 async function issueTools(req, res) {
-  const {
-    operationId,
-    userId,
-    tools,
-    typeIssue,
-    issueToken,
-    clientTime,
-  } = req.body;
-
-
-  // --- Проверка времени клиента ---
-
-  if (!issueToken || !clientTime) {
-    return res.status(400).send('Отсутствуют обязательные параметры.');
-  }
-
-  // --- Проверка времени клиента ---
-
-  const serverTime = Date.now();
-  const timeDifference = serverTime - clientTime;
-  const TIME_THRESHOLD_MS = 1500;
-
-  if (timeDifference > TIME_THRESHOLD_MS) {
-    return res.status(400).json({
-      success: false,
-      message: 'Устаревший запрос. Повторите попытку.',
-    });
-  }
-
-  if (timeDifference > TIME_THRESHOLD_MS) {
-    return res.status(400).json({
-      success: false,
-      message: 'Устаревший запрос. Повторите попытку.',
-    });
-  }
+  const { operationId, userId, tools, typeIssue, issueToken } = req.body
 
   if (!issueToken)
     return res.status(401).send('Authentication token is required.')
