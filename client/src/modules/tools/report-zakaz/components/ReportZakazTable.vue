@@ -39,7 +39,7 @@
         </v-chip>
       </td>
       <td>
-        <template v-if='item.norma >= item.sklad'>
+        <template v-if='(item.norma) >= (item.group_sklad || item.sklad)'>
           {{
             groupPath.includes('Пластины') && item.zakaz !== 0
               ? getRoundedCount(item.zakaz)
