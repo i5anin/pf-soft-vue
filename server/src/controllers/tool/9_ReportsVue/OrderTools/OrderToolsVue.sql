@@ -55,6 +55,7 @@ WITH RECURSIVE
                       0
                   ELSE CASE WHEN tn.norma_green > 0 THEN tn.norma_green ELSE tn.norma END - tn.sklad > 0
                   END
+        AND CASE WHEN tn.group_id > 0 THEN (tn.group_id > 0 AND tn.group_standard = true) ELSE TRUE END
         GROUP BY tn.id, tn.parent_id, tn.name, tn.sklad, tn.norma, tn.group_id,
                  tn.group_standard, t.group_total_sklad, tn.norma_green, tn.norma_red,
                  tn.status_color, tn.missing_percent
