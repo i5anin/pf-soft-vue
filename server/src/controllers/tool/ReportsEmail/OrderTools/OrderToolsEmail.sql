@@ -90,7 +90,7 @@ WITH ToolData AS (SELECT tool_nom.id AS id_tool,
                              WHEN tool_nom.is_plate
                                  THEN CEIL((tool_nom.norma_green - group_totals.group_sklad) / 10) * 10
                              WHEN tool_nom.group_id <> 0
-                                 THEN tool_nom.norma - group_totals.group_sklad
+                                 THEN tool_nom.norma_green - group_totals.group_sklad
                              ELSE tool_nom.norma_green - group_totals.group_sklad
                              END     AS zakaz,
                          tool_nom.sklad,
