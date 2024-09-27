@@ -1,56 +1,58 @@
 <template>
   <div>
     <v-container>
-      <v-img class="mx-auto my-6" max-width="100" src="@/assets/logo_min.png" />
-      <h1 class="text-h4 text-center pb-6">Авторизация</h1>
+      <v-img class='mx-auto my-6' max-width='100' src='@/assets/logo_min.png' />
+      <h1 class='text-h4 text-center pb-6'>Авторизация</h1>
       <v-card
-        v-if="!isAuthorized"
-        class="mx-auto pa-12 pb-8"
-        elevation="8"
-        max-width="448"
-        rounded="lg"
+        v-if='!isAuthorized'
+        class='mx-auto pa-12 pb-8'
+        elevation='8'
+        max-width='448'
+        rounded='lg'
       >
-        <v-form ref="form" v-model="formValid">
-          <div class="text-subtitle-1 text-medium-emphasis">Логин</div>
+        <v-form ref='form' v-model='formValid'>
+          <div class='text-subtitle-1 text-medium-emphasis'>Логин</div>
           <v-text-field
-            v-model="login"
-            density="compact"
-            placeholder="Login"
-            prepend-inner-icon="mdi-key"
-            variant="outlined"
-            :rules="loginRules"
+            v-model='login'
+            density='compact'
+            placeholder='Login'
+            prepend-inner-icon='mdi-key'
+            variant='outlined'
+            :rules='loginRules'
           />
           <div
-            class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between"
+            class='text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between'
           >
             Пароль
           </div>
           <v-text-field
-            v-model="password"
+            v-model='password'
             :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
             :type="visible ? 'text' : 'password'"
-            density="compact"
-            placeholder="Password"
-            prepend-inner-icon="mdi-lock-outline"
-            variant="outlined"
-            :rules="passwordRules"
-            @click:append-inner="toggleVisibility"
+            density='compact'
+            placeholder='Password'
+            prepend-inner-icon='mdi-lock-outline'
+            variant='outlined'
+            :rules='passwordRules'
+            @click:append-inner='toggleVisibility'
+            @keyup='handleKeyUp'
           />
           <v-btn
-            :disabled="!formValid"
+            :disabled='!formValid'
             block
-            class="mb-8"
-            color="blue"
-            size="large"
-            variant="tonal"
-            @click="submit"
-            >Войти</v-btn
+            class='mb-8'
+            color='blue'
+            size='large'
+            variant='tonal'
+            @click='submit'
+          >Войти
+          </v-btn
           >
           <v-alert
-            v-if="showError"
-            type="error"
+            v-if='showError'
+            type='error'
             dismissible
-            @click="showError = false"
+            @click='showError = false'
           >
             {{ errorMessage }}
           </v-alert>
@@ -96,8 +98,6 @@ export default {
 
         if (response.data.status === 'ok') {
           localStorage.setItem('token', response.data.token)
-          // this.$store.dispatch('AuthStore/setAuthorization', true) // Обновите состояние аутентификации
-          // this.$store.dispatch('AuthStore/setUserRole', response.data.role) // Обновите роль пользователя
           this.$router.push('/') // Перенаправляем на главную страницу
         } else {
           this.showError = true
@@ -109,6 +109,11 @@ export default {
         console.error('Login error:', error)
       }
     },
+    handleKeyUp(event) {
+      if (event.which === 13) {
+        this.submit();
+      }
+    }
   },
 }
 </script>
