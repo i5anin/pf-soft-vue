@@ -87,6 +87,7 @@ export default {
       this.visible = !this.visible
     },
     async submit() {
+      console.log('submit')
       await this.$refs.form.validate()
       if (!this.formValid) return
 
