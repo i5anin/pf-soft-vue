@@ -6,7 +6,6 @@
           <thead>
             <tr>
               <th />
-              <th>Партия</th>
               <th>Дата</th>
               <th>Комментарий</th>
               <th>Было</th>
@@ -18,7 +17,6 @@
           <tbody>
             <tr v-for="(item, index) in movements" :key="item.id">
               <td class="gray">{{ index + 1 }}</td>
-              <td>{{ item.specs_nom_id }}</td>
               <td>{{ formatDate(item.datetime_log) }}</td>
               <td>{{ item.message }}</td>
               <td style="color: grey">{{ item.old_amount }}</td>

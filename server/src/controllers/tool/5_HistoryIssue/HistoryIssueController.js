@@ -117,7 +117,7 @@ async function getAllIssuedToolIdsWithNames(req, res) {
     `
     const result = await pool.query(query)
     res.json(
-      result.rows.map((row) => ({ id_tool: row.id_tool, name: row.name })),
+      result.rows.map((row) => ({ id_tool: row.id_tool, name: row.name }))
     )
   } catch (err) {
     console.error('Ошибка при получении идентификаторов инструмента:', err)
@@ -138,17 +138,16 @@ async function getToolMovementById(req, res) {
             vl.old_amount,
             tn.name AS tool_name,
             vu.login AS user_login,
-            thn.specs_nom_id,
-            vl.issued_id
+            thn.specs_nom_id
         FROM dbo.vue_log vl
-        LEFT JOIN dbo.tool_nom tn ON vl.tool_id = tn.id
-        LEFT JOIN dbo.vue_users vu ON vl.user_id = vu.id
-        LEFT JOIN dbo.tool_history_nom thn
-            ON vl.tool_id = thn.id_tool
-            AND vl.datetime_log = thn."timestamp" -- Связь по времени выдачи
-            AND vu.id = thn.issuer_id -- Связь по ID того, кто выдал
+                 LEFT JOIN dbo.tool_nom tn ON vl.tool_id = tn.id
+                 LEFT JOIN dbo.vue_users vu ON vl.user_id = vu.id
+                 LEFT JOIN dbo.tool_history_nom thn
+                           ON vl.tool_id = thn.id_tool
+                               AND vl.datetime_log = thn."timestamp" -- Связь по времени выдачи
+                               AND vu.id = thn.issuer_id -- Связь по ID того, кто выдал
         WHERE vl.tool_id = $1
-        AND vl.new_amount <> vl.old_amount
+          AND vl.new_amount <> vl.old_amount
         ORDER BY vl.datetime_log DESC
         LIMIT 120;
     `
@@ -165,11 +164,10 @@ async function getToolMovementById(req, res) {
           old_amount: row.old_amount,
           tool_name: row.tool_name,
           user_login: row.user_login,
+          tool_nom_id: row.tool_nom_id,
+          vue_users_id: row.vue_users_id,
           specs_nom_id: row.specs_nom_id,
-          issued_id: row.issued_id,
-          user_fio: 'Смирнов (подготовка к производству)', // Статическое значение
-          id_user: -4, // Статическое значение
-        })),
+        }))
       )
     } else {
       res.status(404).send('Движение для данного инструмента не найдено.')
