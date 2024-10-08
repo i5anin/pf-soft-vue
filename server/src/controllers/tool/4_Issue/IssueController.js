@@ -49,7 +49,7 @@ async function issueTools(req, res) {
 
   // --- Проверка времени клиента ---
 
-  if (!issueToken || !clientTime) {
+  if (!issueToken) {
     return res.status(400).send('Отсутствуют обязательные параметры.');
   }
 
